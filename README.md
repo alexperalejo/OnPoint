@@ -21,8 +21,3 @@ Real-time credit card recommendation system that helps users maximize cashback, 
 - Hosting       AWS/Vercel/Render?
 - Testing       Jest or Mocha (TBD)
 
-# Node.js
-- Install Node.js
-- check version node -v
-- initialize npm init
-
