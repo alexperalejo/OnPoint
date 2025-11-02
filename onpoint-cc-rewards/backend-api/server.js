@@ -9,18 +9,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Import routes
-const cardRoutes = require('./routes/cardRoutes');
-const userRoutes = require('./routes/authRoutes');
-const recommendationRoutes = require('./routes/recommendationRoutes');
-
-// Connect DB
 connectDB();
 
-// Use routes
-app.use('/api/cards', cardRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/recommendations', recommendationRoutes);
+// Diagnostic test
+try {
+  const cardRoutes = require('./routes/cardRoutes');
+  const authRoutes = require('./routes/authRoutes');
+  const recommendationRoutes = require('./routes/recommendationRoutes');
+  console.log('✅ Routes loaded:', {
+    cardRoutes,
+    authRoutes,
+    recommendationRoutes
+  });
+
+  app.use('/api/cards', cardRoutes);
+  app.use('/api/users', authRoutes);
+  app.use('/api/recommendations', recommendationRoutes);
+} catch (err) {
+  console.error('Route load error:', err);
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
