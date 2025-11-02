@@ -1,0 +1,43 @@
+Project Setup Instructions
+    
+    Follow these steps to set up and run the OnPoint Credit Card Recommendation System on your local machine.
+    1. Clone the Repository
+        git clone https://github.com/<your-username>/OnPoint-CC-Rewards.git
+        cd OnPoint-CC-Rewards
+
+    2. Install Dependencies    
+        cd backend-api
+        npm install
+
+    3. Set Up Environment Variables - Create a .env file inside backend-api/ using .env.example as a guide:
+        cp .env.example .env
+
+        Then open .env and replace the MongoDB URI with your team’s shared connection string:
+        MONGODB_URI=mongodb+srv://onpoint_user:YourPassword@onpoint-cluster.mongodb.net/onpoint
+        PORT=3000
+
+    4. Run the Backend Server
+        npm run dev
+        or
+        node server.js
+    
+    You should see:
+        MongoDB connected
+        Server running on port 3000
+    
+    5. Frontend (Chrome Extension) - To load your Chrome extension:
+
+        1. Open Chrome → go to chrome://extensions/
+        2. Enable Developer Mode (top right)
+        3. Click “Load unpacked”
+        4. Select the frontend-extension/ folder inside this project
+
+    You should now see the OnPoint extension icon appear in Chrome.
+
+    Notes: 
+
+Do not commit your .env file or node_modules/ to GitHub
+
+.env.example and .gitignore handle this automatically
+
+To keep dependencies up to date:

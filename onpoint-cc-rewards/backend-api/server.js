@@ -16,7 +16,7 @@ try {
   const cardRoutes = require('./routes/cardRoutes');
   const authRoutes = require('./routes/authRoutes');
   const recommendationRoutes = require('./routes/recommendationRoutes');
-  console.log('✅ Routes loaded:', {
+  console.log('Routes loaded:', {
     cardRoutes,
     authRoutes,
     recommendationRoutes
