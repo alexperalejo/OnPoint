@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Checkout Detector",
+  "version": "0.1.0",
+  "description": "Detects checkout pages and displays detection info in a popup.",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "dist/popup.html",
+    "default_title": "Checkout Detector"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/detect-core.js", "content/detect.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
