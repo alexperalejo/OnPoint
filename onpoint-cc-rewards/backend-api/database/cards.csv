@@ -1,22 +1,12 @@
-name,issuer,type,rewardRate,annualFee
-Chase Sapphire Preferred,Chase,Travel Rewards,"2× travel, 3× dining",95
-Citi Double Cash,Citi,Cashback,"2% on all purchases (1% when you buy + 1% when you pay)",0
-Capital One Venture Rewards,Capital One,Travel Rewards,"2× miles on all purchases",95
-Chase Freedom Flex,Chase,Cashback,"5% quarterly on select categories, 3% on dining, 1% on other",0
-American Express Gold,American Express,Travel/Dining Rewards,"4× points at restaurants, 4× points at US supermarkets (up to $25k/year), 1× points other",250
-Wells Fargo Active Cash,Wells Fargo,Cashback,"2% on all purchases",0
-Chase Sapphire Reserve,Chase,Travel Rewards,"5× points on travel through Chase, 3× dining",550
-Blue Cash Preferred,American Express,Cashback,"6% at US supermarkets (up to $6k/year), 3% on streaming, 1% on other purchases",95
-Capital One Savor Cash,Capital One,Cashback,"4% on dining & entertainment, 2% on groceries, 1% other",95
-U.S. Bank Altitude Connect,U.S. Bank,Travel Rewards,"4× points on travel/gas/EV charging (up to $1k quarter), 2× dining/streaming/groceries, 1× other",0
-Discover it Cash Back,Discover,Cashback,"5% rotating categories (on up to $1.5k quarters) + unlimited 1% other",0
-Bank of America Premium Rewards,Bank of America,Travel Rewards,"2× points on travel and dining, 1.5× other purchases",95
-Citi Strata Premier,Citi,Travel Rewards,"4× points on dining/entertainment/travel/groceries, 1× other",195
-American Express Platinum,American Express,Travel Rewards,"5× points on flights booked w/ Amex Travel, 1× points other purchases",695
-Capital One Venture X,Capital One,Travel Rewards,"2× miles on all purchases, 10× miles on hotels booked via Capital One Travel",395
-Chase Freedom Unlimited,Chase,Cashback,"1.5× points on all purchases, 5% on travel booked via Chase, 3% on dining",0
-Wells Fargo Reflect,Wells Fargo,Low Interest/Balance Transfer,"0% intro APR on purchases + balance transfers (up to 18 mo)",0
-Discover it Student,Discover,Cashback,"5% rotating categories + matching cash back at end of first year",0
-Citi Double Cash Student,Citi,Cashback,"2% on all purchases",0
-Bank of America Customized Cash Rewards,Bank of America,Cashback,"3% on category of your choice (gas/groceries/online/ travel) + 2% on groceries or wholesale clubs, 1% other",0
-American Express Blue Business Plus,American Express,Points Rewards,"2× points on first $50k purchases/year,1× points after that",0
+name,issuer,type,category,multiplier,notes,benefit_title,benefit_description,annualFee
+Chase Sapphire Preferred,Chase,Travel,Dining,3,,Travel Insurance,Trip cancellation coverage,95
+Chase Sapphire Preferred,Chase,Travel,Travel,2,,No Foreign Fees,Use abroad without extra charges,95
+Citi Double Cash,Citi,Cashback,Everything Else,2,,,,0
+Amex Gold,American Express,Travel,Dining,4,,,,250
+Amex Gold,American Express,Travel,Groceries,4,,,,250
+Discover It Cashback,Discover,Cashback,Rotating Categories,5,,,,0
+Wells Fargo Active Cash,Wells Fargo,Cashback,Everything Else,2,,,,0
+BOA Customized Cash,Bank of America,Cashback,Groceries,2,,,,0
+Capital One Savor One,Capital One,Cashback,Dining,3,,,,0
+Capital One Savor One,Capital One,Cashback,Entertainment,3,,,,0
+Capital One Savor One,Capital One,Cashback,Groceries,3,,,,0
