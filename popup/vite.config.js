@@ -12,8 +12,8 @@ export default defineConfig({
     outDir: '../extension/dist',
     emptyOutDir: true,
     rollupOptions: {
-      // Use a named input so Rollup emits a plain filename ("popup.html")
-      input: 'popup.html'
+      // Use a named input so Rollup emits a plain filename ("onboarding.html")
+      input: 'onboarding.html'
     }
   }
 });

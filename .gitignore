@@ -1,0 +1,28 @@
+# Node.js dependencies
+node_modules/
+
+# Vite and build output
+dist/
+.vite/
+
+# Popup public assets
+/popup/public/
+
+# Extension build output
+/extension/dist/
+
+# Environment variables
+.env
+
+# Logs and temp files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/

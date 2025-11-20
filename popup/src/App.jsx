@@ -1,74 +1,89 @@
 import React, { useEffect, useState } from 'react'
+import Onboarding from './Onboarding'
 
 export default function App() {
   const [loading, setLoading] = useState(true)
   const [detection, setDetection] = useState(null)
   const [error, setError] = useState(null)
   const [loadedFrom, setLoadedFrom] = useState('')
+  const [showOnboarding, setShowOnboarding] = useState(false)
   // threshold fixed at 0.7 (guaranteed, not adjustable)
   const FIXED_THRESHOLD = 0.7
 
   useEffect(() => {
-    // record where the popup was loaded from (helpful to verify we are using dist/popup.html)
-    try { setLoadedFrom(window.location.href || '') } catch (e) { setLoadedFrom('') }
+    // Check if user is new
+    const isNewUser = !localStorage.getItem('onpoint_onboarded');
+    setShowOnboarding(isNewUser);
+    if (!isNewUser) {
+      // record where the popup was loaded from (helpful to verify we are using dist/popup.html)
+      try { setLoadedFrom(window.location.href || '') } catch (e) { setLoadedFrom('') }
 
-    async function queryContent() {
-      try {
-        const tabs = await new Promise((resolve) => chrome.tabs.query({ active: true, currentWindow: true }, resolve))
-        if (!tabs || !tabs[0]) {
-          setError('No active tab found')
-          setLoading(false)
-          return
-        }
-        const tabId = tabs[0].id
-        const sendReq = () => new Promise((resolve) => chrome.tabs.sendMessage(tabId, { type: 'getDetection' }, resolve))
-
-        const trySend = async (attemptsLeft = 1) => {
-          const resp = await sendReq()
-          if (chrome.runtime.lastError) {
-            // If we still have attempts, try to inject the content scripts and retry
-            if (attemptsLeft > 0 && chrome.scripting) {
-              try {
-                await new Promise((res, rej) => {
-                  chrome.scripting.executeScript({ target: { tabId }, files: ['content/detect-core.js', 'content/detect.js'] }, (injectionResults) => {
-                    if (chrome.runtime.lastError) return rej(chrome.runtime.lastError)
-                    res(injectionResults)
-                  })
-                })
-                // small delay to let script initialize
-                await new Promise(r => setTimeout(r, 150))
-                return trySend(attemptsLeft - 1)
-              } catch (injErr) {
-                setError('Unable to inject content script: ' + String(injErr))
-                setLoading(false)
-                return null
-              }
-            }
-            setError('Content script not available on this page')
+      async function queryContent() {
+        try {
+          const tabs = await new Promise((resolve) => chrome.tabs.query({ active: true, currentWindow: true }, resolve))
+          if (!tabs || !tabs[0]) {
+            setError('No active tab found')
             setLoading(false)
-            return null
+            return
           }
-          return resp
-        }
+          const tabId = tabs[0].id
+          const sendReq = () => new Promise((resolve) => chrome.tabs.sendMessage(tabId, { type: 'getDetection' }, resolve))
 
-        const resp = await trySend(1)
-        if (resp && resp.ok) {
-          setDetection(resp.detection)
-        } else if (resp === null) {
-          // error already set
-        } else {
-          setError('No response from content script')
+          const trySend = async (attemptsLeft = 1) => {
+            const resp = await sendReq()
+            if (chrome.runtime.lastError) {
+              // If we still have attempts, try to inject the content scripts and retry
+              if (attemptsLeft > 0 && chrome.scripting) {
+                try {
+                  await new Promise((res, rej) => {
+                    chrome.scripting.executeScript({ target: { tabId }, files: ['content/detect-core.js', 'content/detect.js'] }, (injectionResults) => {
+                      if (chrome.runtime.lastError) return rej(chrome.runtime.lastError)
+                      res(injectionResults)
+                    })
+                  })
+                  // small delay to let script initialize
+                  await new Promise(r => setTimeout(r, 150))
+                  return trySend(attemptsLeft - 1)
+                } catch (injErr) {
+                  setError('Unable to inject content script: ' + String(injErr))
+                  setLoading(false)
+                  return null
+                }
+              }
+              setError('Content script not available on this page')
+              setLoading(false)
+              return null
+            }
+            return resp
+          }
+
+          const resp = await trySend(1)
+          if (resp && resp.ok) {
+            setDetection(resp.detection)
+          } else if (resp === null) {
+            // error already set
+          } else {
+            setError('No response from content script')
+          }
+          setLoading(false)
+        } catch (e) {
+          setError(String(e))
+          setLoading(false)
         }
-        setLoading(false)
-      } catch (e) {
-        setError(String(e))
-        setLoading(false)
       }
+      queryContent()
     }
-    queryContent()
   }, [])
 
   // no dynamic threshold: fixed at 0.7 per user request
+
+  if (showOnboarding) {
+    return <Onboarding onComplete={() => {
+      localStorage.setItem('onpoint_onboarded', 'true');
+      setShowOnboarding(false);
+      // Optionally, you could trigger a reload or re-run detection logic here
+    }} />;
+  }
 
   return (
     <div className="app">
@@ -122,6 +137,15 @@ export default function App() {
 
       <footer style={{marginTop: '12px', fontSize: '12px'}}>
         <div>Local-only detection · Manifest V3</div>
+        <button
+          style={{marginTop: '8px', padding: '6px 12px', background: '#eee', borderRadius: '4px', fontSize: '13px'}}
+          onClick={() => {
+            localStorage.removeItem('onpoint_onboarded');
+            setShowOnboarding(true);
+          }}
+        >
+          Show Onboarding Again
+        </button>
       </footer>
     </div>
   )
