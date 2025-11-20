@@ -9,8 +9,8 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "dist/popup.html",
-    "default_title": "Checkout Detector"
+    "default_popup": "dist/onboarding.html",
+    "default_title": "OnPoint - Credit Card Rewards"
   },
   "content_scripts": [
     {

@@ -1,152 +1,339 @@
-import React, { useEffect, useState } from 'react'
-import Onboarding from './Onboarding'
+import { useState, useEffect } from "react";
+import { Dashboard } from "./components/Dashboard";
+import { CheckoutSimulator } from "./components/CheckoutSimulator";
+import { CardLibrary } from "./components/CardLibrary";
+import { CheckoutDetector } from "./components/CheckoutDetector";
+import { Onboarding } from "./components/Onboarding";
+import {
+  CreditCardIcon,
+  ShoppingCartIcon,
+  BookOpenIcon,
+  HomeIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
+import { UserProfile } from "./components/UserProfile";
 
 export default function App() {
-  const [loading, setLoading] = useState(true)
-  const [detection, setDetection] = useState(null)
-  const [error, setError] = useState(null)
-  const [loadedFrom, setLoadedFrom] = useState('')
-  const [showOnboarding, setShowOnboarding] = useState(false)
-  // threshold fixed at 0.7 (guaranteed, not adjustable)
-  const FIXED_THRESHOLD = 0.7
+  // Check if opened as full page (from URL parameter) or as popup
+  const [isFullPage, setIsFullPage] = useState(false);
+  const [currentView, setCurrentView] = useState("detector");
 
   useEffect(() => {
-    // Check if user is new
-    const isNewUser = !localStorage.getItem('onpoint_onboarded');
-    setShowOnboarding(isNewUser);
-    if (!isNewUser) {
-      // record where the popup was loaded from (helpful to verify we are using dist/popup.html)
-      try { setLoadedFrom(window.location.href || '') } catch (e) { setLoadedFrom('') }
-
-      async function queryContent() {
-        try {
-          const tabs = await new Promise((resolve) => chrome.tabs.query({ active: true, currentWindow: true }, resolve))
-          if (!tabs || !tabs[0]) {
-            setError('No active tab found')
-            setLoading(false)
-            return
-          }
-          const tabId = tabs[0].id
-          const sendReq = () => new Promise((resolve) => chrome.tabs.sendMessage(tabId, { type: 'getDetection' }, resolve))
-
-          const trySend = async (attemptsLeft = 1) => {
-            const resp = await sendReq()
-            if (chrome.runtime.lastError) {
-              // If we still have attempts, try to inject the content scripts and retry
-              if (attemptsLeft > 0 && chrome.scripting) {
-                try {
-                  await new Promise((res, rej) => {
-                    chrome.scripting.executeScript({ target: { tabId }, files: ['content/detect-core.js', 'content/detect.js'] }, (injectionResults) => {
-                      if (chrome.runtime.lastError) return rej(chrome.runtime.lastError)
-                      res(injectionResults)
-                    })
-                  })
-                  // small delay to let script initialize
-                  await new Promise(r => setTimeout(r, 150))
-                  return trySend(attemptsLeft - 1)
-                } catch (injErr) {
-                  setError('Unable to inject content script: ' + String(injErr))
-                  setLoading(false)
-                  return null
-                }
-              }
-              setError('Content script not available on this page')
-              setLoading(false)
-              return null
-            }
-            return resp
-          }
-
-          const resp = await trySend(1)
-          if (resp && resp.ok) {
-            setDetection(resp.detection)
-          } else if (resp === null) {
-            // error already set
-          } else {
-            setError('No response from content script')
-          }
-          setLoading(false)
-        } catch (e) {
-          setError(String(e))
-          setLoading(false)
-        }
-      }
-      queryContent()
+    // Check if this is opened with ?fullpage=true parameter
+    const params = new URLSearchParams(window.location.search);
+    const isFullPageMode = params.get('fullpage') === 'true';
+    const view = params.get('view');
+    
+    setIsFullPage(isFullPageMode);
+    if (view) {
+      setCurrentView(view);
     }
-  }, [])
+  }, []);
 
-  // no dynamic threshold: fixed at 0.7 per user request
+  // Load user data from localStorage
+  const [userData, setUserData] = useState(() => {
+    const saved = localStorage.getItem("onpoint_user_data");
+    return saved ? JSON.parse(saved) : null;
+  });
 
-  if (showOnboarding) {
-    return <Onboarding onComplete={() => {
-      localStorage.setItem('onpoint_onboarded', 'true');
-      setShowOnboarding(false);
-      // Optionally, you could trigger a reload or re-run detection logic here
-    }} />;
+  const [userCards, setUserCards] = useState(() => {
+    if (userData?.cards) {
+      return userData.cards.map((card, idx) => ({
+        ...card,
+        id: idx.toString(),
+      }));
+    }
+    return [
+      {
+        id: "1",
+        name: "Chase Freedom Unlimited",
+        issuer: "Chase",
+        type: "cashback",
+        annualFee: 0,
+        color: "#1E3A8A",
+        rewards: [
+          {
+            category: "dining",
+            rate: 3,
+            details: "Including takeout and delivery",
+          },
+          { category: "drugstore", rate: 3 },
+          {
+            category: "travel",
+            rate: 5,
+            details: "Through Chase Travel Portal",
+          },
+          { category: "all", rate: 1.5 },
+        ],
+      },
+      {
+        id: "2",
+        name: "American Express Gold",
+        issuer: "Amex",
+        type: "travel",
+        annualFee: 250,
+        color: "#D4AF37",
+        rewards: [
+          {
+            category: "dining",
+            rate: 4,
+            details: "Worldwide at restaurants",
+          },
+          {
+            category: "groceries",
+            rate: 4,
+            details: "At US supermarkets (up to $25k/year)",
+          },
+          { category: "all", rate: 1 },
+        ],
+      },
+    ];
+  });
+
+  const handleOnboardingComplete = (data) => {
+    localStorage.setItem("onpoint_user_data", JSON.stringify(data));
+    setUserData(data);
+    
+    if (data.cards && data.cards.length > 0) {
+      setUserCards(
+        data.cards.map((card, idx) => ({
+          ...card,
+          id: idx.toString(),
+        }))
+      );
+    }
+    
+    // If full page, go to dashboard. If popup, close window
+    if (isFullPage) {
+      setCurrentView("dashboard");
+    } else {
+      window.close();
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("onpoint_user_data");
+    setUserData(null);
+    setUserCards([]);
+    setCurrentView("detector");
+  };
+
+  // If opened as full page with onboarding intent, always show onboarding (even if logged in)
+  if (isFullPage && currentView === "onboarding") {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
+  // In extension popup, ALWAYS show checkout detector (no dashboard)
+  // Dashboard is only for full web app, not extension
+  if (!isFullPage) {
+    return <CheckoutDetector />;
+  }
+
+  // Full page mode - show navigation and different views
   return (
-    <div className="app">
-      <div style={{fontSize: 12, color: '#666', marginBottom: 6}}>Loaded from: {loadedFrom}</div>
-      <h1>Checkout Detector</h1>
-      {loading && <p>Detecting...</p>}
-      {error && <p className="error">{error}</p>}
-        {detection && (
-        <div className="result">
-          <p>Is checkout (detector): <strong>{detection.isCheckout ? 'Yes' : 'No'}</strong></p>
-          <p>Score: {detection.score}</p>
-          <p>Reasons:</p>
-          <ul>
-            {detection.reasons.map((r, i) => <li key={i}>{r}</li>)}
-          </ul>
-        </div>
-      )}
-
-      <div style={{marginTop: '8px'}}>
-        <button onClick={() => location.reload()}>Refresh</button>
-        {' '}
-        <button onClick={() => {
-          if (!detection) return;
-          try {
-            const text = JSON.stringify(detection, null, 2);
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(text);
-            } else {
-              // fallback: open a prompt to copy
-              window.prompt('Copy detection JSON', text);
-            }
-          } catch (e) {
-            window.alert('Unable to copy detection result')
-          }
-        }}>Copy detection JSON</button>
-      </div>
-
-      <div style={{marginTop: '12px'}}>
-        <label style={{fontSize: '13px'}}>Detection threshold: <strong>{FIXED_THRESHOLD.toFixed(2)}</strong></label>
-        {detection && (
-          <div style={{marginTop:8}}>
-            <div>Passes score threshold (&gt;= {FIXED_THRESHOLD.toFixed(2)}): <strong>{detection.isCheckoutByScore ? 'Yes' : 'No'}</strong></div>
-            <div>Accepted after post-check rules: <strong>{detection.isCheckout ? 'Yes' : 'No'}</strong></div>
-            <div style={{fontSize:11, color:'#666'}}>
-              Note: detector may accept pages with strong payment signals even if the raw score is slightly below the threshold. <br/>
-              Payment signal present: <strong>{detection.hasPaymentSignal ? 'Yes' : 'No'}</strong>
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(to bottom right, #eff6ff, #e0e7ff)',
+      fontFamily: 'Poppins, sans-serif'
+    }}>
+      {/* Header */}
+      <header style={{ 
+        background: 'white', 
+        boxShadow: '0 1px 2px rgba(0,0,0,0.05)', 
+        borderBottom: '1px solid #e5e7eb' 
+      }}>
+        <div style={{ 
+          maxWidth: '1280px', 
+          margin: '0 auto', 
+          padding: '16px', 
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between' 
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <img 
+                src="./icons/discord.jpg" 
+                alt="OnPoint Logo" 
+                style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '8px',
+                  objectFit: 'cover'
+                }} 
+              />
+              <div>
+                <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>OnPoint</h1>
+                <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                  Maximize Your Rewards
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {userData && (
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: '14px', fontWeight: '500' }}>Welcome back,</p>
+                  <p style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                    {userData.name.split(" ")[0]}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </header>
 
-      <footer style={{marginTop: '12px', fontSize: '12px'}}>
-        <div>Local-only detection · Manifest V3</div>
-        <button
-          style={{marginTop: '8px', padding: '6px 12px', background: '#eee', borderRadius: '4px', fontSize: '13px'}}
-          onClick={() => {
-            localStorage.removeItem('onpoint_onboarded');
-            setShowOnboarding(true);
-          }}
-        >
-          Show Onboarding Again
-        </button>
-      </footer>
+      {/* Navigation */}
+      <nav style={{ background: 'white', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <button
+              onClick={() => setCurrentView("detector")}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 16px',
+                borderBottom: currentView === "detector" ? '2px solid #2563eb' : '2px solid transparent',
+                color: currentView === "detector" ? '#2563eb' : '#6b7280',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                if (currentView !== "detector") {
+                  e.currentTarget.style.color = '#374151';
+                  e.currentTarget.style.borderBottom = '2px solid #d1d5db';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentView !== "detector") {
+                  e.currentTarget.style.color = '#6b7280';
+                  e.currentTarget.style.borderBottom = '2px solid transparent';
+                }
+              }}
+            >
+              <HomeIcon style={{ width: '16px', height: '16px' }} />
+              Dashboard
+            </button>
+            <button
+              onClick={() => setCurrentView("checkout")}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 16px',
+                borderBottom: currentView === "checkout" ? '2px solid #2563eb' : '2px solid transparent',
+                color: currentView === "checkout" ? '#2563eb' : '#6b7280',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                if (currentView !== "checkout") {
+                  e.currentTarget.style.color = '#374151';
+                  e.currentTarget.style.borderBottom = '2px solid #d1d5db';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentView !== "checkout") {
+                  e.currentTarget.style.color = '#6b7280';
+                  e.currentTarget.style.borderBottom = '2px solid transparent';
+                }
+              }}
+            >
+              <ShoppingCartIcon style={{ width: '16px', height: '16px' }} />
+              Checkout Simulator
+            </button>
+            <button
+              onClick={() => setCurrentView("library")}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 16px',
+                borderBottom: currentView === "library" ? '2px solid #2563eb' : '2px solid transparent',
+                color: currentView === "library" ? '#2563eb' : '#6b7280',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                if (currentView !== "library") {
+                  e.currentTarget.style.color = '#374151';
+                  e.currentTarget.style.borderBottom = '2px solid #d1d5db';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentView !== "library") {
+                  e.currentTarget.style.color = '#6b7280';
+                  e.currentTarget.style.borderBottom = '2px solid transparent';
+                }
+              }}
+            >
+              <BookOpenIcon style={{ width: '16px', height: '16px' }} />
+              Card Library
+            </button>
+            <button
+              onClick={() => setCurrentView("profile")}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 16px',
+                borderBottom: currentView === "profile" ? '2px solid #2563eb' : '2px solid transparent',
+                color: currentView === "profile" ? '#2563eb' : '#6b7280',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                if (currentView !== "profile") {
+                  e.currentTarget.style.color = '#374151';
+                  e.currentTarget.style.borderBottom = '2px solid #d1d5db';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentView !== "profile") {
+                  e.currentTarget.style.color = '#6b7280';
+                  e.currentTarget.style.borderBottom = '2px solid transparent';
+                }
+              }}
+            >
+              <Cog6ToothIcon style={{ width: '16px', height: '16px' }} />
+              Profile
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main style={{ 
+        maxWidth: '1280px', 
+        margin: '0 auto', 
+        padding: '32px 16px' 
+      }}>
+        {currentView === "detector" && (
+          <CheckoutDetector onSignUpClick={() => setCurrentView("onboarding")} />
+        )}
+        {currentView === "dashboard" && (
+          <Dashboard cards={userCards} setCards={setUserCards} />
+        )}
+        {currentView === "checkout" && (
+          <CheckoutSimulator cards={userCards} />
+        )}
+        {currentView === "library" && (
+          <CardLibrary userCards={userCards} setUserCards={setUserCards} />
+        )}
+        {currentView === "profile" && (
+          <UserProfile userData={userData} handleLogout={handleLogout} />
+        )}
+      </main>
     </div>
-  )
+  );
 }
