@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Onboarding</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,14 +14,21 @@
         rel="stylesheet">
 </head>
 
-<body class="font-[Poppins] bg-gradient-to-t from-[#fbc2eb] to-[#a6c1ee] h-screen">
-    <header class= "bg-white">
-       <nav class = "">
+<body class="font-poppins bg-gradient-to-t from-[#fbc2eb] to-[#a6c1ee] h-screen">
+    <header class="bg-white">
+       <nav class="flex justify-between items-center p-4">
         <div>
 
             <img class="w-24" src="/icons/discord.jpg" alt="Test Icon"/>
         </div>
-
+        <div>
+            <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-2 rounded-lg transition-colors">
+                Login
+            </button>
+            <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-2 rounded-lg transition-colors">
+                Sign up
+            </button>
+        </div>
 
 
        </nav> 
@@ -30,5 +37,6 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 </body>
+
 
 </html>
