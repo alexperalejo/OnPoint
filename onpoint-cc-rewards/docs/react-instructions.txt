@@ -1,0 +1,28 @@
+
+Success! Created frontend at C:\Users\peral\OneDrive\Desktop\COMP 490\OnPoint\onpoint-cc-rewards\frontend
+Inside that directory, you can run several commands:
+
+  npm start
+    Starts the development server.
+
+  npm run build
+    Bundles the app into static files for production.
+
+  npm test
+    Starts the test runner.
+
+  npm run eject
+    Removes this tool and copies build dependencies, configuration files
+    and scripts into the app directory. If you do this, you can’t go back!
+
+We suggest that you begin by typing:
+
+  cd frontend
+  npm start
+
+
+File	        Purpose
+App.js	        The main component (your page layout goes here).
+index.js        Starts the React app. Never touch this.
+components/	    Your reusable UI parts (buttons, navbar, cards).
+pages/	        Your actual pages (Home.jsx, Onboarding.jsx, Dashboard.jsx).
