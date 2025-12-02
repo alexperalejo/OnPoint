@@ -3,15 +3,17 @@
 .feature-cards-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin-bottom: 4rem;
+  gap: 2rem;
+  width: 100%;
+  padding: 1rem 0;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .feature-cards-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
 
 .feature-card {
   background-color: #3B82F6;
