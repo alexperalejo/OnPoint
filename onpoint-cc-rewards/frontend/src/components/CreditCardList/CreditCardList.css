@@ -1,0 +1,88 @@
+/*list of credit cards carousel style*/
+
+.credit-card-list {
+  text-align: center;
+  padding: 2rem 0;
+  overflow: hidden;
+}
+
+.list-title {
+  font-size: 1.125rem;
+  color: #4b5563;
+  margin-bottom: 2rem;
+}
+
+.logos-container {
+  position: relative;
+}
+
+.logos-scroll {
+  display: flex;
+  gap: 3rem;
+  opacity: 0.6;
+  animation: scroll 20s linear infinite;
+}
+
+.logo-item {
+  flex-shrink: 0;
+}
+
+.logo-citi {
+  font-size: 1.5rem;
+  color: #0066B2;
+}
+
+.logo-chase {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chase-text {
+  font-size: 1.25rem;
+  color: #374151;
+}
+
+.chase-circle {
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: #0066B2;
+  border-radius: 50%;
+}
+
+.logo-amex {
+  text-align: center;
+}
+
+.amex-line {
+  font-size: 0.75rem;
+  color: #0066B2;
+}
+
+.logo-discover {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1.25rem;
+}
+
+.discover-circle {
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: #FF6600;
+  border-radius: 50%;
+}
+
+.logo-capital {
+  font-size: 1.25rem;
+  color: #E31E24;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}

@@ -1,0 +1,33 @@
+/*Steps Section css*/
+
+.steps-section {
+  margin-bottom: 4rem;
+  padding: 2rem 0;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .steps-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.step-item {
+  text-align: center;
+}
+
+.step-text {
+  font-size: 1.125rem;
+  color: #4b5563;
+}
+
+.step-number {
+  margin-right: 0.5rem;
+}
