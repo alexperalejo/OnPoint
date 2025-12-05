@@ -154,7 +154,7 @@ export default function App() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <img 
-                src="./icons/discord.jpg" 
+                src={chrome.runtime.getURL('icons/discord.jpg')}
                 alt="OnPoint Logo" 
                 style={{ 
                   width: '40px', 

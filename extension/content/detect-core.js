@@ -180,9 +180,6 @@
     } else if (score >= baseThreshold) {
       // between 0.7 and 0.8: accept if any payment/order signal is present
       isCheckout = hasPaymentSignal
-    } else if (score >= 0.6 && hasStrongPaymentSignal) {
-      // allow a near-miss (>=0.6) only when a strong payment-related artifact exists (iframe/fields/JSON-LD)
-      isCheckout = true
     } else {
       isCheckout = false
     }

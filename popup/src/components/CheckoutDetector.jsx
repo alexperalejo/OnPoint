@@ -1,10 +1,52 @@
 import { useEffect, useState } from "react";
+import { CardRecommendation } from "./CardRecommendation";
 
 export function CheckoutDetector({ onSignUpClick }) {
   const [loading, setLoading] = useState(true);
   const [detection, setDetection] = useState(null);
   const [error, setError] = useState(null);
+  const [showRecommendation, setShowRecommendation] = useState(false);
+  const [recommendedCard, setRecommendedCard] = useState(null);
   const FIXED_THRESHOLD = 0.7;
+
+  // BACKEND API INTEGRATION PLACEHOLDER
+  // When checkout is detected, call backend like this:
+  // const fetchRecommendedCard = async (userCards, pageUrl) => {
+  //   const response = await fetch('/api/recommend-card', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({
+  //       userCards: userCards,  // List of user's cards with their categories/tags
+  //       currentUrl: pageUrl,   // URL of checkout page
+  //       pageContent: detection // Detection results (optional)
+  //     })
+  //   });
+  //   return await response.json(); // Returns: { card: bestCard, savingsPercentage: X }
+  // };
+
+  // Dummy card for demonstration (will be replaced with backend response)
+  const DUMMY_RECOMMENDED_CARD = {
+    id: "1",
+    name: "Chase Freedom Unlimited",
+    issuer: "Chase",
+    type: "cashback",
+    annualFee: 0,
+    color: "#1E3A8A",
+    rewards: [
+      {
+        category: "dining",
+        rate: 3,
+        details: "Including takeout and delivery",
+      },
+      { category: "drugstore", rate: 3 },
+      {
+        category: "travel",
+        rate: 5,
+        details: "Through Chase Travel Portal",
+      },
+      { category: "all", rate: 1.5 },
+    ],
+  };
 
   useEffect(() => {
     async function queryContent() {
@@ -67,12 +109,28 @@ export function CheckoutDetector({ onSignUpClick }) {
         const resp = await trySend(1);
         if (resp && resp.ok) {
           setDetection(resp.detection);
+          setLoading(false);
+          
+          // When checkout detected, prepare to fetch card recommendation from backend
+          if (resp.detection.isCheckout) {
+            console.log('Checkout detected on URL:', window.location.href);
+            
+            // TODO: Call backend API with:
+            // 1. Current page URL
+            // 2. User's card list (from localStorage or props)
+            // 3. Get back the recommended card
+            
+            // For now, show dummy card immediately
+            setRecommendedCard(DUMMY_RECOMMENDED_CARD);
+            setShowRecommendation(true);
+          }
         } else if (resp === null) {
           // error already set
+          setLoading(false);
         } else {
           setError("No response from content script");
+          setLoading(false);
         }
-        setLoading(false);
       } catch (e) {
         setError(String(e));
         setLoading(false);
@@ -122,30 +180,17 @@ export function CheckoutDetector({ onSignUpClick }) {
             </ul>
           </div>
 
-          {detection.isCheckout && (
-            <button
-              onClick={() => {
-                // Open same page but as full page with onboarding parameter
-                chrome.tabs.create({ 
-                  url: chrome.runtime.getURL('dist/onboarding.html?fullpage=true&view=onboarding') 
-                });
+          {showRecommendation && recommendedCard && (
+            <CardRecommendation 
+              card={recommendedCard}
+              onApply={(card) => {
+                console.log('User selected card:', card);
+                // TODO: Backend flag - send to backend that user selected this card for transaction
+                // This is where we'd track which card was recommended and if user used it
+                setShowRecommendation(false);
               }}
-              style={{
-                width: '100%',
-                padding: '10px',
-                marginTop: '12px',
-                background: '#2563eb',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => e.target.style.background = '#1d4ed8'}
-              onMouseOut={(e) => e.target.style.background = '#2563eb'}
-            >
-              Get Card Recommendations
-            </button>
+              onDismiss={() => setShowRecommendation(false)}
+            />
           )}
 
           <div style={{ 
@@ -166,6 +211,32 @@ export function CheckoutDetector({ onSignUpClick }) {
           </div>
         </div>
       )}
+
+      <button
+        onClick={() => {
+          // Open same page but as full page with onboarding parameter
+          chrome.tabs.create({ 
+            url: chrome.runtime.getURL('dist/onboarding.html?fullpage=true&view=onboarding') 
+          });
+        }}
+        style={{
+          width: '100%',
+          padding: '10px 16px',
+          marginTop: '16px',
+          background: '#2563eb',
+          color: 'white',
+          border: 'none',
+          borderRadius: '6px',
+          fontWeight: '500',
+          cursor: 'pointer',
+          fontSize: '14px',
+          boxSizing: 'border-box'
+        }}
+        onMouseOver={(e) => e.target.style.background = '#1d4ed8'}
+        onMouseOut={(e) => e.target.style.background = '#2563eb'}
+      >
+        Get Card Recommendations
+      </button>
 
       <div style={{ marginTop: '12px' }}>
         <button 
