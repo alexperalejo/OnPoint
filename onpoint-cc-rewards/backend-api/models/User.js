@@ -11,19 +11,25 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
+    trim: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
   },
   createdAt: {
     type: Date,
     default: Date.now,
   },
-  // Optional: store user's selected or owned cards
+
   cards: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'CreditCard',
+    ref: 'Card',
   }]
 });
 
 module.exports = mongoose.model('User', userSchema);
 
 
-/* This defines a simple user with name, email, timestamp, and references to saved credit cards. */
