@@ -1,0 +1,30 @@
+/*App css*/
+.app {
+  width: auto;
+  min-height: 100vh;
+  background-color: rgb(255, 255, 255);
+}
+
+.main-content {
+  width: 100%;
+  max-width: 1400px; /* adjust if needed */
+  margin: 0 auto;
+  padding: 2rem 3rem;
+}
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#root, .app {
+  width: 100%;
+  height: auto;
+}
+
+* {
+  font-family: 'Inter', sans-serif;
+}

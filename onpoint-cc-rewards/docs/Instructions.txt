@@ -1,43 +1,70 @@
 Project Setup Instructions
-    
-    Follow these steps to set up and run the OnPoint Credit Card Recommendation System on your local machine.
-    1. Clone the Repository
-        git clone https://github.com/<your-username>/OnPoint-CC-Rewards.git
-        cd OnPoint-CC-Rewards
 
-    2. Install Dependencies    
-        cd backend-api
-        npm install
+Follow these steps to set up and run the OnPoint Credit Card Recommendation System on your local machine.
 
-    3. Set Up Environment Variables - Create a .env file inside backend-api/ using .env.example as a guide:
-        cp .env.example .env
+------------------------------------------------------------
+1. Clone the Repository
+------------------------------------------------------------
+    git clone https://github.com/<your-username>/OnPoint-CC-Rewards.git
+    cd OnPoint-CC-Rewards
 
-        Then open .env and replace the MongoDB URI with your team’s shared connection string:
-        MONGODB_URI=mongodb+srv://onpoint_user:YourPassword@onpoint-cluster.mongodb.net/onpoint
-        PORT=3000
+------------------------------------------------------------
+2. Install Backend Dependencies
+------------------------------------------------------------
+    cd backend-api
+    npm install
 
-    4. Run the Backend Server
-        npm run dev
-        or
-        node server.js
-    
-    You should see:
-        MongoDB connected
-        Server running on port 3000
-    
-    5. Frontend (Chrome Extension) - To load your Chrome extension:
+------------------------------------------------------------
+3. Set Up Environment Variables
+------------------------------------------------------------
+Create a .env file inside backend-api/ using .env.example as a guide:
 
-        1. Open Chrome → go to chrome://extensions/
-        2. Enable Developer Mode (top right)
-        3. Click “Load unpacked”
-        4. Select the frontend-extension/ folder inside this project
+    cp .env.example .env
 
-    You should now see the OnPoint extension icon appear in Chrome.
+Then open .env and replace the MongoDB URI with your team’s shared connection string:
 
-    Notes: 
+    MONGODB_URI=mongodb+srv://onpoint_user:<password>@onpoint-cluster.mongodb.net/onpoint
+    PORT=3000
 
-Do not commit your .env file or node_modules/ to GitHub
+------------------------------------------------------------
+4. Run the Backend Server
+------------------------------------------------------------
+    npm run dev
+    (or)
+    node server.js
 
-.env.example and .gitignore handle this automatically
+Expected output:
+    MongoDB connected
+    Server running on port 3000
 
-To keep dependencies up to date:
+------------------------------------------------------------
+5. Load the Chrome Extension (Frontend Extension)
+------------------------------------------------------------
+    1. Open Chrome → go to: chrome://extensions/
+    2. Enable "Developer Mode" (top right)
+    3. Click “Load unpacked”
+    4. Select the folder: frontend-extension/
+
+You should now see the OnPoint extension icon appear in Chrome.
+
+------------------------------------------------------------
+6. Run the React Frontend Web App
+------------------------------------------------------------
+The React web interface is located in the frontend/ directory.
+
+    cd ../frontend
+    npm install
+    npm run dev
+
+Open the URL shown in your terminal  
+(usually: http://localhost:5173)
+
+------------------------------------------------------------
+Important Notes
+------------------------------------------------------------
+- DO NOT commit your .env file or node_modules/ to GitHub.
+- .env.example and .gitignore already prevent these from being committed.
+- To keep your dependencies up to date:
+      npm install
+      git pull
+

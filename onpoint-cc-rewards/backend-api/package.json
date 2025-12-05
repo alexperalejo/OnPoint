@@ -8,7 +8,8 @@
     "mongoose": "^8.19.2"
   },
   "scripts": {
-  "seed": "node utils/importCSV.js"
-}
+    "seed": "node utils/importCSV.js",
+    "test": "node test.js"
+  }
   
 }
