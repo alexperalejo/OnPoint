@@ -2,7 +2,12 @@
 
 const express = require('express');
 const router = express.Router();
+<<<<<<< HEAD
 const Card = require('../models/Card');
+=======
+const cardController = require('../controllers/cardController');
+const auth = require('../middleware/auth');
+>>>>>>> cd94c93 (refactor: move authentication middleware to separate file and protect routes)
 
 // GET all cards
 router.get('/', async (req, res) => {
@@ -14,6 +19,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // POST add new card
 router.post('/', async (req, res) => {
   try {
@@ -24,5 +30,14 @@ router.post('/', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+=======
+// POST add new card (protected)
+router.post('/', auth.authenticate, cardController.createCard);
+
+// Routes for single card
+router.get('/:id', cardController.loadCard, cardController.getCardById);
+router.patch('/:id', auth.authenticate, cardController.loadCard, cardController.updateCard);
+router.delete('/:id', auth.authenticate, cardController.loadCard, cardController.deleteCard);
+>>>>>>> cd94c93 (refactor: move authentication middleware to separate file and protect routes)
 
 module.exports = router;
