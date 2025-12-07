@@ -11,6 +11,20 @@
     return null;
   };
 
+  // Persist the latest detection so dev tools can read it without re-sending commands.
+  function persistDetection(detection) {
+    try {
+      const payload = {
+        detection,
+        url: (typeof location !== 'undefined' && location.href) || '',
+        capturedAt: Date.now()
+      };
+      chrome.storage?.local?.set({ lastDetectionContent: payload });
+    } catch (e) {
+      /* ignore storage failures */
+    }
+  }
+
   function runDetect(doc) {
     doc = doc || (typeof document !== 'undefined' ? document : null);
     const fn = getDetectFn();
@@ -24,10 +38,13 @@
 
   // Initial run
   let lastDetection = runDetect(document);
+  let lastUrl = (typeof location !== 'undefined' && location.href) || '';
+  persistDetection(lastDetection);
 
   // Debounce helper
   let debounceTimer = null;
   const DEBOUNCE_MS = 250;
+  const POLL_MS = 2000; // periodic safeguard for SPA/nav changes
 
   // Limit observation triggers to nodes likely to affect checkout detection
   const importantSelectors = [
@@ -57,16 +74,44 @@
     return false;
   }
 
+  // Poll occasionally to catch SPA navigation without DOM mutations
+  try {
+    setInterval(() => {
+      scheduleRecompute();
+    }, POLL_MS);
+  } catch (e) { /* ignore */ }
+
+  // Listen for URL-changing events common to SPAs
+  try {
+    window.addEventListener('popstate', scheduleRecompute, { passive: true });
+    window.addEventListener('hashchange', scheduleRecompute, { passive: true });
+    window.addEventListener('load', scheduleRecompute, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') scheduleRecompute();
+    }, { passive: true });
+  } catch (e) { /* ignore */ }
+
   function scheduleRecompute() {
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
       try {
         const newDet = runDetect(document);
-        if (!lastDetection || newDet.score !== lastDetection.score || newDet.isCheckout !== lastDetection.isCheckout) {
-          lastDetection = newDet;
+        const currentUrl = (typeof location !== 'undefined' && location.href) || '';
+        const changed =
+          !lastDetection ||
+          newDet.score !== lastDetection.score ||
+          newDet.isCheckout !== lastDetection.isCheckout ||
+          currentUrl !== lastUrl;
+        lastDetection = newDet;
+        lastUrl = currentUrl;
+        if (changed) {
+          persistDetection(lastDetection);
           // helpful page-visible log for manual QA
           try { console.info('checkout-detection:update', lastDetection); } catch (e) { }
+        } else {
+          // still persist to keep capturedAt fresh even if detection unchanged
+          persistDetection(lastDetection);
         }
       } catch (e) {
         // swallow exceptions to avoid breaking page
@@ -104,6 +149,8 @@
     if (msg && msg.type === 'getDetection') {
       // recompute quickly
       lastDetection = runDetect(document);
+      lastUrl = (typeof location !== 'undefined' && location.href) || lastUrl;
+      persistDetection(lastDetection);
       sendResponse({ ok: true, detection: lastDetection });
     }
     return true; // keep channel open for async
