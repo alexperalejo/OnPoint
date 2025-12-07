@@ -9,6 +9,24 @@ export function CheckoutDetector({ onSignUpClick }) {
   const [recommendedCard, setRecommendedCard] = useState(null);
   const FIXED_THRESHOLD = 0.7;
 
+  // Persist the latest detection plus a small history for developer inspection.
+  async function persistDetectionDebug(payload) {
+    try {
+      const getExisting = () => new Promise((resolve) => {
+        chrome.storage?.local?.get(['detectionHistory'], (data) => resolve(data || {}));
+      });
+      const existing = await getExisting();
+      const history = Array.isArray(existing.detectionHistory) ? existing.detectionHistory : [];
+      const nextHistory = [{ ...payload }, ...history].slice(0, 10);
+      await chrome.storage?.local?.set({
+        lastDetectionDebug: payload,
+        detectionHistory: nextHistory,
+      });
+    } catch (storageErr) {
+      console.warn('Could not store detection debug info', storageErr);
+    }
+  }
+
   // BACKEND API INTEGRATION PLACEHOLDER
   // When checkout is detected, call backend like this:
   // const fetchRecommendedCard = async (userCards, pageUrl) => {
@@ -109,6 +127,12 @@ export function CheckoutDetector({ onSignUpClick }) {
         const resp = await trySend(1);
         if (resp && resp.ok) {
           setDetection(resp.detection);
+          // Persist full rationale for developers (out of UI)
+          persistDetectionDebug({
+            detection: resp.detection,
+            tabUrl: tab.url,
+            capturedAt: Date.now(),
+          });
           setLoading(false);
           
           // When checkout detected, prepare to fetch card recommendation from backend
@@ -172,12 +196,9 @@ export function CheckoutDetector({ onSignUpClick }) {
               Is checkout (detector): <strong>{detection.isCheckout ? 'Yes' : 'No'}</strong>
             </p>
             <p style={{ marginBottom: '8px' }}>Score: {detection.score.toFixed(2)}</p>
-            <p style={{ marginBottom: '4px', fontWeight: '500' }}>Reasons:</p>
-            <ul style={{ paddingLeft: '20px', margin: 0 }}>
-              {detection.reasons.map((r, i) => (
-                <li key={i} style={{ marginBottom: '4px', color: '#444' }}>{r}</li>
-              ))}
-            </ul>
+            <p style={{ marginBottom: '4px', fontWeight: '500', color: '#4b5563' }}>
+              Rationale hidden in UI. Check `lastDetectionDebug` in chrome.storage.local.
+            </p>
           </div>
 
           {showRecommendation && recommendedCard && (
@@ -193,22 +214,6 @@ export function CheckoutDetector({ onSignUpClick }) {
             />
           )}
 
-          <div style={{ 
-            marginTop: '16px', 
-            paddingTop: '12px', 
-            borderTop: '1px solid #e5e7eb',
-            fontSize: '13px',
-            color: '#666'
-          }}>
-            <div>Detection threshold: <strong>{FIXED_THRESHOLD.toFixed(2)}</strong></div>
-            <div>Passes score threshold (&gt;= {FIXED_THRESHOLD.toFixed(2)}): <strong>{detection.isCheckoutByScore ? 'Yes' : 'No'}</strong></div>
-            <div>Accepted after post-check rules: <strong>{detection.isCheckout ? 'Yes' : 'No'}</strong></div>
-            <div style={{ fontSize: '11px', marginTop: '8px' }}>
-              Note: detector may accept pages with strong payment signals even if the raw score is slightly below the threshold.
-              <br />
-              Payment signal present: <strong>{detection.hasPaymentSignal ? 'Yes' : 'No'}</strong>
-            </div>
-          </div>
         </div>
       )}
 

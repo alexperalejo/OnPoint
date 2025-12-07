@@ -13,14 +13,14 @@
     // URL heuristics (broadened)
     const urlChecks = [
       { p: 'checkout', w: 0.28 },
-      { p: '/cart', w: 0.10 },
-      { p: 'payment', w: 0.18 },
-      { p: 'order', w: 0.07 },
-      { p: 'purchase', w: 0.06 },
-      { p: 'basket', w: 0.06 },
-      { p: 'confirm', w: 0.04 },
-      { p: 'review', w: 0.03 },
-      { p: 'pay', w: 0.12 }
+      { p: '/cart', w: 0.06 },
+      { p: 'payment', w: 0.14 },
+      { p: 'order', w: 0.05 },
+      { p: 'purchase', w: 0.05 },
+      { p: 'basket', w: 0.05 },
+      { p: 'confirm', w: 0.03 },
+      { p: 'review', w: 0.01 },
+      { p: 'pay', w: 0.06 }
     ];
     urlChecks.forEach(c => { if (url.includes(c.p)) { score += c.w; reasons.push(`url:${c.p}`); } });
 
@@ -80,13 +80,13 @@
         } catch (e) { }
       });
     }
-  if (foundAddr >= 2) { score += 0.12; reasons.push('address-fields'); }
+  if (foundAddr >= 2) { score += 0.06; reasons.push('address-fields'); }
 
     // Structural cues: classes / ids, ARIA roles, and schema.org markers
     const structural = ['checkout', 'order', 'payment', 'cart', 'order-summary', 'shipping'];
     if (doc) {
       for (const s of structural) {
-        try { if (doc.querySelector(`[class*="${s}"]`) || doc.querySelector(`[id*="${s}"]`)) { score += 0.06; reasons.push(`struct:${s}`); } } catch (e) { }
+        try { if (doc.querySelector(`[class*="${s}"]`) || doc.querySelector(`[id*="${s}"]`)) { score += 0.02; reasons.push(`struct:${s}`); } } catch (e) { }
       }
       // ARIA/roles
       try {
@@ -166,20 +166,17 @@
     hasOrderTotal = typeof hasOrderTotal !== 'undefined' ? hasOrderTotal : (reasons.indexOf('order-total') !== -1)
 
     // Accept if clearly above strong threshold.
-    // If between baseThreshold and strongThreshold, require a payment signal.
-    // Note: remove the previous "near-miss" rule that accepted scores < baseThreshold
-    // simply because a payment signal existed. This prevents cart pages (score < 0.7)
-    // from being accepted just because they mention totals or include platform markers.
+    // If between baseThreshold and strongThreshold, now require a strong payment signal
+    // (field/iframe/JSON-LD) instead of any weak signal like 'order total'.
     const hasPaymentSignal = hasPaymentField || hasOrderTotal || hasJsonLd || hasPaymentIframe
-    // strong signals (payment field / provider iframe / JSON-LD) are more reliable than a mere 'order-total' string
     const hasStrongPaymentSignal = hasPaymentField || hasPaymentIframe || hasJsonLd
 
     let isCheckout = false
     if (score >= strongThreshold) {
       isCheckout = true
     } else if (score >= baseThreshold) {
-      // between 0.7 and 0.8: accept if any payment/order signal is present
-      isCheckout = hasPaymentSignal
+      // between 0.7 and 0.8: only accept if strong signals exist
+      isCheckout = hasStrongPaymentSignal
     } else {
       isCheckout = false
     }
