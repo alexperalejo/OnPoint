@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// controller for auth routes
-=======
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -60,4 +57,3 @@ exports.logout = async (req, res) => {
 
 
 // Note: authentication middleware has been moved to `middleware/auth.js`.
->>>>>>> cd94c93 (refactor: move authentication middleware to separate file and protect routes)

@@ -1,21 +1,35 @@
-//export enum AttributeType{
-//    Url = "url",
-//    Tag = "tag",
-//    All = "all"
-//}
-//export type CardAttribute = {
-//        type: AttributeType,
-//        value: string,
-//        points: number
-//}
-//export type Card = {
-//    id: string,
-//    attributes: CardAttribute[]
-//}
-//export type PaymentInfo = {
-//    url: string
-//    tags: string[]
-//}
+/**
+ * @readonly
+ * @enum {string}
+ */
+const AttributeType = {
+    Url: "url",
+    Tag: "tag",
+    All: "all"
+}
+/**
+ * @typedef {object} CardAttribute
+ * @property {AttributeType} type
+ * @property {string} value
+ * @property {number} points
+ */
+/**
+ * @typedef {object} Card
+ * @property {string} id
+ * @property {CardAttribute[]} attributes
+ */
+/**
+ * @typedef {object} PaymentInfo
+ * @property {string} url
+ * @property {string[]} tags
+ */
+
+/**
+ * Get Points for a card
+ * @param {PaymentInfo} paymentInfo 
+ * @param {Card} card 
+ * @returns {number} The total points that applies from a card.
+ */
 function getCardPoints(paymentInfo, card)
 {
     var points = 0;
@@ -41,6 +55,12 @@ function getCardPoints(paymentInfo, card)
     });
     return points;
 }
+/**
+ * Get the reccomended card for a list of cards
+ * @param {PaymentInfo} paymentInfo 
+ * @param {Card[]} cards 
+ * @returns {string} The id of the best card
+ */
 function reccomendCard(paymentInfo, cards)
 {
     if(cards.length == 0) return null;
