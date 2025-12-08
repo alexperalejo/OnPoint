@@ -9,7 +9,8 @@
     ,"jsonwebtoken": "^9.0.0"
   },
   "scripts": {
-    "seed": "node utils/importCSV.js",
+    "seed": "node ./database/seedCards.js",
+    "seed:merchants": "node ./database/seedMerchants.js",
     "test": "node test.js"
   }
   

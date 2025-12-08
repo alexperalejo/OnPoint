@@ -1,33 +1,20 @@
 // MongoDB schema for cards
 
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const creditCardSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  issuer: {
-    type: String,
-  },
-  type: {
-    type: String, // e.g. Cashback, Travel, Gas, Dining, etc.
-  },
-  rewards: {
-    category: String,  // e.g. "Dining"
-    rate: String,      // e.g. "3x points"
-    description: String
-  },
-  annualFee: {
-    type: Number,
-    default: 0,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  }
+const cardSchema = new mongoose.Schema({
+  name: String,
+  issuer: String,
+  type: String,
+  category: String,
+  multiplier: Number,
+  notes: String,
+  benefit_title: String,
+  benefit_description: String,
+  annualFee: Number
 });
 
-module.exports = mongoose.model('Card', creditCardSchema);
+export default mongoose.model("Card", cardSchema);
+
 
 /* This model stores reward categories, issuers, types, and reward info — perfect for dynamic recommendation logic later. */

@@ -59,6 +59,7 @@ The React web interface is located in the frontend/ directory.
 Open the URL shown in your terminal  
 (usually: http://localhost:5173)
 
+
 ------------------------------------------------------------
 Important Notes
 ------------------------------------------------------------

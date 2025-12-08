@@ -1,0 +1,22 @@
+[
+  {
+    "merchant_name": "Hilton",
+    "url_keywords": ["hilton.com"],
+    "tags": ["hotel", "travel"]
+  },
+  {
+    "merchant_name": "DoorDash",
+    "url_keywords": ["doordash.com"],
+    "tags": ["dining", "delivery", "food"]
+  },
+  {
+    "merchant_name": "Expedia",
+    "url_keywords": ["expedia.com"],
+    "tags": ["travel", "flights", "hotels"]
+  },
+  {
+    "merchant_name": "Walmart",
+    "url_keywords": ["walmart.com"],
+    "tags": ["groceries", "shopping"]
+  }
+]

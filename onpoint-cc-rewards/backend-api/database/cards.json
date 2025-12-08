@@ -1,0 +1,123 @@
+[
+  {
+    "name": "Chase Sapphire Preferred",
+    "issuer": "Chase",
+    "type": "Travel",
+    "category": "Dining",
+    "multiplier": 3,
+    "notes": "",
+    "benefit_title": "Travel Insurance",
+    "benefit_description": "Trip cancellation coverage",
+    "annualFee": 95
+  },
+  {
+    "name": "Chase Sapphire Preferred",
+    "issuer": "Chase",
+    "type": "Travel",
+    "category": "Travel",
+    "multiplier": 2,
+    "notes": "",
+    "benefit_title": "No Foreign Fees",
+    "benefit_description": "Use abroad without extra charges",
+    "annualFee": 95
+  },
+  {
+    "name": "Citi Double Cash",
+    "issuer": "Citi",
+    "type": "Cashback",
+    "category": "Everything Else",
+    "multiplier": 2,
+    "notes": "",
+    "benefit_title": "",
+    "benefit_description": "",
+    "annualFee": 0
+  },
+  {
+    "name": "Amex Gold",
+    "issuer": "American Express",
+    "type": "Travel",
+    "category": "Dining",
+    "multiplier": 4,
+    "notes": "",
+    "benefit_title": "",
+    "benefit_description": "",
+    "annualFee": 250
+  },
+  {
+    "name": "Amex Gold",
+    "issuer": "American Express",
+    "type": "Travel",
+    "category": "Groceries",
+    "multiplier": 4,
+    "notes": "",
+    "benefit_title": "",
+    "benefit_description": "",
+    "annualFee": 250
+  },
+  {
+    "name": "Discover It Cashback",
+    "issuer": "Discover",
+    "type": "Cashback",
+    "category": "Rotating Categories",
+    "multiplier": 5,
+    "notes": "",
+    "benefit_title": "",
+    "benefit_description": "",
+    "annualFee": 0
+  },
+  {
+    "name": "Wells Fargo Active Cash",
+    "issuer": "Wells Fargo",
+    "type": "Cashback",
+    "category": "Everything Else",
+    "multiplier": 2,
+    "notes": "",
+    "benefit_title": "",
+    "benefit_description": "",
+    "annualFee": 0
+  },
+  {
+    "name": "BOA Customized Cash",
+    "issuer": "Bank of America",
+    "type": "Cashback",
+    "category": "Groceries",
+    "multiplier": 2,
+    "notes": "",
+    "benefit_title": "",
+    "benefit_description": "",
+    "annualFee": 0
+  },
+  {
+    "name": "Capital One Savor One",
+    "issuer": "Capital One",
+    "type": "Cashback",
+    "category": "Dining",
+    "multiplier": 3,
+    "notes": "",
+    "benefit_title": "",
+    "benefit_description": "",
+    "annualFee": 0
+  },
+  {
+    "name": "Capital One Savor One",
+    "issuer": "Capital One",
+    "type": "Cashback",
+    "category": "Entertainment",
+    "multiplier": 3,
+    "notes": "",
+    "benefit_title": "",
+    "benefit_description": "",
+    "annualFee": 0
+  },
+  {
+    "name": "Capital One Savor One",
+    "issuer": "Capital One",
+    "type": "Cashback",
+    "category": "Groceries",
+    "multiplier": 3,
+    "notes": "",
+    "benefit_title": "",
+    "benefit_description": "",
+    "annualFee": 0
+  }
+]
