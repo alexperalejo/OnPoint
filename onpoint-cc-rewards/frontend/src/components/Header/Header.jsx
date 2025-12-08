@@ -22,13 +22,13 @@ export function Header({ onAuthClick }) {
           </div>
           <div className="auth-buttons">
             <button 
-              onClick={onAuthClick}
+              onClick={() => onAuthClick('login')}
               className="btn btn-login"
             >
               Log in
             </button>
             <button 
-              onClick={onAuthClick}
+              onClick={() => onAuthClick('signup')}
               className="btn btn-signup"
             >
               Sign up
