@@ -10,12 +10,10 @@ const creditCardSchema = new mongoose.Schema({
   issuer: {
     type: String,
   },
-  type: {
-    type: String, // e.g. Cashback, Travel, Gas, Dining, etc.
-  },
   rewards: {
     category: String,  // e.g. "Dining"
-    rate: String,      // e.g. "3x points"
+    vale: String,      // either Url, Tag, or All
+    rate: Number,      // for "1.5%" store as 1.5"
     description: String
   },
   annualFee: {
