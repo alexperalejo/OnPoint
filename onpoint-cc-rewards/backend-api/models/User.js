@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   // Optional: store user's selected or owned cards
   cards: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'CreditCard',
+    ref: 'Card',
   }]
 });
 
