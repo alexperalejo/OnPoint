@@ -2,26 +2,24 @@
 
 const express = require('express');
 const router = express.Router();
-const Card = require('../models/Card');
-const cardController = require('../controllers/cardController');
-const auth = require('../middleware/auth');
+const cardService = require('../services/cardService');
 
 // GET all cards
 router.get('/', async (req, res) => {
   try {
-    const cards = await Card.find();
-    res.json(cards);
+    res.json(cardService.getAllCards());
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// POST add new card (protected)
-router.post('/', auth.authenticate, cardController.createCard);
-
-// Routes for single card
-router.get('/:id', cardController.loadCard, cardController.getCardById);
-router.patch('/:id', auth.authenticate, cardController.loadCard, cardController.updateCard);
-router.delete('/:id', auth.authenticate, cardController.loadCard, cardController.deleteCard);
+// Get card
+router.get('/:id', async (req, res) => {
+  try{
+    res.json(cardService.getCardById(req.params.id))
+  } catch(err){
+    res.status(500).json({message: err})
+  }
+});
 
 module.exports = router;

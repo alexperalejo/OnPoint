@@ -219,9 +219,9 @@ export function CheckoutDetector({ onSignUpClick }) {
 
       <button
         onClick={() => {
-          // Open same page but as full page with onboarding parameter
+          // Open the frontend web app (localhost during dev, deployed URL in production)
           chrome.tabs.create({ 
-            url: chrome.runtime.getURL('dist/onboarding.html?fullpage=true&view=onboarding') 
+            url: 'http://localhost:5173' 
           });
         }}
         style={{

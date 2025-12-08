@@ -1,44 +1,38 @@
-/*import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Onboarding from "./pages/Onboarding";
-import Dashboard from "./pages/Dashboard";
-
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
-*/
 import { useState } from 'react';
 import { Header } from './components/Header/Header.jsx';
 import { FeatureCards } from './components/FeatureCards/FeatureCards.jsx';
 import { Steps } from './components/Steps/Steps.jsx';
 import { CreditCardList } from './components/CreditCardList/CreditCardList.jsx';
 import { Onboarding } from './components/Onboarding/Onboarding.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 import './App.css';
 
 export default function App() {
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [stage, setStage] = useState('landing'); // landing | onboarding | dashboard
+  const [authMode, setAuthMode] = useState('signup');
 
-  if (showOnboarding) {
+  if (stage === 'onboarding') {
     return (
-      <Onboarding 
-        onBack={() => setShowOnboarding(false)} 
+      <Onboarding
+        mode={authMode}
+        onBack={() => setStage('landing')}
+        onComplete={() => setStage('dashboard')}
       />
     );
   }
 
+  if (stage === 'dashboard') {
+    return <Dashboard onSignOut={() => setStage('landing')} />;
+  }
+
   return (
     <div className="app">
-      <Header onAuthClick={() => setShowOnboarding(true)} />
+      <Header
+        onAuthClick={(mode) => {
+          setAuthMode(mode);
+          setStage('onboarding');
+        }}
+      />
 
       <main className="main-content">
         <FeatureCards />
