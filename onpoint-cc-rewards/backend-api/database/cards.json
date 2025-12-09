@@ -4,10 +4,10 @@
     "issuer": "Chase",
     "annualFee": 0,
     "attributes": [
-      { "type": "reward", "category": "dining", "multiplier": 3 },
-      { "type": "reward", "category": "drugstore", "multiplier": 3 },
-      { "type": "reward", "category": "travel_chase", "multiplier": 5 },
-      { "type": "reward", "category": "all", "multiplier": 1.5 }
+      { "type": "tag", "category": "dining", "multiplier": 3 },
+      { "type": "tag", "category": "drugstore", "multiplier": 3 },
+      { "type": "tag", "category": "travel_chase", "multiplier": 5 },
+      { "type": "all", "category": "all", "multiplier": 1.5 }
     ]
   },
 
@@ -16,12 +16,12 @@
     "issuer": "Chase",
     "annualFee": 95,
     "attributes": [
-      { "type": "reward", "category": "dining", "multiplier": 3 },
-      { "type": "reward", "category": "travel_general", "multiplier": 2 },
-      { "type": "reward", "category": "travel_chase", "multiplier": 5 },
-      { "type": "reward", "category": "online_grocery", "multiplier": 3 },
-      { "type": "reward", "category": "streaming", "multiplier": 3 },
-      { "type": "reward", "category": "all", "multiplier": 1 }
+      { "type": "tag", "category": "dining", "multiplier": 3 },
+      { "type": "tag", "category": "travel_general", "multiplier": 2 },
+      { "type": "tag", "category": "travel_chase", "multiplier": 5 },
+      { "type": "tag", "category": "online_grocery", "multiplier": 3 },
+      { "type": "tag", "category": "streaming", "multiplier": 3 },
+      { "type": "all", "category": "all", "multiplier": 1 }
     ]
   },
 
@@ -30,10 +30,10 @@
     "issuer": "Amex",
     "annualFee": 250,
     "attributes": [
-      { "type": "reward", "category": "dining", "multiplier": 4 },
-      { "type": "reward", "category": "groceries", "multiplier": 4 },
-      { "type": "reward", "category": "flights", "multiplier": 3 },
-      { "type": "reward", "category": "all", "multiplier": 1 }
+      { "type": "tag", "category": "dining", "multiplier": 4 },
+      { "type": "tag", "category": "groceries", "multiplier": 4 },
+      { "type": "tag", "category": "flights", "multiplier": 3 },
+      { "type": "all", "category": "all", "multiplier": 1 }
     ]
   },
 
@@ -42,7 +42,7 @@
     "issuer": "Citi",
     "annualFee": 0,
     "attributes": [
-      { "type": "reward", "category": "all", "multiplier": 2 }
+      { "type": "all", "category": "all", "multiplier": 2 }
     ]
   },
 
@@ -51,12 +51,12 @@
     "issuer": "Capital One",
     "annualFee": 0,
     "attributes": [
-      { "type": "reward", "category": "dining", "multiplier": 3 },
-      { "type": "reward", "category": "entertainment", "multiplier": 3 },
-      { "type": "reward", "category": "groceries", "multiplier": 3 },
-      { "type": "reward", "category": "streaming", "multiplier": 3 },
-      { "type": "reward", "category": "travel_capital_one", "multiplier": 5 },
-      { "type": "reward", "category": "all", "multiplier": 1 }
+      { "type": "tag", "category": "dining", "multiplier": 3 },
+      { "type": "tag", "category": "entertainment", "multiplier": 3 },
+      { "type": "tag", "category": "groceries", "multiplier": 3 },
+      { "type": "tag", "category": "streaming", "multiplier": 3 },
+      { "type": "tag", "category": "travel_capital_one", "multiplier": 5 },
+      { "type": "all", "category": "all", "multiplier": 1 }
     ]
   },
 
@@ -65,8 +65,8 @@
     "issuer": "Discover",
     "annualFee": 0,
     "attributes": [
-      { "type": "reward", "category": "rotating", "multiplier": 5 },
-      { "type": "reward", "category": "all", "multiplier": 1 }
+      { "type": "tag", "category": "rotating", "multiplier": 5 },
+      { "type": "all", "category": "all", "multiplier": 1 }
     ]
   },
 
@@ -75,9 +75,9 @@
     "issuer": "Capital One",
     "annualFee": 395,
     "attributes": [
-      { "type": "reward", "category": "travel_capital_one_flights", "multiplier": 5 },
-      { "type": "reward", "category": "travel_capital_one_hotels_cars", "multiplier": 10 },
-      { "type": "reward", "category": "all", "multiplier": 2 }
+      { "type": "tag", "category": "travel_capital_one_flights", "multiplier": 5 },
+      { "type": "tag", "category": "travel_capital_one_hotels_cars", "multiplier": 10 },
+      { "type": "all", "category": "all", "multiplier": 2 }
     ]
   },
 
@@ -86,11 +86,11 @@
     "issuer": "Amex",
     "annualFee": 95,
     "attributes": [
-      { "type": "reward", "category": "groceries", "multiplier": 6 },
-      { "type": "reward", "category": "streaming", "multiplier": 6 },
-      { "type": "reward", "category": "transit", "multiplier": 3 },
-      { "type": "reward", "category": "gas", "multiplier": 3 },
-      { "type": "reward", "category": "all", "multiplier": 1 }
+      { "type": "tag", "category": "groceries", "multiplier": 6 },
+      { "type": "tag", "category": "streaming", "multiplier": 6 },
+      { "type": "tag", "category": "transit", "multiplier": 3 },
+      { "type": "tag", "category": "gas", "multiplier": 3 },
+      { "type": "all", "category": "all", "multiplier": 1 }
     ]
   },
 
@@ -99,11 +99,11 @@
     "issuer": "Chase",
     "annualFee": 0,
     "attributes": [
-      { "type": "reward", "category": "rotating", "multiplier": 5 },
-      { "type": "reward", "category": "dining", "multiplier": 3 },
-      { "type": "reward", "category": "drugstore", "multiplier": 3 },
-      { "type": "reward", "category": "travel_chase", "multiplier": 5 },
-      { "type": "reward", "category": "all", "multiplier": 1 }
+      { "type": "tag", "category": "rotating", "multiplier": 5 },
+      { "type": "tag", "category": "dining", "multiplier": 3 },
+      { "type": "tag", "category": "drugstore", "multiplier": 3 },
+      { "type": "tag", "category": "travel_chase", "multiplier": 5 },
+      { "type": "all", "category": "all", "multiplier": 1 }
     ]
   }
 ]

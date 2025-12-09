@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // load .env
-require('dotenv').config({ path: __dirname + '/../.env' });
+require('dotenv').config({ path: '../.env' });
 
 // load model
 const Card = require('../models/Card.js');

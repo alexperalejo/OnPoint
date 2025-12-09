@@ -3,13 +3,11 @@ const fs = require('fs');
 const path = require('path');
 
 // load .env from backend-api/.env
-require('dotenv').config({ path: __dirname + '/../.env' });
+require('dotenv').config({ path: '../.env' });
 
 // load Merchant model
 const Merchant = require('../models/Merchant.js');
 console.log("Merchant model loaded:", Merchant);
-
-
 async function seedMerchants() {
   try {
     await mongoose.connect(process.env.MONGODB_URI);

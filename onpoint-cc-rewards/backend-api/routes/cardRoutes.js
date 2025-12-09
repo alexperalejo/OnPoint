@@ -7,7 +7,7 @@ const cardService = require('../services/cardService');
 // GET all cards
 router.get('/', async (req, res) => {
   try {
-    res.json(cardService.getAllCards());
+    res.json(await cardService.getAllCards());
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 // Get card
 router.get('/:id', async (req, res) => {
   try{
-    res.json(cardService.getCardById(req.params.id))
+    res.json(await cardService.getCardById(req.params.id))
   } catch(err){
     res.status(500).json({message: err})
   }

@@ -1,7 +1,7 @@
 // MongoDB connection helper
 
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({path: '../.env'});
 
 const connectDB = async () => {
   try {

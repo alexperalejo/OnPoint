@@ -2,6 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose')
 const recommendationService = require('../services/recommendationService');
 const auth = require('../middleware/auth');
 
@@ -37,7 +38,7 @@ router.post('/', async function(req, res) {
     let merchantTags = [];
     try {
         // Find merchant whose url_keywords match the url
-        const merchant = await Merchant.findOne({ url_keywords: { $in: [req.body.url] } });
+        const merchant = await Merchant.findOne({ url_keywords: req.body.url }).lean();
         if(merchant && Array.isArray(merchant.tags)) {
             merchantTags = merchant.tags;
         }
@@ -48,6 +49,7 @@ router.post('/', async function(req, res) {
     // Fetch card documents from DB
     let cardDocs = [];
     try {
+        
         cardDocs = await Card.find({ _id: { $in: req.body.cards } }).lean();
     } catch (err) {
         console.error('Error fetching cards:', err);
@@ -62,27 +64,27 @@ router.post('/', async function(req, res) {
     const purchase = { url: req.body.url, tags: merchantTags, amount: Number(req.body.amount) || 1 };
 
     const candidates = cardDocs.map(card => {
-        const { totalValueUSD, breakdown } = recommendationService.computeCardRewardValue(card, purchase);
+        const rewards = recommendationService.getCardRewards(purchase, { id: card._id, attributes: card.attributes.map(a => {return {points: a.multiplier, type: a.type, value: a.category}})});
         return {
-            cardId: card._id,
-            name: card.name,
-            issuer: card.issuer,
-            attributes: card.attributes || card.rewards || {},
-            annualFee: card.annualFee || 0,
-            totalValueUSD,
-            breakdown,
-            tags: merchantTags
+            results: {
+                cardId: card._id,
+                rewardPoints: rewards.points,
+                breakdown: rewards.breakdown,
+            },
+            additionalInfo: {
+                annualFee: card.annualFee || 0
+            }
         };
     });
 
-    // pick best: highest totalValueUSD, tie-breaker lower annual fee
-    candidates.sort((a, b) => {
-        if (b.totalValueUSD !== a.totalValueUSD) return b.totalValueUSD - a.totalValueUSD;
-        return a.annualFee - b.annualFee;
-    });
+    // pick best: highest points
+    const results = candidates.sort((a, b) => {
+        if(a.results.rewardPoints != b.results.rewardPoints) b.results.rewardPoints - a.results.rewardPoints;
+        return b.additionalInfo.annualFee - a.additionalInfo.annualFee;
+    }).map(a => {return a.results});
 
-    const best = candidates[0] || null;
-    return res.json({ card: best, alternatives: candidates.slice(1,4) });
+    const best = results[0] || null;
+    return res.json({ card: best, alternatives: results.slice(1,4) });
 });
 
 module.exports = router;

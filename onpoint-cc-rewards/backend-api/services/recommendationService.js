@@ -25,14 +25,31 @@ const AttributeType = {
  */
 
 /**
+ * @typedef {object} BreakdownElement
+ * @property {number} points
+ * @property {number} contribution
+ * @property {string} from
+ */
+
+/**
+ * @typedef {object} CardRewards
+ * @property {number} points
+ * @property {BreakdownElement[]} breakdown
+ */
+
+/**
  * Get Points for a card
  * @param {PaymentInfo} paymentInfo 
  * @param {Card} card 
- * @returns {number} The total points that applies from a card.
+ * @returns {CardRewards} The rewards card.
  */
-function getCardPoints(paymentInfo, card)
+function getCardRewards(paymentInfo, card)
 {
     var points = 0;
+    /**
+     * @type {{points:number,from:string}[]}
+     */
+    var breakdown = [];
     card.attributes.forEach(attribute => {
         switch(attribute.type)
         {
@@ -40,40 +57,25 @@ function getCardPoints(paymentInfo, card)
                 if(attribute.value == paymentInfo.url)
                 {
                     points += attribute.points;
+                    breakdown.push({points: attribute.points, from: paymentInfo.url});
                 }
                 break;
             case "tag":
                 if(paymentInfo.tags.includes(attribute.value))
                 {
                     points += attribute.points;
+                    breakdown.push({points: attribute.points, from: attribute.value});
                 }
                 break;
             case "all":
                 points += attribute.points;
+                breakdown.push({points: attribute.points, from: 'cashback'});
                 break;
         }
     });
-    return points;
+    return {
+        points: points,
+        breakdown: breakdown.map(b => { return {points: b.points, contribution: b.points/points, from: b.from} })
+    };
 }
-/**
- * Get the reccomended card for a list of cards
- * @param {PaymentInfo} paymentInfo 
- * @param {Card[]} cards 
- * @returns {string} The id of the best card
- */
-function reccomendCard(paymentInfo, cards)
-{
-    if(cards.length == 0) return null;
-    var reccommendedCardId = null;
-    var maxPoints = -1;
-    cards.forEach(card => {
-        var points = getCardPoints(paymentInfo, card);
-        if(points > maxPoints)
-        {
-            reccommendedCardId = card.id;
-            maxPoints = points;
-        }
-    });
-    return reccommendedCardId;
-}
-module.exports = {reccomendCard: reccomendCard};
+module.exports = {getCardRewards: getCardRewards};

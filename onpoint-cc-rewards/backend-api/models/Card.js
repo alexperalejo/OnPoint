@@ -3,13 +3,22 @@
 const mongoose = require('mongoose');
 
 const attributeSchema = new mongoose.Schema({
-  type: String,        // ex: "reward"
+  type: {
+      type: String,
+      required: true
+    },  // ex: "reward"
   category: String,    // ex: "dining"
-  multiplier: Number   // ex: 3
+  multiplier: {
+      type: Number,
+      required: true
+    }   // ex: 3
 }, { _id: false });
 
 const cardSchema = new mongoose.Schema({
-  name: String,
+  name: {
+    type: String,
+    required: true
+  },
   issuer: String,
   attributes: [attributeSchema],  // ex: [{ type: "reward", category: "dining", multiplier: 3 }]
   notes: String,
