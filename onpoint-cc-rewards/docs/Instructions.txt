@@ -59,6 +59,18 @@ The React web interface is located in the frontend/ directory.
 Open the URL shown in your terminal  
 (usually: http://localhost:5173)
 
+------------------------------------------------------------
+7. Build the Popup (Vite)
+------------------------------------------------------------
+
+The popup UI for the Chrome extension uses Vite and must be built before loading the extension.
+
+From the project root:
+
+cd frontend-extension/popup
+npm install --save-dev vite
+npm run build
+
 
 ------------------------------------------------------------
 Important Notes

@@ -1,15 +1,15 @@
 // MongoDB schema for cards
 
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema({
   name: String,
   issuer: String,
   attributes: [
     {
-      type: String,
-      category: String,
-      multiplier: Number
+      type: String,       // ex: "dining", "travel", "grocery"
+      category: String,   // category name
+      multiplier: Number  // numeric reward multiplier
     }
   ],
   notes: String,
@@ -18,7 +18,7 @@ const cardSchema = new mongoose.Schema({
   annualFee: Number
 });
 
-export default mongoose.model("Card", cardSchema);
+module.exports = mongoose.model("Card", cardSchema);
 
 
 /* This model stores reward categories, issuers, types, and reward info — perfect for dynamic recommendation logic later. */

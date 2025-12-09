@@ -1,12 +1,34 @@
-function getAllCards(){
+const Card = require('../models/Card.js');
 
-}
 /**
- * 
- * @param {string} id 
+ * Get all cards in the database.
+ * @returns {Promise<Array>} Array of card documents
  */
-function getCardById(id){
-    
+async function getAllCards(){
+    try {
+        return await Card.find({}).lean();
+    } catch (err) {
+        console.error('Error fetching cards:', err);
+        throw err;
+    }
 }
 
-module.exports = {getAllCards:getAllCards, getCardById:getCardById}
+/**
+ * Get a single card by ID
+ * @param {string} id - MongoDB ObjectId of card
+ * @returns {Promise<Object|null>} Card document or null if not found
+ */
+
+async function getCardById(id){
+    try{
+        return await Card.findById(id).lean();
+    } catch (err) {
+        console.error(`error fetching card with ID ${id}:`, err);
+        throw err;
+    }
+}
+
+module.exports = {
+    getAllCards:getAllCards, 
+    getCardById:getCardById
+}
