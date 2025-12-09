@@ -2,16 +2,16 @@
 
 const mongoose = require('mongoose');
 
+const attributeSchema = new mongoose.Schema({
+  type: String,        // ex: "reward"
+  category: String,    // ex: "dining"
+  multiplier: Number   // ex: 3
+}, { _id: false });
+
 const cardSchema = new mongoose.Schema({
   name: String,
   issuer: String,
-  attributes: [
-    {
-      type: String,       // ex: "dining", "travel", "grocery"
-      category: String,   // category name
-      multiplier: Number  // numeric reward multiplier
-    }
-  ],
+  attributes: [attributeSchema],  // ex: [{ type: "reward", category: "dining", multiplier: 3 }]
   notes: String,
   benefit_title: String,
   benefit_description: String,

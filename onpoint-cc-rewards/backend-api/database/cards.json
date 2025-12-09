@@ -1,123 +1,109 @@
 [
   {
-    "name": "Chase Sapphire Preferred",
+    "name": "Chase Freedom Unlimited",
     "issuer": "Chase",
-    "type": "Travel",
-    "category": "Dining",
-    "multiplier": 3,
-    "notes": "",
-    "benefit_title": "Travel Insurance",
-    "benefit_description": "Trip cancellation coverage",
-    "annualFee": 95
+    "annualFee": 0,
+    "attributes": [
+      { "type": "reward", "category": "dining", "multiplier": 3 },
+      { "type": "reward", "category": "drugstore", "multiplier": 3 },
+      { "type": "reward", "category": "travel_chase", "multiplier": 5 },
+      { "type": "reward", "category": "all", "multiplier": 1.5 }
+    ]
   },
+
   {
     "name": "Chase Sapphire Preferred",
     "issuer": "Chase",
-    "type": "Travel",
-    "category": "Travel",
-    "multiplier": 2,
-    "notes": "",
-    "benefit_title": "No Foreign Fees",
-    "benefit_description": "Use abroad without extra charges",
-    "annualFee": 95
+    "annualFee": 95,
+    "attributes": [
+      { "type": "reward", "category": "dining", "multiplier": 3 },
+      { "type": "reward", "category": "travel_general", "multiplier": 2 },
+      { "type": "reward", "category": "travel_chase", "multiplier": 5 },
+      { "type": "reward", "category": "online_grocery", "multiplier": 3 },
+      { "type": "reward", "category": "streaming", "multiplier": 3 },
+      { "type": "reward", "category": "all", "multiplier": 1 }
+    ]
   },
+
+  {
+    "name": "American Express Gold",
+    "issuer": "Amex",
+    "annualFee": 250,
+    "attributes": [
+      { "type": "reward", "category": "dining", "multiplier": 4 },
+      { "type": "reward", "category": "groceries", "multiplier": 4 },
+      { "type": "reward", "category": "flights", "multiplier": 3 },
+      { "type": "reward", "category": "all", "multiplier": 1 }
+    ]
+  },
+
   {
     "name": "Citi Double Cash",
     "issuer": "Citi",
-    "type": "Cashback",
-    "category": "Everything Else",
-    "multiplier": 2,
-    "notes": "",
-    "benefit_title": "",
-    "benefit_description": "",
-    "annualFee": 0
+    "annualFee": 0,
+    "attributes": [
+      { "type": "reward", "category": "all", "multiplier": 2 }
+    ]
   },
+
   {
-    "name": "Amex Gold",
-    "issuer": "American Express",
-    "type": "Travel",
-    "category": "Dining",
-    "multiplier": 4,
-    "notes": "",
-    "benefit_title": "",
-    "benefit_description": "",
-    "annualFee": 250
+    "name": "Capital One SavorOne",
+    "issuer": "Capital One",
+    "annualFee": 0,
+    "attributes": [
+      { "type": "reward", "category": "dining", "multiplier": 3 },
+      { "type": "reward", "category": "entertainment", "multiplier": 3 },
+      { "type": "reward", "category": "groceries", "multiplier": 3 },
+      { "type": "reward", "category": "streaming", "multiplier": 3 },
+      { "type": "reward", "category": "travel_capital_one", "multiplier": 5 },
+      { "type": "reward", "category": "all", "multiplier": 1 }
+    ]
   },
+
   {
-    "name": "Amex Gold",
-    "issuer": "American Express",
-    "type": "Travel",
-    "category": "Groceries",
-    "multiplier": 4,
-    "notes": "",
-    "benefit_title": "",
-    "benefit_description": "",
-    "annualFee": 250
-  },
-  {
-    "name": "Discover It Cashback",
+    "name": "Discover it Cash Back",
     "issuer": "Discover",
-    "type": "Cashback",
-    "category": "Rotating Categories",
-    "multiplier": 5,
-    "notes": "",
-    "benefit_title": "",
-    "benefit_description": "",
-    "annualFee": 0
+    "annualFee": 0,
+    "attributes": [
+      { "type": "reward", "category": "rotating", "multiplier": 5 },
+      { "type": "reward", "category": "all", "multiplier": 1 }
+    ]
   },
+
   {
-    "name": "Wells Fargo Active Cash",
-    "issuer": "Wells Fargo",
-    "type": "Cashback",
-    "category": "Everything Else",
-    "multiplier": 2,
-    "notes": "",
-    "benefit_title": "",
-    "benefit_description": "",
-    "annualFee": 0
-  },
-  {
-    "name": "BOA Customized Cash",
-    "issuer": "Bank of America",
-    "type": "Cashback",
-    "category": "Groceries",
-    "multiplier": 2,
-    "notes": "",
-    "benefit_title": "",
-    "benefit_description": "",
-    "annualFee": 0
-  },
-  {
-    "name": "Capital One Savor One",
+    "name": "Capital One Venture X",
     "issuer": "Capital One",
-    "type": "Cashback",
-    "category": "Dining",
-    "multiplier": 3,
-    "notes": "",
-    "benefit_title": "",
-    "benefit_description": "",
-    "annualFee": 0
+    "annualFee": 395,
+    "attributes": [
+      { "type": "reward", "category": "travel_capital_one_flights", "multiplier": 5 },
+      { "type": "reward", "category": "travel_capital_one_hotels_cars", "multiplier": 10 },
+      { "type": "reward", "category": "all", "multiplier": 2 }
+    ]
   },
+
   {
-    "name": "Capital One Savor One",
-    "issuer": "Capital One",
-    "type": "Cashback",
-    "category": "Entertainment",
-    "multiplier": 3,
-    "notes": "",
-    "benefit_title": "",
-    "benefit_description": "",
-    "annualFee": 0
+    "name": "American Express Blue Cash Preferred",
+    "issuer": "Amex",
+    "annualFee": 95,
+    "attributes": [
+      { "type": "reward", "category": "groceries", "multiplier": 6 },
+      { "type": "reward", "category": "streaming", "multiplier": 6 },
+      { "type": "reward", "category": "transit", "multiplier": 3 },
+      { "type": "reward", "category": "gas", "multiplier": 3 },
+      { "type": "reward", "category": "all", "multiplier": 1 }
+    ]
   },
+
   {
-    "name": "Capital One Savor One",
-    "issuer": "Capital One",
-    "type": "Cashback",
-    "category": "Groceries",
-    "multiplier": 3,
-    "notes": "",
-    "benefit_title": "",
-    "benefit_description": "",
-    "annualFee": 0
+    "name": "Chase Freedom Flex",
+    "issuer": "Chase",
+    "annualFee": 0,
+    "attributes": [
+      { "type": "reward", "category": "rotating", "multiplier": 5 },
+      { "type": "reward", "category": "dining", "multiplier": 3 },
+      { "type": "reward", "category": "drugstore", "multiplier": 3 },
+      { "type": "reward", "category": "travel_chase", "multiplier": 5 },
+      { "type": "reward", "category": "all", "multiplier": 1 }
+    ]
   }
 ]
