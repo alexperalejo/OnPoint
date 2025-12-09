@@ -21,7 +21,7 @@ async function seedMerchants() {
 
     const merchants = JSON.parse(fs.readFileSync(merchantsPath, 'utf8'));
     console.log("Loading from:", merchantsPath);
-    console.log("Merchant JSON content:", merchants);
+    //console.log("Merchant JSON content:", merchants);
 
     // Clear old data
     await Merchant.deleteMany({});
