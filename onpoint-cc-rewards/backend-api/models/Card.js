@@ -5,9 +5,13 @@ import mongoose from "mongoose";
 const cardSchema = new mongoose.Schema({
   name: String,
   issuer: String,
-  type: String,
-  category: String,
-  multiplier: Number,
+  attributes: [
+    {
+      type: String,
+      category: String,
+      multiplier: Number
+    }
+  ],
   notes: String,
   benefit_title: String,
   benefit_description: String,
