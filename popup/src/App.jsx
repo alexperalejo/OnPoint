@@ -11,7 +11,18 @@ import {
   HomeIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
+import Cookies from 'js-cookie'
 import { UserProfile } from "./components/UserProfile";
+
+function getRandomHexColor() {
+    // Generate a random integer between 0 and 0xFFFFFF (16777215)
+    const randomInt = Math.floor(Math.random() * 0xFFFFFF);
+    
+    // Convert to hexadecimal and pad with leading zeros if needed
+    const hexColor = `#${randomInt.toString(16).padStart(6, '0')}`;
+    
+    return hexColor;
+}
 
 export default function App() {
   // Check if opened as full page (from URL parameter) or as popup
@@ -90,6 +101,43 @@ export default function App() {
     ];
   });
 
+
+  useEffect(() => {
+    const initialCookies = Cookies.get('user-cards')
+    console.log('using cookie', initialCookies)
+    if(initialCookies)
+    {
+      const initialCards=initialCookies.split('|');
+      Promise.all(initialCards.filter(c => c && c.length != 0).map(async c => {
+        const response = await fetch("http://localhost:3000/api/cards/" + c);
+        const data = await response.json();
+        const newCard = {
+          id: data._id,
+          name: data.name,
+          issuer: data.issuer,
+          annualFee: data.annualFee,
+          color: getRandomHexColor(),
+          rewards: data.attributes.filter(a => a.type != 'url').map(a_1 => {
+            if (a_1.type == "all")
+              return {
+                category: 'all',
+                rate: a_1.multiplier
+              };
+            return {
+              category: a_1.category,
+              rate: a_1.multiplier
+            };
+          })
+        };
+        console.log('recieved card', newCard)
+        return newCard;
+      })).then(values => {
+        console.log('set user cards', values)
+            setUserCards(values)
+      })
+    }
+  }, [])
+
   const handleOnboardingComplete = (data) => {
     localStorage.setItem("onpoint_user_data", JSON.stringify(data));
     setUserData(data);
@@ -126,7 +174,7 @@ export default function App() {
   // In extension popup, ALWAYS show checkout detector (no dashboard)
   // Dashboard is only for full web app, not extension
   if (!isFullPage) {
-    return <CheckoutDetector />;
+    return <CheckoutDetector cards={userCards} />;
   }
 
   // Full page mode - show navigation and different views

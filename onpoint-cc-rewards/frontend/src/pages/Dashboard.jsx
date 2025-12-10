@@ -1,11 +1,56 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Dashboard.css';
 import CardLibrary from './CardLibrary.jsx';
 import UserProfile from './UserProfile.jsx';
-
+import Cookies from 'js-cookie'
+import { useChromeStorageSync } from 'use-chrome-storage'
+function getRandomHexColor() {
+    // Generate a random integer between 0 and 0xFFFFFF (16777215)
+    const randomInt = Math.floor(Math.random() * 0xFFFFFF);
+    
+    // Convert to hexadecimal and pad with leading zeros if needed
+    const hexColor = `#${randomInt.toString(16).padStart(6, '0')}`;
+    
+    return hexColor;
+}
 export default function Dashboard({ onSignOut }) {
+  const [storedCards, setStoredCards] = useChromeStorageSync('cardinfo', [])
   const [currentView, setCurrentView] = useState('dashboard'); // dashboard | library | profile
   const [userCards, setUserCards] = useState([]);
+
+  useEffect(() => {
+    console.log('using cards', storedCards)
+    if(storedCards.length > 0)
+    {
+      Promise.all(storedCards.map(async c => {
+        const response = await fetch("http://localhost:3000/api/cards/" + c);
+        const data = await response.json();
+        const newCard = {
+          id: data._id,
+          name: data.name,
+          issuer: data.issuer,
+          annualFee: data.annualFee,
+          color: getRandomHexColor(),
+          rewards: data.attributes.filter(a => a.type != 'url').map(a_1 => {
+            if (a_1.type == "all")
+              return {
+                category: 'all',
+                rate: a_1.multiplier
+              };
+            return {
+              category: a_1.category,
+              rate: a_1.multiplier
+            };
+          })
+        };
+        console.log('recieved card', newCard)
+        return newCard;
+      })).then(values => {
+        console.log('set user cards', values)
+            setUserCards(values)
+      })
+    }
+  }, [storedCards])
 
   const totalAnnualFees = userCards.reduce((sum, card) => sum + card.annualFee, 0);
   const avgRewardRate = userCards.length > 0
@@ -129,7 +174,12 @@ export default function Dashboard({ onSignOut }) {
                       </div>
                       <button
                         className="remove-card-btn"
-                        onClick={() => setUserCards(userCards.filter(c => c.id !== card.id))}
+                        onClick={() => {
+                          //const userCardsCookie = Cookies.get('user-cards');
+                          //Cookies.set('user-cards', userCardsCookie.replace(card.id + '|', ''))
+                          setStoredCards(storedCards.filter(c => c != card.id))
+                          setUserCards(userCards.filter(c => c.id !== card.id))
+                        }}
                       >
                         Remove Card
                       </button>
@@ -142,7 +192,7 @@ export default function Dashboard({ onSignOut }) {
         </main>
       )}
 
-      {currentView === 'library' && <CardLibrary userCards={userCards} setUserCards={setUserCards} />}
+      {currentView === 'library' && <CardLibrary userCards={userCards} setUserCards={setUserCards} storedCards={storedCards} setStoredCards={setStoredCards} />}
 
       {currentView === 'profile' && <UserProfile onSignOut={onSignOut} />}
     </div>
