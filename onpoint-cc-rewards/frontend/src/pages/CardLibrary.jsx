@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import './CardLibrary.css';
 
 const POPULAR_CARDS = [
@@ -120,12 +120,12 @@ export default function CardLibrary({ userCards = [], setUserCards }) {
     return userCards.some(c => c.name === cardName);
   };
 
-  const handleAddCard = (card) => {
-    if (!isCardAdded(card.name)) {
-      const newCard = { ...card, id: Date.now().toString() };
+  const handleAddCard = useCallback((card) => {
+    if (!userCards.some(c => c.name === card.name)) {
+      const newCard = { ...card, id: `${card.name}-${Math.random().toString(36).substr(2, 9)}` };
       setUserCards([...userCards, newCard]);
     }
-  };
+  }, [userCards, setUserCards]);
 
   const filteredCards = POPULAR_CARDS.filter(card => {
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
