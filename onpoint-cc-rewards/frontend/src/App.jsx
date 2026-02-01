@@ -10,7 +10,10 @@ export default function App() {
   const [stage, setStage] = useState('landing'); // landing | onboarding | dashboard
   const [authMode, setAuthMode] = useState('signup');
   
-  return <Dashboard onSignOut={() => setStage('landing')} />;
+  if (stage === 'dashboard') {
+    return <Dashboard onSignOut={() => setStage('landing')} />;
+  }
+
   if (stage === 'onboarding') {
     return (
       <Onboarding
@@ -19,9 +22,6 @@ export default function App() {
         onComplete={() => setStage('dashboard')}
       />
     );
-  }
-
-  if (stage === 'dashboard') {
   }
 
   return (

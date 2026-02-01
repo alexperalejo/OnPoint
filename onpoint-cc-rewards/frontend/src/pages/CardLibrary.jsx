@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './CardLibrary.css';
 import Cookies from 'js-cookie'
 
@@ -155,7 +155,7 @@ export default function CardLibrary({ userCards = [], setUserCards, storedCards 
     return userCards.some(c => c.name === cardName);
   };
 
-  const handleAddCard = (card) => {
+  const handleAddCard = useCallback((card) => {
     if (!isCardAdded(card.name)) {
       console.log('adding card', card)
       setStoredCards([...storedCards, card.id])
