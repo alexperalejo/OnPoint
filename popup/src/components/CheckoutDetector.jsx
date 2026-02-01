@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CardRecommendation } from "./CardRecommendation";
 
-export function CheckoutDetector({ onSignUpClick }) {
+export function CheckoutDetector({ cards, onSignUpClick }) {
   const [loading, setLoading] = useState(true);
   const [detection, setDetection] = useState(null);
   const [error, setError] = useState(null);
@@ -145,8 +145,17 @@ export function CheckoutDetector({ onSignUpClick }) {
             // 3. Get back the recommended card
             
             // For now, show dummy card immediately
-            setRecommendedCard(DUMMY_RECOMMENDED_CARD);
-            setShowRecommendation(true);
+            fetch("http://localhost:3000/recommendations", {
+              method: 'POST',
+              body: JSON.stringify({
+                url: window.location.href,
+                cards: cards.map(c => c.id)
+              })
+            }).then(response => response.json())
+              .then(body => {
+                setRecommendedCard(cards.filter(c => c.id == body.card.cardId)[0]);
+                setShowRecommendation(true);
+              })
           }
         } else if (resp === null) {
           // error already set
@@ -221,7 +230,7 @@ export function CheckoutDetector({ onSignUpClick }) {
         onClick={() => {
           // Open the frontend web app (localhost during dev, deployed URL in production)
           chrome.tabs.create({ 
-            url: 'http://localhost:5173' 
+            url: 'dashboard.html' 
           });
         }}
         style={{

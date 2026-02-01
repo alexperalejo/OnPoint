@@ -156,8 +156,8 @@
     // Post-check rule to reduce false positives on CTA-heavy landing pages:
     // Default base threshold we treat as a candidate is 0.7. If score >= 0.8 we accept.
     // If score is in [0.7, 0.8) require a "strong payment" signal (payment field, order total, JSON-LD checkout/order, or payment iframe).
-    const baseThreshold = 0.7
-    const strongThreshold = 0.8
+    const baseThreshold = 0.1
+    const strongThreshold = 0.1
 
     // derive booleans if not set earlier
     hasJsonLd = typeof hasJsonLd !== 'undefined' ? hasJsonLd : (reasons.indexOf('schema:ld+json') !== -1)

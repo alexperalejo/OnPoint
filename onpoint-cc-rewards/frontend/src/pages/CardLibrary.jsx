@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import './CardLibrary.css';
+import Cookies from 'js-cookie'
 
 const POPULAR_CARDS = [
   {
@@ -111,23 +112,64 @@ const POPULAR_CARDS = [
     ]
   }
 ];
-
-export default function CardLibrary({ userCards = [], setUserCards }) {
+function getRandomHexColor() {
+    // Generate a random integer between 0 and 0xFFFFFF (16777215)
+    const randomInt = Math.floor(Math.random() * 0xFFFFFF);
+    
+    // Convert to hexadecimal and pad with leading zeros if needed
+    const hexColor = `#${randomInt.toString(16).padStart(6, '0')}`;
+    
+    return hexColor;
+}
+export default function CardLibrary({ userCards = [], setUserCards, storedCards = [], setStoredCards, }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [availableCards, setAvailableCards] = useState(POPULAR_CARDS);
   const [filterType, setFilterType] = useState('all');
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/cards").then(r => r.json())
+    .then(data => {
+      console.log(data)
+      setAvailableCards(data.map(v => { return {
+        id: v._id,
+        name: v.name,
+        issuer: v.issuer,
+        annualFee: v.annualFee,
+        color: getRandomHexColor(),
+        rewards: v.attributes.filter(a => a.type != 'url').map(a => {
+          if(a.type == "all")
+            return {
+              category: 'all',
+              rate: a.multiplier
+            }
+          return {
+            category: a.category,
+            rate: a.multiplier
+          }
+        })
+      }}))
+    })
+  }, [])
 
   const isCardAdded = (cardName) => {
     return userCards.some(c => c.name === cardName);
   };
 
-  const handleAddCard = useCallback((card) => {
-    if (!userCards.some(c => c.name === card.name)) {
-      const newCard = { ...card, id: `${card.name}-${Math.random().toString(36).substr(2, 9)}` };
-      setUserCards([...userCards, newCard]);
+  const handleAddCard = (card) => {
+    if (!isCardAdded(card.name)) {
+      console.log('adding card', card)
+      setStoredCards([...storedCards, card.id])
+      //if(!storedCards || storedCards.length == 0)
+      //{
+      //  Cookies.set("user-cards", card.id +'|')
+      //} else{
+      //  Cookies.set("user-cards", storedCards + card.id + '|')
+      //}
+      setUserCards([...userCards, card]);
     }
   }, [userCards, setUserCards]);
 
-  const filteredCards = POPULAR_CARDS.filter(card => {
+  const filteredCards = availableCards.filter(card => {
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          card.issuer.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterType === 'all' || card.type === filterType;

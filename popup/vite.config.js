@@ -10,7 +10,7 @@ export default defineConfig({
   root: '.',
   build: {
     outDir: '../extension/dist',
-    emptyOutDir: true,
+    emptyOutDir: false,
     rollupOptions: {
       input: 'onboarding.html'
     }
