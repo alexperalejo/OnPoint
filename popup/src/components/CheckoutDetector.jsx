@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { CardRecommendation } from "./CardRecommendation";
-
+import { useChromeStorageSync } from "use-chrome-storage"
 export function CheckoutDetector({ cards, onSignUpClick }) {
+
+  const [savedCards, setSavedCards] = useChromeStorageSync('cardinfo')
   const [loading, setLoading] = useState(true);
   const [detection, setDetection] = useState(null);
   const [error, setError] = useState(null);
@@ -149,11 +151,11 @@ export function CheckoutDetector({ cards, onSignUpClick }) {
               method: 'POST',
               body: JSON.stringify({
                 url: window.location.href,
-                cards: cards.map(c => c.id)
+                cards: savedCards
               })
             }).then(response => response.json())
               .then(body => {
-                setRecommendedCard(cards.filter(c => c.id == body.card.cardId)[0]);
+                setRecommendedCard(savedCards.filter(c => c.id == body.card.cardId)[0]);
                 setShowRecommendation(true);
               })
           }
