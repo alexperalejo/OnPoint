@@ -64,12 +64,6 @@ export default function Dashboard({ onSignOut }) {
             <p className="brand-tag">Maximize Your Rewards</p>
           </div>
         </div>
-        <div className="nav-actions">
-          <p className="welcome">Welcome back, <strong>OnPoint member</strong></p>
-          {onSignOut && (
-            <button className="link-btn" onClick={onSignOut}>Sign out</button>
-          )}
-        </div>
       </header>
 
       <nav className="dash-nav">
