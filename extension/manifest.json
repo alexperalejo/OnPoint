@@ -20,7 +20,7 @@
     }
   ],
   "options_ui": {
-    "page": "dashboard.html",
+    "page": "dist/dashboard.html",
     "open_in_tab": true
   },
   "icons": {

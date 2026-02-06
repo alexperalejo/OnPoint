@@ -53,12 +53,6 @@ export default function Dashboard({ onSignOut }) {
   }, [storedCards])
 
   const totalAnnualFees = userCards.reduce((sum, card) => sum + card.annualFee, 0);
-  const avgRewardRate = userCards.length > 0
-    ? userCards.reduce((sum, card) => {
-        const baseRate = card.rewards.find(r => r.category === 'All')?.rate || 1;
-        return sum + baseRate;
-      }, 0) / userCards.length
-    : 0;
 
   return (
     <div className="dash-shell">
@@ -109,13 +103,7 @@ export default function Dashboard({ onSignOut }) {
                 <p className="stat-value">{userCards.length}</p>
               </div>
             </div>
-            <div className="stat-card">
-              <div className="stat-icon success">📈</div>
-              <div>
-                <p className="stat-label">Avg. Base Rate</p>
-                <p className="stat-value">{avgRewardRate.toFixed(1)}%</p>
-              </div>
-            </div>
+
             <div className="stat-card">
               <div className="stat-icon violet">💲</div>
               <div>

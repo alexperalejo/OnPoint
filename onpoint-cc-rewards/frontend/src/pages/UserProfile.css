@@ -1,37 +1,38 @@
+/* profile page styles */
 .profile-shell {
   padding: 1.5rem 2rem;
   min-height: 100vh;
-  background: radial-gradient(circle at 30% 20%, #eef2ff 0, #f7f9ff 40%, #ffffff 75%);
+  background: radial-gradient(circle at 30% 20%, #f3f6fd 0, #f8fafd 40%, #fcfdff 75%);
 }
 
 .profile-header-card {
-  background: #ffffff;
+  background: #fafdff;
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.25rem;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.07);
+  border: 1px solid #e3e8f0;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.04);
 }
 
 .profile-title {
   margin: 0 0 0.5rem;
   font-size: 1.35rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1e293b;
 }
 
 .profile-subtitle {
   margin: 0;
-  color: #475569;
+  color: #64748b;
 }
 
 .profile-info-card {
-  background: #ffffff;
+  background: #fafdff;
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.25rem;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.07);
+  border: 1px solid #e3e8f0;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.04);
 }
 
 .profile-user-row {
@@ -47,7 +48,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb, #4338ca);
+  background: linear-gradient(135deg, #60a5fa, #6366f1);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -58,7 +59,7 @@
 .user-name {
   margin: 0 0 0.25rem;
   font-size: 1.25rem;
-  color: #0f172a;
+  color: #1e293b;
 }
 
 .user-email {
@@ -78,7 +79,7 @@
   gap: 0.5rem;
   margin: 0;
   font-size: 1.05rem;
-  color: #0f172a;
+  color: #1e293b;
 }
 
 .section-icon {
@@ -93,7 +94,7 @@
 
 .info-item {
   padding: 1rem;
-  background: #f8fafc;
+  background: #f4f7fb;
   border-radius: 0.75rem;
 }
 
@@ -106,7 +107,54 @@
 .info-value {
   margin: 0;
   font-weight: 600;
-  color: #0f172a;
+  color: #1e293b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .profile-shell {
+    background: radial-gradient(circle at 30% 20%, #1a2233 0, #232b3a 40%, #181c24 75%);
+  }
+
+  .profile-header-card,
+  .profile-info-card,
+  .notifications-card,
+  .signout-card {
+    background: #232b3a;
+    border: 1px solid #2d3748;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.45);
+  }
+
+  .profile-title,
+  .section-heading,
+  .user-name,
+  .info-value {
+    color: #e2e8f0;
+  }
+
+  .profile-subtitle,
+  .user-email,
+  .info-label,
+  .notification-desc,
+  .signout-note {
+    color: #9fb0c3;
+  }
+
+  .profile-user-row {
+    border-bottom: 1px solid #2d3748;
+  }
+
+  .info-item {
+    background: #1f2633;
+  }
+
+  .user-avatar {
+    background: linear-gradient(135deg, #2563eb, #1e293b);
+  }
+
+  .notification-item {
+    background: #1f2633;
+    border: 1px solid #2d3748;
+  }
 }
 
 .stats-grid {

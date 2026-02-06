@@ -1,8 +1,41 @@
+/* Dark mode support */
+:root {
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --accent-blue: #3b82f6;
+  --accent-blue-hover: #2563eb;
+}
+
+html.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --border-color: #334155;
+  --accent-blue: #60a5fa;
+  --accent-blue-hover: #3b82f6;
+}
+
+html.dark .app {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+html.dark body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
 /*App css*/
 .app {
   width: auto;
   min-height: 100vh;
-  background-color: rgb(255, 255, 255);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .main-content {

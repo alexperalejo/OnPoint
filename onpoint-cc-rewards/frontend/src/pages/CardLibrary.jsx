@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import './CardLibrary.css';
-import Cookies from 'js-cookie'
 
 const POPULAR_CARDS = [
   {
@@ -112,14 +111,20 @@ const POPULAR_CARDS = [
     ]
   }
 ];
+
+const MUTED_CARD_COLORS = [
+  '#1f3a5f',
+  '#2b4a7d',
+  '#355c7d',
+  '#2f5d62',
+  '#3b3f6b',
+  '#6b4e71',
+  '#7b5b3e',
+  '#3f4c6b'
+];
+
 function getRandomHexColor() {
-    // Generate a random integer between 0 and 0xFFFFFF (16777215)
-    const randomInt = Math.floor(Math.random() * 0xFFFFFF);
-    
-    // Convert to hexadecimal and pad with leading zeros if needed
-    const hexColor = `#${randomInt.toString(16).padStart(6, '0')}`;
-    
-    return hexColor;
+  return MUTED_CARD_COLORS[Math.floor(Math.random() * MUTED_CARD_COLORS.length)];
 }
 export default function CardLibrary({ userCards = [], setUserCards, storedCards = [], setStoredCards, }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -155,7 +160,7 @@ export default function CardLibrary({ userCards = [], setUserCards, storedCards 
     return userCards.some(c => c.name === cardName);
   };
 
-  const handleAddCard = useCallback((card) => {
+  const handleAddCard = (card) => {
     if (!isCardAdded(card.name)) {
       console.log('adding card', card)
       setStoredCards([...storedCards, card.id])
@@ -167,7 +172,7 @@ export default function CardLibrary({ userCards = [], setUserCards, storedCards 
       //}
       setUserCards([...userCards, card]);
     }
-  }, [userCards, setUserCards]);
+  };
 
   const filteredCards = availableCards.filter(card => {
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -220,8 +225,13 @@ export default function CardLibrary({ userCards = [], setUserCards, storedCards 
 
       <div className="library-grid">
         {filteredCards.map((card, idx) => (
-          <div key={idx} className="library-card">
-            <div className="card-visual" style={{ background: card.color }}>
+            <div key={idx} className="library-card">
+            <div
+              className="card-visual"
+              style={{
+                background: `linear-gradient(135deg, rgba(255,255,255,0.08), rgba(15,23,42,0.18)), ${card.color}`
+              }}
+            >
               <p className="card-issuer">{card.issuer}</p>
               <p className="card-name">{card.name}</p>
               <div className="card-chip"></div>

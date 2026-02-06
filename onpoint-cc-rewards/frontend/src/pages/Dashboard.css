@@ -1,8 +1,13 @@
 .dash-shell {
   min-height: 100vh;
-  background: radial-gradient(circle at 30% 20%, #eef2ff 0, #f7f9ff 40%, #ffffff 75%);
-  color: #0f172a;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+html.dark .dash-shell {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 
 .dash-topbar {
@@ -10,7 +15,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .brand {
@@ -23,7 +28,7 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #2563eb, #4338ca);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -39,7 +44,7 @@
 
 .brand-tag {
   margin: 0;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -47,13 +52,13 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .link-btn {
   background: none;
   border: none;
-  color: #2563eb;
+  color: var(--accent-blue);
   cursor: pointer;
   font-weight: 600;
 }
@@ -62,7 +67,7 @@
   display: flex;
   gap: 0.5rem;
   padding: 0.75rem 2rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .nav-item {
@@ -70,14 +75,19 @@
   border: none;
   padding: 0.65rem 1rem;
   border-radius: 999px;
-  color: #475569;
+  color: var(--text-secondary);
   cursor: pointer;
   font-weight: 600;
+  transition: color 0.2s, background 0.2s;
 }
 
 .nav-item.is-active {
-  color: #1d4ed8;
-  background: #e6edff;
+  color: var(--accent-blue-hover);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+html.dark .nav-item.is-active {
+  background: rgba(96, 165, 250, 0.15);
 }
 
 .dash-main {
@@ -94,32 +104,44 @@
 }
 
 .stat-card {
-  background: #ffffff;
+  background: var(--bg-secondary);
   border-radius: 1rem;
   padding: 1rem 1.25rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   display: flex;
   gap: 0.75rem;
   align-items: center;
   box-shadow: 0 12px 30px rgba(59, 130, 246, 0.07);
+  transition: background 0.3s ease;
+}
+
+html.dark .stat-card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .stat-icon {
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: #eef2ff;
+  background: rgba(59, 130, 246, 0.1);
   display: grid;
   place-items: center;
   font-size: 1.2rem;
 }
 
-.stat-icon.success { background: #e8fff3; }
-.stat-icon.violet { background: #f5e8ff; }
+html.dark .stat-icon {
+  background: rgba(96, 165, 250, 0.15);
+}
+
+.stat-icon.success { background: rgba(16, 185, 129, 0.1); }
+html.dark .stat-icon.success { background: rgba(34, 197, 94, 0.15); }
+
+.stat-icon.violet { background: rgba(139, 92, 246, 0.1); }
+html.dark .stat-icon.violet { background: rgba(168, 85, 247, 0.15); }
 
 .stat-label {
   margin: 0;
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
@@ -127,14 +149,14 @@
   margin: 0.1rem 0 0;
   font-weight: 800;
   font-size: 1.35rem;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .tip-banner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(90deg, #1d4ed8, #2563eb);
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
   color: #ffffff;
   border-radius: 1rem;
   padding: 1rem 1.25rem;
@@ -174,6 +196,12 @@
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
 }
 
+html.dark .cards-panel {
+  background: #1f2937;
+  border-color: #334155;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
 .cards-header {
   display: flex;
   justify-content: space-between;
@@ -182,9 +210,17 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+html.dark .cards-header {
+  border-bottom-color: #475569;
+}
+
 .panel-title {
   margin: 0;
   font-weight: 700;
+}
+
+html.dark .panel-title {
+  color: #e2e8f0;
 }
 
 .empty-state {
@@ -193,6 +229,10 @@
   place-items: center;
   text-align: center;
   gap: 0.35rem;
+}
+
+html.dark .empty-state {
+  background: inherit;
 }
 
 .empty-icon {
@@ -207,9 +247,22 @@
   margin-bottom: 0.35rem;
 }
 
+html.dark .empty-icon {
+  background: #374151;
+  color: #9ca3af;
+}
+
 .empty-title { margin: 0; font-weight: 700; font-size: 1.1rem; }
 
+html.dark .empty-title {
+  color: #e2e8f0;
+}
+
 .empty-text { margin: 0; color: #475569; max-width: 500px; }
+
+html.dark .empty-text {
+  color: #cbd5e1;
+}
 
 .primary-btn {
   margin-top: 0.5rem;
@@ -239,9 +292,19 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+html.dark .user-card-item {
+  background: #1f2937;
+  border-color: #475569;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
 .user-card-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
+}
+
+html.dark .user-card-item:hover {
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.25);
 }
 
 .user-card-visual {
@@ -285,6 +348,10 @@
   padding: 1rem;
 }
 
+html.dark .user-card-info {
+  background: #1f2937;
+}
+
 .user-card-meta {
   display: flex;
   justify-content: space-between;
@@ -295,9 +362,18 @@
   color: #64748b;
 }
 
+html.dark .user-card-meta {
+  border-bottom-color: #475569;
+  color: #94a3b8;
+}
+
 .user-card-meta .free {
   color: #0f9f63;
   font-weight: 700;
+}
+
+html.dark .user-card-meta .free {
+  color: #6ee7b7;
 }
 
 .user-card-rewards {
@@ -311,12 +387,20 @@
   font-weight: 600;
 }
 
+html.dark .rewards-heading {
+  color: #94a3b8;
+}
+
 .user-card-rewards ul {
   margin: 0;
   padding: 0;
   list-style: none;
   font-size: 0.85rem;
   color: #475569;
+}
+
+html.dark .user-card-rewards ul {
+  color: #cbd5e1;
 }
 
 .user-card-rewards li {
@@ -335,9 +419,19 @@
   transition: all 0.15s ease;
 }
 
+html.dark .remove-card-btn {
+  color: #fca5a5;
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
 .remove-card-btn:hover {
   background: #fef2f2;
   border-color: #fca5a5;
+}
+
+html.dark .remove-card-btn:hover {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.5);
 }
 
 @media (max-width: 900px) {

@@ -4,18 +4,30 @@
   align-items: center;
   justify-content: center;
   padding: 2.5rem;
-  background: radial-gradient(circle at 20% 20%, #f0f4ff 0, #f7f9ff 40%, #ffffff 75%);
-  color: #0f172a;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+html.dark .onboarding-shell {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 
 .onboarding-card {
   width: min(960px, 100%);
-  background: #ffffff;
+  background: var(--bg-secondary);
   border-radius: 1.25rem;
   box-shadow: 0 20px 70px rgba(31, 82, 160, 0.12);
   padding: 1.75rem 2.25rem 2rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+html.dark .onboarding-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.3);
 }
 
 .progress-container {
@@ -32,18 +44,18 @@
 .progress-pill {
   height: 8px;
   width: 150px;
-  background: #e5e7eb;
+  background: var(--border-color);
   border-radius: 999px;
   transition: background-color 0.25s ease;
 }
 
 .progress-pill.is-active {
-  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-blue-hover));
 }
 
 .progress-label {
   text-align: center;
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
@@ -55,11 +67,15 @@
   border-bottom: 1px solid #f1f5f9;
 }
 
+html.dark .onboarding-header {
+  border-bottom-color: #334155;
+}
+
 .header-icon {
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 1.1rem;
-  background: linear-gradient(135deg, #2563eb, #4338ca);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   display: grid;
   place-items: center;
   color: #ffffff;
@@ -82,10 +98,18 @@
   color: #0f172a;
 }
 
+html.dark .onboarding-title {
+  color: #f1f5f9;
+}
+
 .onboarding-subtitle {
   margin: 0.25rem 0 0;
   color: #475569;
   font-size: 1rem;
+}
+
+html.dark .onboarding-subtitle {
+  color: #cbd5e1;
 }
 
 .onboarding-body {
@@ -104,7 +128,7 @@
 }
 
 .callout.primary {
-  background: linear-gradient(90deg, #1d4ed8, #2563eb);
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
   color: #ffffff;
 }
 
@@ -114,10 +138,22 @@
   border: 1px solid #cbd9ff;
 }
 
+html.dark .callout.info {
+  background: rgba(37, 99, 235, 0.1);
+  color: #60a5fa;
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
 .callout.success {
   background: #e9f8ef;
   color: #0f172a;
   border: 1px solid #c7ebd3;
+}
+
+html.dark .callout.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 .callout-icon {
@@ -156,6 +192,10 @@
   font-size: 0.95rem;
 }
 
+html.dark .field-label {
+  color: #e2e8f0;
+}
+
 .field-input {
   display: flex;
   align-items: center;
@@ -167,6 +207,12 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
+html.dark .field-input {
+  border-color: #334155;
+  background: #1e293b;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+
 .field-input input {
   flex: 1;
   border: none;
@@ -176,14 +222,30 @@
   outline: none;
 }
 
+html.dark .field-input input {
+  color: #e2e8f0;
+}
+
+html.dark .field-input input::placeholder {
+  color: #64748b;
+}
+
 .field-leading {
   font-size: 1rem;
   color: #475569;
 }
 
+html.dark .field-leading {
+  color: #94a3b8;
+}
+
 .field-hint {
   color: #6b7280;
   font-size: 0.9rem;
+}
+
+html.dark .field-hint {
+  color: #94a3b8;
 }
 
 .card-list {
@@ -206,9 +268,20 @@
   color: #0f172a;
 }
 
+html.dark .card-row {
+  border-color: #334155;
+  background: #1f2937;
+  color: #e2e8f0;
+}
+
 .card-row:hover {
   border-color: #cbd5e1;
   background: #f1f5f9;
+}
+
+html.dark .card-row:hover {
+  border-color: #475569;
+  background: #2d3748;
 }
 
 .card-row.is-selected {
@@ -217,24 +290,35 @@
   background: #eef3ff;
 }
 
-.card-row-left {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
+html.dark .card-row.is-selected {
+  border-color: #3b82f6;
+  background: rgba(37, 99, 235, 0.1);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.25);
 }
 
 .chevron {
   color: #475569;
 }
 
+html.dark .chevron {
+  color: #94a3b8;
+}
+
 .issuer-name {
   color: #0f172a;
+}
+
+html.dark .issuer-name {
+  color: #e2e8f0;
 }
 
 .card-row-right {
   color: #475569;
   font-weight: 600;
+}
+
+html.dark .card-row-right {
+  color: #94a3b8;
 }
 
 .muted-text {
@@ -259,6 +343,11 @@
   background: #ffffff;
 }
 
+html.dark .preference-row {
+  border-color: #334155;
+  background: #1f2937;
+}
+
 .preference-row input {
   margin-top: 0.35rem;
 }
@@ -269,10 +358,18 @@
   color: #0f172a;
 }
 
+html.dark .preference-title {
+  color: #e2e8f0;
+}
+
 .preference-desc {
   margin: 0.2rem 0 0;
   color: #475569;
   font-size: 0.95rem;
+}
+
+html.dark .preference-desc {
+  color: #cbd5e1;
 }
 
 .success-banner {
@@ -328,6 +425,10 @@
   border-top: 1px solid #f1f5f9;
 }
 
+html.dark .onboarding-footer {
+  border-top-color: #334155;
+}
+
 .btn {
   border: none;
   cursor: pointer;
@@ -343,15 +444,24 @@
 }
 
 .btn.primary {
-  background: linear-gradient(90deg, #1d4ed8, #2563eb);
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
   color: #ffffff;
-  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 8px 22px rgba(96, 165, 250, 0.15);
 }
 
 .btn.ghost {
   background: transparent;
   color: #475569;
   border: 1px solid #e2e8f0;
+}
+
+html.dark .btn.ghost {
+  color: #cbd5e1;
+  border-color: #475569;
+}
+
+html.dark .btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .success-panel {
@@ -371,15 +481,28 @@
   margin: 0 auto 1rem;
 }
 
+html.dark .success-icon {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+
 .success-title {
   margin: 0;
   font-size: 1.25rem;
   color: #0f172a;
 }
 
+html.dark .success-title {
+  color: #e2e8f0;
+}
+
 .success-subtext {
   margin: 0.4rem 0 0;
   color: #475569;
+}
+
+html.dark .success-subtext {
+  color: #cbd5e1;
 }
 
 @media (max-width: 900px) {
