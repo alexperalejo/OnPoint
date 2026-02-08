@@ -21,7 +21,7 @@ export default function Dashboard({ onSignOut }) {
 
   useEffect(() => {
     console.log('using cards', storedCards)
-    const usedCards = storedCards.filter(c => c != null || c != undefined)
+    const usedCards = storedCards.filter(c => c != null && c != undefined)
     if(usedCards.length > 0)
     {
       Promise.all(usedCards.map(async c => {
@@ -58,8 +58,8 @@ export default function Dashboard({ onSignOut }) {
   const addCard = useCallback(card => {
       if(card == null || card == undefined) return;
       if(card.id == null || card.id == undefined) return;
-      setStoredCards([...storedCards.filter(c => c != null || c != undefined), card.id])
-      setUserCards([...userCards.filter(c => c != null || c != undefined), card]);
+      setStoredCards([...storedCards.filter(c => c != null && c != undefined), card.id])
+      setUserCards([...userCards.filter(c => c != null && c != undefined), card]);
   }, []);
 
   const totalAnnualFees = userCards.reduce((sum, card) => sum + card.annualFee, 0);
