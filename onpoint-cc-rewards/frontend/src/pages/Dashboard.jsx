@@ -57,6 +57,7 @@ export default function Dashboard({ onSignOut }) {
 
   const addCard = useCallback(card => {
       if(card == null || card == undefined) return;
+      if(card.id == null || card.id == undefined) return;
       setStoredCards([...storedCards.filter(c => c != null && c != undefined), card.id])
       setUserCards([...userCards.filter(c => c != null && c != undefined), card]);
   }, []);
