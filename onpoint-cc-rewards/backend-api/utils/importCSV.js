@@ -2,7 +2,9 @@ console.log("RUNNING FROM:", process.cwd());
 
 console.log("DEBUG ENV MONGODB_URI =", process.env.MONGODB_URI);
 
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+
 const fs = require("fs");
 const csv = require("csv-parser");
 const mongoose = require("mongoose");
@@ -40,9 +42,10 @@ async function importCSV() {
           name: row.name,
           issuer: row.issuer,
           type: row.type,
+          imageKey: row.imageKey || null,
           rewardCategories: [],
           benefits: [],
-          annualFee: Number(row.annualFee) || 0
+          annualFee: Number(row.annualFee) || 0,
         };
       }
 

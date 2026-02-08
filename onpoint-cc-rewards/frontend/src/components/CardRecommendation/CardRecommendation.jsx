@@ -1,3 +1,5 @@
+
+import { getCardImage } from "../../utils/cardImageMap";
 export function CardRecommendation({ card, onApply, onDismiss }) {
   if (!card) return null;
 
@@ -47,8 +49,24 @@ export function CardRecommendation({ card, onApply, onDismiss }) {
         color: 'white',
         marginBottom: '12px'
       }}>
+        <img
+          src={getCardImage(card.imageKey)}
+          alt={card.name}
+          style={{
+            width: '100%',
+            maxWidth: '260px',
+            borderRadius: '10px',
+            marginBottom: '8px',
+            display: 'block'
+          }}
+        />
+
         <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>
           {card.name}
+        </div>
+
+          {card.name}
+        
         </div>
         <div style={{ fontSize: '12px', opacity: 0.9 }}>
           {card.issuer}
@@ -58,7 +76,7 @@ export function CardRecommendation({ card, onApply, onDismiss }) {
             Annual Fee: ${card.annualFee}
           </div>
         )}
-      </div>
+      
 
       {card.rewards && card.rewards.length > 0 && (
         <div style={{ marginBottom: '12px' }}>

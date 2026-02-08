@@ -24,7 +24,9 @@ const cardSchema = new mongoose.Schema({
   notes: String,
   benefit_title: String,
   benefit_description: String,
-  annualFee: Number
+  annualFee: Number,
+  imageKey: { type: String },
+
 });
 
 module.exports = mongoose.model("Card", cardSchema);

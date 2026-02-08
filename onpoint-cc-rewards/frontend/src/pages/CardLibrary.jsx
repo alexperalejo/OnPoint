@@ -1,3 +1,4 @@
+import { getCardImage } from '../utils/cardImageMap';
 import { useState, useEffect } from 'react';
 import './CardLibrary.css';
 
@@ -123,9 +124,9 @@ const MUTED_CARD_COLORS = [
   '#3f4c6b'
 ];
 
-function getRandomHexColor() {
+/*function getRandomHexColor() {
   return MUTED_CARD_COLORS[Math.floor(Math.random() * MUTED_CARD_COLORS.length)];
-}
+}*/
 export default function CardLibrary({ userCards = [], addCard }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [availableCards, setAvailableCards] = useState(POPULAR_CARDS);
@@ -135,26 +136,22 @@ export default function CardLibrary({ userCards = [], addCard }) {
     fetch("http://localhost:3000/api/cards").then(r => r.json())
     .then(data => {
       console.log(data)
-      setAvailableCards(data.map(v => { return {
-        id: v._id,
-        name: v.name,
-        issuer: v.issuer,
-        annualFee: v.annualFee,
-        color: getRandomHexColor(),
-        rewards: v.attributes.filter(a => a.type != 'url').map(a => {
-          if(a.type == "all")
-            return {
-              category: 'all',
-              rate: a.multiplier
-            }
-          return {
-            category: a.category,
-            rate: a.multiplier
-          }
-        })
-      }}))
-    })
-  }, [])
+      setAvailableCards(data.map(v => {
+        return {
+          id: v._id,
+          name: v.name,
+          issuer: v.issuer,
+          annualFee: v.annualFee,
+          imageKey: v.imageKey,
+          rewards: v.attributes.filter(a => a.type != 'url').map(a => {
+            if (a.type == "all") return { category: 'all', rate: a.multiplier };
+            return { category: a.category, rate: a.multiplier };
+          })
+        };
+      }))
+    });
+  }, []);
+
 
   const isCardAdded = (cardName) => {
     return userCards.some(c => c.name === cardName);
@@ -225,16 +222,14 @@ export default function CardLibrary({ userCards = [], addCard }) {
       <div className="library-grid">
         {filteredCards.map((card, idx) => (
             <div key={idx} className="library-card">
-            <div
-              className="card-visual"
-              style={{
-                background: `linear-gradient(135deg, rgba(255,255,255,0.08), rgba(15,23,42,0.18)), ${card.color}`
-              }}
-            >
-              <p className="card-issuer">{card.issuer}</p>
-              <p className="card-name">{card.name}</p>
-              <div className="card-chip"></div>
+            <div className="card-visual">
+              <img
+                src={getCardImage(card.imageKey)}
+                alt={card.name}
+                className="card-img"
+              />
             </div>
+
             <div className="card-details">
               <div className="card-meta">
                 <span className="meta-label">Annual Fee</span>

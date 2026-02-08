@@ -6,7 +6,8 @@ const Card = require('../models/Card.js');
  */
 async function getAllCards(){
     try {
-        return await Card.find({}).lean();
+        //return await Card.find({}).lean();
+        return await Card.find({}).select("name issuer attributes annualFee imageKey").lean();
     } catch (err) {
         console.error('Error fetching cards:', err);
         throw err;
@@ -21,6 +22,7 @@ async function getAllCards(){
 
 async function getCardById(id){
     try{
+        //return await Card.findById(id).lean();
         return await Card.findById(id).lean();
     } catch (err) {
         console.error(`error fetching card with ID ${id}:`, err);

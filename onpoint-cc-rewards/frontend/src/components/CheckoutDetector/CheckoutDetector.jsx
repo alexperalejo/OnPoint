@@ -1,4 +1,5 @@
 /* global chrome */
+import { getCardImage } from "../../utils/cardImageMap";
 import { useEffect, useState } from "react";
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation";
 import { useChromeStorageSync } from "use-chrome-storage"
@@ -148,7 +149,7 @@ export function CheckoutDetector() {
             // 3. Get back the recommended card
             
             // For now, show dummy card immediately
-            fetch("http://localhost:3000/recommendations", {
+            /*fetch("http://localhost:3000/recommendations", {
               method: 'POST',
               body: JSON.stringify({
                 url: window.location.href,
@@ -156,9 +157,53 @@ export function CheckoutDetector() {
               })
             }).then(response => response.json())
               .then(body => {
-                setRecommendedCard(savedCards.filter(c => c.id == body.card.cardId)[0]);
-                setShowRecommendation(true);
-              })
+                //setRecommendedCard(savedCards.filter(c => c.id == body.card.cardId)[0]);
+                //setShowRecommendation(true);
+                if (resp.detection.isCheckout) {
+                  console.log("Checkout detected on URL:", tab.url);
+
+                  // TEMP: bypass backend to test UI + images
+                  const card = savedCards?.[0];
+
+                  console.log(
+                    "[CARD IMAGE TEST]",
+                    card?.name,
+                    card?.imageKey,
+                    getCardImage(card?.imageKey)
+                  );
+
+                  setRecommendedCard(card || null);
+                  setShowRecommendation(!!card);
+                }
+
+              }*/
+            // TEMP: bypass backend to test UI + images
+            console.log("[SAVED CARDS RAW]", savedCards);
+
+            //const card = savedCards?.[0];
+            const cardsArray = Array.isArray(savedCards)
+              ? savedCards
+              : Array.isArray(savedCards?.value)
+                ? savedCards.value
+                : [];
+
+            const firstId = cardsArray[0];
+
+            if (!firstId) {
+              console.log("[CHECKOUT] No saved card IDs yet");
+              return;
+            }
+
+            const res = await fetch(`http://localhost:3000/api/cards/${firstId}`);
+            const card = await res.json();
+
+            console.log("[CARD FROM API]", card);
+            console.log("[CARD IMAGE TEST]", card?.name, card?.imageKey, getCardImage(card?.imageKey));
+
+            setRecommendedCard(card);
+            setShowRecommendation(true);
+
+
           }
         } else if (resp === null) {
           // error already set
@@ -174,6 +219,8 @@ export function CheckoutDetector() {
     }
     queryContent();
   }, [savedCards]);
+
+
 
   const isDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches || document.documentElement.classList.contains('dark');
   

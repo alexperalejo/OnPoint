@@ -8,7 +8,8 @@
       { "type": "tag", "category": "drugstore", "multiplier": 3 },
       { "type": "tag", "category": "travel_chase", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1.5 }
-    ]
+    ],
+    "imageKey": "chase-freedom-unlimited"
   },
 
   {
@@ -22,7 +23,8 @@
       { "type": "tag", "category": "online_grocery", "multiplier": 3 },
       { "type": "tag", "category": "streaming", "multiplier": 3 },
       { "type": "all", "category": "all", "multiplier": 1 }
-    ]
+    ],
+    "imageKey": "chase-sapphire-preferred"
   },
 
   {
@@ -34,7 +36,8 @@
       { "type": "tag", "category": "groceries", "multiplier": 4 },
       { "type": "tag", "category": "flights", "multiplier": 3 },
       { "type": "all", "category": "all", "multiplier": 1 }
-    ]
+    ],
+    "imageKey": "amex-gold"
   },
 
   {
@@ -43,7 +46,8 @@
     "annualFee": 0,
     "attributes": [
       { "type": "all", "category": "all", "multiplier": 2 }
-    ]
+    ],
+    "imageKey": "citi-double-cash"
   },
 
   {
@@ -57,7 +61,8 @@
       { "type": "tag", "category": "streaming", "multiplier": 3 },
       { "type": "tag", "category": "travel_capital_one", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1 }
-    ]
+    ],
+    "imageKey": "capital-one-savor-one"
   },
 
   {
@@ -67,7 +72,8 @@
     "attributes": [
       { "type": "tag", "category": "rotating", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1 }
-    ]
+    ],
+    "imageKey": "discover-it"
   },
 
   {
@@ -78,7 +84,8 @@
       { "type": "tag", "category": "travel_capital_one_flights", "multiplier": 5 },
       { "type": "tag", "category": "travel_capital_one_hotels_cars", "multiplier": 10 },
       { "type": "all", "category": "all", "multiplier": 2 }
-    ]
+    ],
+    "imageKey": "capital-one-venture-x"
   },
 
   {
@@ -91,7 +98,8 @@
       { "type": "tag", "category": "transit", "multiplier": 3 },
       { "type": "tag", "category": "gas", "multiplier": 3 },
       { "type": "all", "category": "all", "multiplier": 1 }
-    ]
+    ],
+    "imageKey": "amex-blue-cash-preferred"
   },
 
   {
@@ -104,6 +112,7 @@
       { "type": "tag", "category": "drugstore", "multiplier": 3 },
       { "type": "tag", "category": "travel_chase", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1 }
-    ]
+    ],
+    "imageKey": "chase-freedom-flex"
   }
 ]

@@ -1,11 +1,13 @@
-import { useState, useEffect, use, useMemo, useCallback } from 'react';
+import { getCardImage } from "../utils/cardImageMap";
+
+import { useState, useEffect, /*use, useMemo, */useCallback } from 'react';
 import './Dashboard.css';
 import CardLibrary from './CardLibrary.jsx';
 import UserProfile from './UserProfile.jsx';
 import Cookies from 'js-cookie'
 import { useChromeStorageSync } from 'use-chrome-storage'
-import { useTransition } from 'react';
-function getRandomHexColor() {
+//import { useTransition } from 'react';
+/*//function getRandomHexColor() {
     // Generate a random integer between 0 and 0xFFFFFF (16777215)
     const randomInt = Math.floor(Math.random() * 0xFFFFFF);
     
@@ -13,7 +15,7 @@ function getRandomHexColor() {
     const hexColor = `#${randomInt.toString(16).padStart(6, '0')}`;
     
     return hexColor;
-}
+}*/
 export default function Dashboard({ onSignOut }) {
   const [storedCards, setStoredCards] = useChromeStorageSync('cardinfo', [])
   const [currentView, setCurrentView] = useState('dashboard'); // dashboard | library | profile
@@ -27,12 +29,20 @@ export default function Dashboard({ onSignOut }) {
       Promise.all(usedCards.map(async c => {
         const response = await fetch("http://localhost:3000/api/cards/" + c);
         const data = await response.json();
-        const newCard = {
+        /*const newCard = {
           id: data._id,
           name: data.name,
           issuer: data.issuer,
           annualFee: data.annualFee,
-          color: getRandomHexColor(),
+          color: getRandomHexColor(),*/
+          const newCard = {
+          id: data._id,
+          name: data.name,
+          issuer: data.issuer,
+          annualFee: data.annualFee,
+          imageKey: data.imageKey,
+          
+
           rewards: data.attributes.filter(a => a.type != 'url').map(a_1 => {
             if (a_1.type == "all")
               return {
@@ -149,10 +159,23 @@ export default function Dashboard({ onSignOut }) {
               <div className="user-cards-grid">
                 {userCards.map((card) => (
                   <div key={card.id} className="user-card-item">
-                    <div className="user-card-visual" style={{ background: card.color }}>
-                      <p className="user-card-issuer">{card.issuer}</p>
+                    <div className="user-card-visual">
+                      <img
+                        src={getCardImage(card.imageKey)}
+                        alt={card.name}
+                        style={{
+                          width: "100%",
+                          height: "140px",
+                          objectFit: "cover",
+                          borderRadius: "14px",
+                          display: "block"
+                        }}
+                      />
                       <p className="user-card-name">{card.name}</p>
+                      <p className="user-card-issuer">{card.issuer}</p>
+
                     </div>
+
                     <div className="user-card-info">
                       <div className="user-card-meta">
                         <span>Annual Fee:</span>
