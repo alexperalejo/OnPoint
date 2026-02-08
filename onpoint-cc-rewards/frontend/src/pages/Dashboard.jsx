@@ -52,7 +52,7 @@ export default function Dashboard({ onSignOut }) {
             setUserCards(values)
       })
     }
-  }, [storedCards])
+  }, [storedCards, setUserCards])
 
 
   const addCard = useCallback(card => {
@@ -60,7 +60,7 @@ export default function Dashboard({ onSignOut }) {
       if(card.id == null || card.id == undefined) return;
       setStoredCards([...storedCards.filter(c => c != null && c != undefined), card.id])
       setUserCards([...userCards.filter(c => c != null && c != undefined), card]);
-  }, []);
+  }, [storedCards, userCards, setStoredCards, setUserCards]);
 
   const totalAnnualFees = userCards.reduce((sum, card) => sum + card.annualFee, 0);
 
@@ -171,8 +171,8 @@ export default function Dashboard({ onSignOut }) {
                         onClick={() => {
                           //const userCardsCookie = Cookies.get('user-cards');
                           //Cookies.set('user-cards', userCardsCookie.replace(card.id + '|', ''))
-                          setStoredCards(storedCards.filter(c => (c != null || c != undefined) && c != card.id))
-                          setUserCards(userCards.filter(c => (c != null || c != undefined) && c.id !== card.id))
+                          setStoredCards(storedCards.filter(c => (c != null && c != undefined) && c != card.id))
+                          setUserCards(userCards.filter(c => (c != null && c != undefined) && c.id !== card.id))
                         }}
                       >
                         Remove Card
