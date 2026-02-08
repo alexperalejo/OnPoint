@@ -13,7 +13,7 @@ Follow these steps to set up and run the OnPoint Credit Card Recommendation Syst
 ------------------------------------------------------------
     cd backend-api
     npm install
-
+    
 ------------------------------------------------------------
 3. Set Up Environment Variables
 ------------------------------------------------------------
@@ -29,9 +29,7 @@ Then open .env and replace the MongoDB URI with your team’s shared connection 
 ------------------------------------------------------------
 4. Run the Backend Server
 ------------------------------------------------------------
-    npm run dev
-    (or)
-    node server.js
+    npm start
 
 Expected output:
     MongoDB connected
@@ -58,19 +56,6 @@ The React web interface is located in the frontend/ directory.
 
 Open the URL shown in your terminal  
 (usually: http://localhost:5173)
-
-------------------------------------------------------------
-7. Build the Popup (Vite)
-------------------------------------------------------------
-
-The popup UI for the Chrome extension uses Vite and must be built before loading the extension.
-
-From the project root:
-
-cd frontend-extension/popup
-npm install --save-dev vite
-npm run build
-
 
 ------------------------------------------------------------
 Important Notes
