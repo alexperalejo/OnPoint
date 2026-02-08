@@ -7,6 +7,7 @@ import amexBlueCashPreferred from "../assets/cards/amex-blue-cash-preferred.png"
 import citiDoubleCash from "../assets/cards/citi-double-cash.png";
 import discoverIt from "../assets/cards/discover-it.png";
 import capitalOneSavorOne from "../assets/cards/capital-one-savor-one.png";
+import capitalOneVentureX from "../assets/cards/capital-one-venture-x.png";
 
 // lookup table
 export const cardImageMap = {
@@ -17,7 +18,8 @@ export const cardImageMap = {
     "amex-blue-cash-preferred": amexBlueCashPreferred,
     "citi-double-cash": citiDoubleCash,
     "discover-it": discoverIt,
-    "capital-one-savor-one": capitalOneSavorOne
+    "capital-one-savor-one": capitalOneSavorOne,
+    "capital-one-venture-x": capitalOneVentureX
 };
 
 // export

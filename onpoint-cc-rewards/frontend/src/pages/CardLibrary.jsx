@@ -220,8 +220,9 @@ export default function CardLibrary({ userCards = [], addCard }) {
       </div>
 
       <div className="library-grid">
-        {filteredCards.map((card, idx) => (
-            <div key={idx} className="library-card">
+        {filteredCards.map((card) => (
+          <div key={card.id || card.name} className="library-card">
+
             <div className="card-visual">
               <img
                 src={getCardImage(card.imageKey)}
