@@ -126,7 +126,7 @@ const MUTED_CARD_COLORS = [
 function getRandomHexColor() {
   return MUTED_CARD_COLORS[Math.floor(Math.random() * MUTED_CARD_COLORS.length)];
 }
-export default function CardLibrary({ userCards = [], setUserCards, storedCards = [], setStoredCards, }) {
+export default function CardLibrary({ userCards = [], addCard }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [availableCards, setAvailableCards] = useState(POPULAR_CARDS);
   const [filterType, setFilterType] = useState('all');
@@ -163,14 +163,13 @@ export default function CardLibrary({ userCards = [], setUserCards, storedCards 
   const handleAddCard = (card) => {
     if (!isCardAdded(card.name)) {
       console.log('adding card', card)
-      setStoredCards([...storedCards, card.id])
       //if(!storedCards || storedCards.length == 0)
       //{
       //  Cookies.set("user-cards", card.id +'|')
       //} else{
       //  Cookies.set("user-cards", storedCards + card.id + '|')
       //}
-      setUserCards([...userCards, card]);
+      addCard(card);
     }
   };
 

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use, useMemo, useCallback } from 'react';
 import './Dashboard.css';
 import CardLibrary from './CardLibrary.jsx';
 import UserProfile from './UserProfile.jsx';
 import Cookies from 'js-cookie'
 import { useChromeStorageSync } from 'use-chrome-storage'
+import { useTransition } from 'react';
 function getRandomHexColor() {
     // Generate a random integer between 0 and 0xFFFFFF (16777215)
     const randomInt = Math.floor(Math.random() * 0xFFFFFF);
@@ -20,9 +21,10 @@ export default function Dashboard({ onSignOut }) {
 
   useEffect(() => {
     console.log('using cards', storedCards)
-    if(storedCards.length > 0)
+    const usedCards = storedCards.filter(c => c != null && c != undefined)
+    if(usedCards.length > 0)
     {
-      Promise.all(storedCards.map(async c => {
+      Promise.all(usedCards.map(async c => {
         const response = await fetch("http://localhost:3000/api/cards/" + c);
         const data = await response.json();
         const newCard = {
@@ -52,7 +54,15 @@ export default function Dashboard({ onSignOut }) {
     }
   }, [storedCards])
 
+
+  const addCard = useCallback(card => {
+      setStoredCards([...storedCards.filter(c => c != null && c != undefined), card.id])
+      setUserCards([...userCards.filter(c => c != null && c != undefined), card]);
+  }, []);
+
   const totalAnnualFees = userCards.reduce((sum, card) => sum + card.annualFee, 0);
+
+
 
   return (
     <div className="dash-shell">
@@ -159,8 +169,8 @@ export default function Dashboard({ onSignOut }) {
                         onClick={() => {
                           //const userCardsCookie = Cookies.get('user-cards');
                           //Cookies.set('user-cards', userCardsCookie.replace(card.id + '|', ''))
-                          setStoredCards(storedCards.filter(c => c != card.id))
-                          setUserCards(userCards.filter(c => c.id !== card.id))
+                          setStoredCards(storedCards.filter(c => c != null && c != undefined && c != card.id))
+                          setUserCards(userCards.filter(c => c != null && c != undefined && c.id !== card.id))
                         }}
                       >
                         Remove Card
@@ -174,7 +184,7 @@ export default function Dashboard({ onSignOut }) {
         </main>
       )}
 
-      {currentView === 'library' && <CardLibrary userCards={userCards} setUserCards={setUserCards} storedCards={storedCards} setStoredCards={setStoredCards} />}
+      {currentView === 'library' && <CardLibrary userCards={userCards} addCard={addCard}/>}
 
       {currentView === 'profile' && <UserProfile onSignOut={onSignOut} />}
     </div>
