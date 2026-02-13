@@ -1,80 +1,98 @@
 import { getCardImage } from "../utils/cardImageMap";
+import { useState, useEffect, useCallback } from "react";
+import "./Dashboard.css";
+import CardLibrary from "./CardLibrary.jsx";
+import UserProfile from "./UserProfile.jsx";
+import { useChromeStorageSync } from "use-chrome-storage";
 
-import { useState, useEffect, /*use, useMemo, */useCallback } from 'react';
-import './Dashboard.css';
-import CardLibrary from './CardLibrary.jsx';
-import UserProfile from './UserProfile.jsx';
-import Cookies from 'js-cookie'
-import { useChromeStorageSync } from 'use-chrome-storage'
-//import { useTransition } from 'react';
-/*//function getRandomHexColor() {
-    // Generate a random integer between 0 and 0xFFFFFF (16777215)
-    const randomInt = Math.floor(Math.random() * 0xFFFFFF);
-    
-    // Convert to hexadecimal and pad with leading zeros if needed
-    const hexColor = `#${randomInt.toString(16).padStart(6, '0')}`;
-    
-    return hexColor;
-}*/
+import { useDarkMode } from "../hooks/useDarkMode";
+
 export default function Dashboard({ onSignOut }) {
-  const [storedCards, setStoredCards] = useChromeStorageSync('cardinfo', [])
-  const [currentView, setCurrentView] = useState('dashboard'); // dashboard | library | profile
+  // ✅ system-following dark mode (adds/removes "dark" on <html>)
+  useDarkMode();
+
+  const [storedCards, setStoredCards] = useChromeStorageSync("cardinfo", []);
+  const [currentView, setCurrentView] = useState("dashboard"); // dashboard | library | profile
   const [userCards, setUserCards] = useState([]);
 
   useEffect(() => {
-    console.log('using cards', storedCards)
-    const usedCards = storedCards.filter(c => c != null && c != undefined)
-    if(usedCards.length > 0)
-    {
-      Promise.all(usedCards.map(async c => {
-        const response = await fetch("http://localhost:3000/api/cards/" + c);
-        const data = await response.json();
-        /*const newCard = {
-          id: data._id,
-          name: data.name,
-          issuer: data.issuer,
-          annualFee: data.annualFee,
-          color: getRandomHexColor(),*/
-          const newCard = {
-          id: data._id,
-          name: data.name,
-          issuer: data.issuer,
-          annualFee: data.annualFee,
-          imageKey: data.imageKey,
-          
+    console.log("using cards", storedCards);
+    const usedCards = (storedCards || []).filter((c) => c != null && c != undefined);
 
-          rewards: data.attributes.filter(a => a.type != 'url').map(a_1 => {
-            if (a_1.type == "all")
-              return {
-                category: 'all',
-                rate: a_1.multiplier
-              };
-            return {
-              category: a_1.category,
-              rate: a_1.multiplier
-            };
-          })
-        };
-        console.log('recieved card', newCard)
-        return newCard;
-      })).then(values => {
-        console.log('set user cards', values)
-            setUserCards(values)
-      })
+    let mounted = true;
+
+    if (usedCards.length === 0) {
+      // ensure we don't synchronously set state inside the effect body
+      Promise.resolve().then(() => {
+        if (mounted) setUserCards([]);
+      });
+
+      return () => {
+        mounted = false;
+      };
     }
-  }, [storedCards, setUserCards])
 
+    (async () => {
+      try {
+        const values = await Promise.all(
+          usedCards.map(async (c) => {
+            const response = await fetch("http://localhost:3000/api/cards/" + c);
+            const data = await response.json();
 
-  const addCard = useCallback(card => {
-      if(card == null || card == undefined) return;
-      if(card.id == null || card.id == undefined) return;
-      setStoredCards([...storedCards.filter(c => c != null && c != undefined), card.id])
-      setUserCards([...userCards.filter(c => c != null && c != undefined), card]);
-  }, [storedCards, userCards, setStoredCards, setUserCards]);
+            const newCard = {
+              id: data._id,
+              name: data.name,
+              issuer: data.issuer,
+              annualFee: data.annualFee,
+              imageKey: data.imageKey,
+              rewards: (data.attributes || [])
+                .filter((a) => a.type != "url")
+                .map((a_1) => {
+                  if (a_1.type == "all") {
+                    return { category: "all", rate: a_1.multiplier };
+                  }
+                  return { category: a_1.category, rate: a_1.multiplier };
+                }),
+            };
+
+            console.log("received card", newCard);
+            return newCard;
+          })
+        );
+
+        if (mounted) {
+          console.log("set user cards", values);
+          setUserCards(values);
+        }
+      } catch (err) {
+        console.error("Error fetching cards:", err);
+        if (mounted) setUserCards([]);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [storedCards]);
+
+  const addCard = useCallback(
+    (card) => {
+      if (card == null || card == undefined) return;
+      if (card.id == null || card.id == undefined) return;
+
+      setStoredCards([
+        ...storedCards.filter((c) => c != null && c != undefined),
+        card.id,
+      ]);
+      setUserCards([
+        ...userCards.filter((c) => c != null && c != undefined),
+        card,
+      ]);
+    },
+    [storedCards, userCards, setStoredCards, setUserCards]
+  );
 
   const totalAnnualFees = userCards.reduce((sum, card) => sum + card.annualFee, 0);
-
-
 
   return (
     <div className="dash-shell">
@@ -90,26 +108,26 @@ export default function Dashboard({ onSignOut }) {
 
       <nav className="dash-nav">
         <button
-          className={`nav-item ${currentView === 'dashboard' ? 'is-active' : ''}`}
-          onClick={() => setCurrentView('dashboard')}
+          className={`nav-item ${currentView === "dashboard" ? "is-active" : ""}`}
+          onClick={() => setCurrentView("dashboard")}
         >
           Dashboard
         </button>
         <button
-          className={`nav-item ${currentView === 'library' ? 'is-active' : ''}`}
-          onClick={() => setCurrentView('library')}
+          className={`nav-item ${currentView === "library" ? "is-active" : ""}`}
+          onClick={() => setCurrentView("library")}
         >
           Card Library
         </button>
         <button
-          className={`nav-item ${currentView === 'profile' ? 'is-active' : ''}`}
-          onClick={() => setCurrentView('profile')}
+          className={`nav-item ${currentView === "profile" ? "is-active" : ""}`}
+          onClick={() => setCurrentView("profile")}
         >
           Profile
         </button>
       </nav>
 
-      {currentView === 'dashboard' && (
+      {currentView === "dashboard" && (
         <main className="dash-main">
           <section className="stats-grid">
             <div className="stat-card">
@@ -149,11 +167,14 @@ export default function Dashboard({ onSignOut }) {
             <header className="cards-header">
               <p className="panel-title">Your Cards</p>
             </header>
+
             {userCards.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">💳</div>
                 <p className="empty-title">No Cards Yet</p>
-                <p className="empty-text">Visit the Card Library tab to browse and add credit cards to your wallet.</p>
+                <p className="empty-text">
+                  Visit the Card Library tab to browse and add credit cards to your wallet.
+                </p>
               </div>
             ) : (
               <div className="user-cards-grid">
@@ -168,34 +189,45 @@ export default function Dashboard({ onSignOut }) {
                           height: "140px",
                           objectFit: "cover",
                           borderRadius: "14px",
-                          display: "block"
+                          display: "block",
                         }}
                       />
                       <p className="user-card-name">{card.name}</p>
                       <p className="user-card-issuer">{card.issuer}</p>
-
                     </div>
 
                     <div className="user-card-info">
                       <div className="user-card-meta">
                         <span>Annual Fee:</span>
-                        <span className={card.annualFee === 0 ? 'free' : ''}>${card.annualFee}</span>
+                        <span className={card.annualFee === 0 ? "free" : ""}>
+                          ${card.annualFee}
+                        </span>
                       </div>
+
                       <div className="user-card-rewards">
                         <p className="rewards-heading">Reward Categories</p>
                         <ul>
                           {card.rewards.slice(0, 3).map((r, i) => (
-                            <li key={i}>{r.category}: {r.rate}%</li>
+                            <li key={i}>
+                              {r.category}: {r.rate}%
+                            </li>
                           ))}
                         </ul>
                       </div>
+
                       <button
                         className="remove-card-btn"
                         onClick={() => {
-                          //const userCardsCookie = Cookies.get('user-cards');
-                          //Cookies.set('user-cards', userCardsCookie.replace(card.id + '|', ''))
-                          setStoredCards(storedCards.filter(c => (c != null && c != undefined) && c != card.id))
-                          setUserCards(userCards.filter(c => (c != null && c != undefined) && c.id !== card.id))
+                          setStoredCards(
+                            storedCards.filter(
+                              (c) => c != null && c != undefined && c != card.id
+                            )
+                          );
+                          setUserCards(
+                            userCards.filter(
+                              (c) => c != null && c != undefined && c.id !== card.id
+                            )
+                          );
                         }}
                       >
                         Remove Card
@@ -209,9 +241,9 @@ export default function Dashboard({ onSignOut }) {
         </main>
       )}
 
-      {currentView === 'library' && <CardLibrary userCards={userCards} addCard={addCard}/>}
+      {currentView === "library" && <CardLibrary userCards={userCards} addCard={addCard} />}
 
-      {currentView === 'profile' && <UserProfile onSignOut={onSignOut} />}
+      {currentView === "profile" && <UserProfile onSignOut={onSignOut} />}
     </div>
   );
 }

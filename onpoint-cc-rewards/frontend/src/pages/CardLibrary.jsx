@@ -1,6 +1,8 @@
 import { getCardImage } from '../utils/cardImageMap';
 import { useState, useEffect } from 'react';
 import './CardLibrary.css';
+import { useDarkMode } from '../hooks/useDarkMode';
+
 
 const POPULAR_CARDS = [
   {
@@ -128,6 +130,7 @@ const MUTED_CARD_COLORS = [
   return MUTED_CARD_COLORS[Math.floor(Math.random() * MUTED_CARD_COLORS.length)];
 }*/
 export default function CardLibrary({ userCards = [], addCard }) {
+  useDarkMode(); // enables html.dark + CSS dark styles (system wins)
   const [searchTerm, setSearchTerm] = useState('');
   const [availableCards, setAvailableCards] = useState(POPULAR_CARDS);
   const [filterType, setFilterType] = useState('all');
