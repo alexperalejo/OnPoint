@@ -35,6 +35,151 @@
     }
     return { isCheckout: false, score: 0, reasons: [] };
   }
+  //====================================================================
+  //Checkout total extraction helpers
+  //====================================================================
+  // Money Helper function to extract value and currency from text, used by some detect-core rules
+    function parseMoney(text) {
+    if (!text) return null;
+    const cleaned = String(text).replace(/\s+/g, " ").trim();
+
+    const m = cleaned.match(/([€£¥₹$])?\s*([0-9]{1,3}(?:[.,][0-9]{3})*(?:[.,][0-9]{2})|[0-9]+(?:[.,][0-9]{2})?)/);
+    if (!m) return null;
+
+    const currency = m[1] || "$";
+    let amountStr = m[2];
+
+    const hasComma = amountStr.includes(",");
+    const hasDot = amountStr.includes(".");
+
+    if (hasComma && hasDot) {
+      // 1,234.56 (US) OR 1.234,56 (EU) — decide by last separator
+      if (amountStr.lastIndexOf(",") > amountStr.lastIndexOf(".")) {
+        amountStr = amountStr.replace(/\./g, "").replace(",", ".");
+      } else {
+        amountStr = amountStr.replace(/,/g, "");
+      }
+    } else if (hasComma && !hasDot) {
+      // 1,234 -> 1234
+      amountStr = amountStr.replace(/,/g, "");
+    }
+
+    const value = Number(amountStr);
+    if (Number.isNaN(value)) return null;
+    return { value, currency, raw: text };
+  } // end parseMoney
+
+  function isVisible(element){
+    if (!element) return false;
+
+    const rect = element.getBoundingClientRect?.();
+    if (!rect) return true; 
+    return rect.width > 0 && rect.height > 0;
+  } //end isVisible helper
+
+  function scoreElement(element){
+    const baseScore = new Set([
+      element?.getAttribute?.("data-testid"),
+      element?.getAttribute?.("data-anchor-id"),
+      element?.id,
+      element?.className
+    ].filter(Boolean).map(x => String(x).toLowerCase()));
+    
+    let score = 0;
+    const joined = Array.from(baseScore).join(" ");
+
+    if (joined.includes("grand")) score += 5;
+    if (joined.includes("ordercarttotal")) score += 5;
+    if (joined.includes("total")) score += 3;
+    if (joined.includes("amount")) score += 1;
+    if (joined.includes("tax")) score -= 2;
+    if (joined.includes("fee")) score -= 2;
+    if (joined.includes("subtotal")) score -= 4;
+
+    if (isVisible(element)) score += 1;
+
+    return score;
+  } //end scoreElement
+
+  //Generic selector (from 3 merchants)
+  function extractTotalBySelectors() {
+    const selectors = [
+      // Your exact ones (still "generic" because they’re attribute based)
+      '[data-testid="resGrandTotalCost"]',
+      '[data-testid="totalForStayAmount"]',
+      '[data-testid="grand-total-value"]',
+      '[data-anchor-id="OrderCartTotal"]',
+
+      // Broader patterns that catch a lot of sites
+      '[data-testid*="grand"][data-testid*="total"]',
+      '[data-testid*="grand-total"]',
+      '[data-testid*="order"][data-testid*="total"]',
+      '[data-testid*="total"]',
+      '[data-anchor-id*="Total"]',
+      '[data-anchor-id*="total"]',
+      '[id*="grand"][id*="total"]',
+      '[id*="order"][id*="total"]',
+      '[class*="grand"][class*="total"]',
+      '[class*="order"][class*="total"]'
+    ];
+
+    const candidates = [];
+    for (const sel of selectors) {
+      const els = document.querySelectorAll(sel);
+      for (const el of els) {
+        const money = parseMoney(el.textContent);
+        if (!money) continue;
+        candidates.push({ el, money, score: scoreElement(el) });
+      }
+    } 
+
+    if (!candidates.length) return null;
+
+    // Pick best by (score desc), then by amount desc (final total often largest)
+    candidates.sort((a, b) => (b.score - a.score) || (b.money.value - a.money.value));
+    return candidates[0].money;
+  } // end extractTotalBySelectors
+
+//Fallback label-based scan (useful for Expedia if selectors ever fail)
+  function extractTotalByLabels() {
+    const labelPatterns = [
+      /trip\s*total/i,
+      /order\s*total/i,
+      /grand\s*total/i,
+      /total\s*due/i,
+      /amount\s*due/i,
+      /estimated\s*total/i,
+      /\btotal\b/i, // last resort
+    ];
+
+    const nodes = Array.from(document.querySelectorAll("body *"))
+      .filter(el => el.children.length === 0)
+      .slice(0, 3500);
+
+    for (const el of nodes) {
+      const t = (el.textContent || "").trim();
+      if (!t) continue;
+
+      const matches = labelPatterns.some(p => p.test(t));
+      if (!matches) continue;
+
+      // try sibling/parent container for money
+      const sib = el.nextElementSibling;
+      const m1 = parseMoney(sib?.textContent);
+      if (m1) return m1;
+
+      const parent = el.parentElement;
+      const m2 = parseMoney(parent?.textContent);
+      if (m2) return m2;
+    }
+
+    return null;
+  } // end extractTotalByLabels
+
+  function extractCheckoutTotal() {
+    return extractTotalBySelectors() || extractTotalByLabels();
+  }
+  //====================================================================
 
   // Initial run
   let lastDetection = runDetect(document);
@@ -147,16 +292,41 @@
   // Expose via chrome.runtime messaging
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg && msg.type === 'getDetection') {
-      // recompute quickly
-      lastDetection = runDetect(document);
-      lastUrl = (typeof location !== 'undefined' && location.href) || lastUrl;
-      persistDetection(lastDetection);
-      sendResponse({ ok: true, detection: lastDetection });
-    }
-    return true; // keep channel open for async
-  });
 
-  // Also expose for debugging
+      lastDetection = runDetect(document);
+      lastUrl = location.href;
+      persistDetection(lastDetection);
+
+      const total = extractCheckoutTotal();
+
+    if (lastDetection?.isCheckout && total && total.value > 0) {
+      chrome.storage?.local?.get(["checkoutTotal"], (prev) => {
+        const old = prev?.checkoutTotal?.amount;
+        if (old === total.value && prev?.checkoutTotal?.url === location.href) return;
+
+        chrome.storage?.local?.set({
+          checkoutTotal: {
+            amount: total.value,
+            currency: total.currency,
+            raw: total.raw,
+            url: location.href,
+            host: location.hostname,
+            ts: Date.now(),
+          }
+        });
+      });
+    } //end conditional storage of checkout total
+
+      sendResponse({
+        ok: true,
+        detection: lastDetection,
+        checkoutTotal: total || null
+      });
+    }
+    return true;
+  }); // end message listener
+
+  // expose for debugging
   window.__checkoutDetection = {
     get: () => lastDetection,
     recompute: () => { lastDetection = runDetect(document); return lastDetection; }

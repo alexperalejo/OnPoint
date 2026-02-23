@@ -1,8 +1,8 @@
 /* global chrome */
-import { getCardImage } from "../../utils/cardImageMap";
-import { useEffect, useState } from "react";
-import { CardRecommendation } from "../CardRecommendation/CardRecommendation";
-import { useChromeStorageSync } from "use-chrome-storage"
+import { getCardImage } from "../../utils/cardImageMap"; // Utility to get card image URL based on imageKey
+import { useEffect, useState } from "react"; // React hooks for state and lifecycle
+import { CardRecommendation } from "../CardRecommendation/CardRecommendation"; // Card recommendation component
+import { useChromeStorageSync } from "use-chrome-storage" // Custom hook to access chrome.storage.sync for saved cards
 
 export function CheckoutDetector() {
   const [savedCards] = useChromeStorageSync('cardinfo')
