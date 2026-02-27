@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Purchase completion sample</title>
+    <style>body{font-family:Arial;padding:18px} .panel{max-width:720px;margin:0 auto}</style>
+  </head>
+  <body>
+    <div class="panel">
+      <h1>Thank you — your order is confirmed</h1>
+      <p>Thank you for your order. We've received your order and payment has been processed.</p>
+
+      <section>
+        <h2>Order Details</h2>
+        <p><strong>Order number:</strong> ABC12345</p>
+        <p><strong>Amount:</strong> $49.95</p>
+        <p><strong>Status:</strong> Payment received</p>
+      </section>
+
+      <p>You will receive an email confirmation with your receipt shortly.</p>
+
+      <!-- JSON-LD order schema to provide a strong receipt signal -->
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Order",
+        "orderNumber": "ABC12345",
+        "priceCurrency": "USD",
+        "price": "49.95",
+        "orderStatus": "https://schema.org/OrderProcessing"
+      }
+      </script>
+    </div>
+  </body>
+</html>
