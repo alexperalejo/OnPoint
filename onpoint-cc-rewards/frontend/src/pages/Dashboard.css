@@ -101,6 +101,38 @@ html.dark .nav-item.is-active {
   gap: 1.25rem;
 }
 
+.savings-main {
+  gap: 1rem;
+}
+
+.savings-panel {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+}
+
+html.dark .savings-panel {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.savings-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.savings-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.savings-subtitle {
+  margin: 0.35rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
 /* =========================
    STATS
    ========================= */

@@ -12,7 +12,7 @@ export default function Dashboard({ onSignOut }) {
   useDarkMode();
 
   const [storedCards, setStoredCards] = useChromeStorageSync("cardinfo", []);
-  const [currentView, setCurrentView] = useState("dashboard"); // dashboard | library | profile
+  const [currentView, setCurrentView] = useState("dashboard"); // dashboard | library | savings | profile
   const [userCards, setUserCards] = useState([]);
 
   useEffect(() => {
@@ -118,6 +118,12 @@ export default function Dashboard({ onSignOut }) {
           onClick={() => setCurrentView("library")}
         >
           Card Library
+        </button>
+        <button
+          className={`nav-item ${currentView === "savings" ? "is-active" : ""}`}
+          onClick={() => setCurrentView("savings")}
+        >
+          Savings Analysis
         </button>
         <button
           className={`nav-item ${currentView === "profile" ? "is-active" : ""}`}
@@ -242,6 +248,19 @@ export default function Dashboard({ onSignOut }) {
       )}
 
       {currentView === "library" && <CardLibrary userCards={userCards} addCard={addCard} />}
+
+      {currentView === "savings" && (
+        <main className="dash-main savings-main">
+          <section className="savings-panel">
+            <header className="savings-header">
+              <h2 className="savings-title">Savings Analysis</h2>
+              <p className="savings-subtitle">
+                See how much value you’re getting from your cards and where you could improve.
+              </p>
+            </header>
+          </section>
+        </main>
+      )}
 
       {currentView === "profile" && <UserProfile onSignOut={onSignOut} />}
     </div>
