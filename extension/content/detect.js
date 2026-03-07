@@ -304,16 +304,23 @@
         const old = prev?.checkoutTotal?.amount;
         if (old === total.value && prev?.checkoutTotal?.url === location.href) return;
 
-        chrome.storage?.local?.set({
-          checkoutTotal: {
-            amount: total.value,
-            currency: total.currency,
-            raw: total.raw,
-            url: location.href,
-            host: location.hostname,
-            ts: Date.now(),
-          }
-        });
+        const checkoutObj = {
+          amount: total.value,
+          currency: total.currency,
+          raw: total.raw,
+          url: location.href,
+          host: location.hostname,
+          ts: Date.now(),
+        };
+        try {
+          chrome.storage?.local?.set({ checkoutTotal: checkoutObj }, () => {
+            try {
+              chrome.runtime.sendMessage({ type: 'checkoutCaptured', checkout: checkoutObj });
+            } catch (e) { /* ignore */ }
+          });
+        } catch (e) {
+          try { chrome.runtime.sendMessage({ type: 'checkoutCaptured', checkout: checkoutObj }); } catch (e) { }
+        }
       });
     } //end conditional storage of checkout total
 

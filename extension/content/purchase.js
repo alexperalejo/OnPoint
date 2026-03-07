@@ -56,7 +56,7 @@
   const PURCHASE_LINK_WINDOW_MS = 2 * 60 * 60 * 1000; // 2 hours
 
   const listenerFn = (msg, sender, sendResponse) => {
-    if (!msg || msg.type !== 'getPurchaseDetection') return true;
+    if (!msg || msg.type !== 'getPurchaseDetection') return; 
 
     const detection = runDetect(document);
     persistDebug(detection);
@@ -102,9 +102,14 @@
         };
 
         try {
-          chrome.storage?.local?.set({ purchaseCandidate: candidate });
+          chrome.storage?.local?.set({ purchaseCandidate: candidate }, () => {
+            try {
+              chrome.runtime.sendMessage({ type: 'purchaseDetected', purchase: candidate });
+            } catch (e) { /* ignore */ }
+          });
         } catch (e) {
           console.warn('Failed to persist purchaseCandidate', e);
+          try { chrome.runtime.sendMessage({ type: 'purchaseDetected', purchase: candidate }); } catch (e) { }
         }
       }
 

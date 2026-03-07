@@ -15,7 +15,13 @@
   "content_scripts": [
     {
       "matches": ["https://*/*", "http://*/*"],
-      "js": ["content/detect-core.js"],
+      "js": [
+        "content/detect-core.js",
+        "content/detect.js",
+        "content/purchase-detect-core.js",
+        "content/purchase.js",
+        "content/recommendation-ui.js"
+      ],
       "run_at": "document_idle"
     }
   ],
