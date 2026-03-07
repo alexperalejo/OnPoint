@@ -310,6 +310,124 @@ export default function Dashboard({ onSignOut }) {
               </div>
             </div>
           </section>
+
+          <section className="cards-panel savings-monthly-panel">
+            <header className="cards-header savings-monthly-header">
+              <div>
+                <h2 className="savings-title">Monthly Savings Analysis</h2>
+                <p className="savings-subtitle">Reward breakdown per card and category</p>
+              </div>
+
+              <select id="selectedSavingsMonth" className="savings-month-select" defaultValue="March 2026">
+                <option value="March 2026">March 2026</option>
+              </select>
+            </header>
+
+            <div className="savings-monthly-content">
+              <section className="savings-total-banner" aria-label="total-monthly-savings">
+                <div>
+                  <p className="savings-total-label">TOTAL SAVINGS FOR MARCH 2026</p>
+                  <p className="savings-total-value" id="monthlySavingsValue">
+                    $134.50
+                  </p>
+                </div>
+
+                <button className="savings-total-icon" type="button" aria-label="Monthly savings summary icon">
+                  💳
+                </button>
+              </section>
+
+              <div className="savings-two-col-layout">
+                <section className="savings-col-card">
+                  <p className="savings-col-title">Card Contributions</p>
+
+                  <div id="contributionList" className="savings-contribution-list">
+                    <article className="savings-contribution-item">
+                      <div className="savings-contribution-left">
+                        <div className="savings-item-icon" aria-hidden="true">
+                          💳
+                        </div>
+                        <div>
+                          <p className="savings-item-title">Sapphire Preferred</p>
+                          <p className="savings-item-subtitle">Chase</p>
+                        </div>
+                      </div>
+
+                      <div className="savings-contribution-right">
+                        <p className="savings-item-amount">+$54.50</p>
+                        <p className="savings-item-earned">Earned</p>
+                      </div>
+                    </article>
+
+                    <article className="savings-contribution-item">
+                      <div className="savings-contribution-left">
+                        <div className="savings-item-icon" aria-hidden="true">
+                          💳
+                        </div>
+                        <div>
+                          <p className="savings-item-title">Blue Cash Everyday</p>
+                          <p className="savings-item-subtitle">Amex</p>
+                        </div>
+                      </div>
+
+                      <div className="savings-contribution-right">
+                        <p className="savings-item-amount">+$45.00</p>
+                        <p className="savings-item-earned">Earned</p>
+                      </div>
+                    </article>
+
+                    <article className="savings-contribution-item">
+                      <div className="savings-contribution-left">
+                        <div className="savings-item-icon" aria-hidden="true">
+                          💳
+                        </div>
+                        <div>
+                          <p className="savings-item-title">Custom Cash</p>
+                          <p className="savings-item-subtitle">Citi</p>
+                        </div>
+                      </div>
+
+                      <div className="savings-contribution-right">
+                        <p className="savings-item-amount">+$35.00</p>
+                        <p className="savings-item-earned">Earned</p>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+
+                <section className="savings-col-card">
+                  <p className="savings-col-title">Category Breakdown</p>
+
+                  <div id="categoryBreakdownChart" className="savings-donut-placeholder" aria-label="donut-chart-placeholder">
+                    <div className="savings-donut-ring" />
+                  </div>
+
+                  <div id="categoryLegendList" className="savings-legend-list">
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot travel" />Travel</span>
+                      <span>$42.50</span>
+                    </div>
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot groceries" />Groceries</span>
+                      <span>$36.00</span>
+                    </div>
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot gas" />Gas</span>
+                      <span>$9.00</span>
+                    </div>
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot dining" />Dining</span>
+                      <span>$37.00</span>
+                    </div>
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot general" />General</span>
+                      <span>$10.00</span>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </section>
         </main>
       )}
 
