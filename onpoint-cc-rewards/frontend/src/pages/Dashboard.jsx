@@ -253,11 +253,62 @@ export default function Dashboard({ onSignOut }) {
         <main className="dash-main savings-main">
           <section className="savings-panel">
             <header className="savings-header">
-              <h2 className="savings-title">Savings Analysis</h2>
+              <h2 className="savings-title">Rewards Overview</h2>
               <p className="savings-subtitle">
                 See how much value you’re getting from your cards and where you could improve.
               </p>
             </header>
+
+            <div className="savings-overview-grid stats-grid" data-section="cashback-overview">
+              <div className="stat-card savings-stat-card" data-card="total-rewards">
+                <div className="savings-stat-head">
+                  <p className="stat-label">Total Rewards</p>
+                  <div className="stat-icon" aria-hidden="true">
+                    💵
+                  </div>
+                </div>
+                <p
+                  className="stat-value"
+                  id="totalCashbackValue"
+                  data-metric="total-cashback"
+                >
+                  $1,245.50
+                </p>
+                <p className="savings-helper-text">All-time rewards earned</p>
+              </div>
+
+              <div className="stat-card savings-stat-card" data-card="monthly-average">
+                <div className="savings-stat-head">
+                  <p className="stat-label">Monthly Average</p>
+                  <div className="stat-icon violet" aria-hidden="true">
+                    📅
+                  </div>
+                </div>
+                <p
+                  className="stat-value"
+                  id="monthlyAverageValue"
+                  data-metric="monthly-average"
+                >
+                  $103.79
+                </p>
+                <p className="savings-helper-text">Average per month</p>
+              </div>
+
+              <div className="stat-card savings-stat-card" data-card="top-card">
+                <div className="savings-stat-head">
+                  <p className="stat-label">Top Card</p>
+                  <div className="stat-icon success" aria-hidden="true">
+                    🏆
+                  </div>
+                </div>
+                <p className="stat-value" id="topCardValue" data-metric="top-card">
+                  Sapphire
+                </p>
+                <p className="savings-helper-text" id="topCardSubtext" data-metric="top-card-share">
+                  42% of total savings
+                </p>
+              </div>
+            </div>
           </section>
         </main>
       )}
