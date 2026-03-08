@@ -113,4 +113,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     })();
     return true;
   }
+
+  // Backwards-compatible handler for UI requests that use { action: 'getDetector', tabId }
+  if (message.action === 'getDetector') {
+    // Keep the message channel open for an async response
+    try {
+      const tabId = message.tabId;
+      const storageKey = `detector_${tabId}`;
+      // Read from storage and reply with the detector value (if any)
+      chrome.storage.local.get([storageKey], (res) => {
+        try {
+          const val = res && res[storageKey];
+          sendResponse({ detector: val || null });
+        } catch (e) {
+          // Best-effort: ensure we still respond
+          try { sendResponse({ detector: null }); } catch (er) { }
+        }
+      });
+      return true; // signal we'll call sendResponse asynchronously
+    } catch (e) {
+      try { sendResponse({ detector: null }); } catch (er) { }
+      return false;
+    }
+  }
 });
