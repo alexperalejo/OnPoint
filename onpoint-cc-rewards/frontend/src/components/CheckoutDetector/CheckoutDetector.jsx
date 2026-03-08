@@ -1,5 +1,4 @@
 /* global chrome */
-import { getCardImage } from "../../utils/cardImageMap"; // Utility to get card image URL based on imageKey
 import { useEffect, useState } from "react"; // React hooks for state and lifecycle
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation"; // Card recommendation component
 import { useChromeStorageSync } from "use-chrome-storage" // Custom hook to access chrome.storage.sync for saved cards
@@ -31,22 +30,6 @@ export function CheckoutDetector() {
     }
   }
 
-  // BACKEND API INTEGRATION PLACEHOLDER
-  // When checkout is detected, call backend like this:
-  // const fetchRecommendedCard = async (userCards, pageUrl) => {
-  //   const response = await fetch('/api/recommend-card', {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({
-  //       userCards: userCards,  // List of user's cards with their categories/tags
-  //       currentUrl: pageUrl,   // URL of checkout page
-  //       pageContent: detection // Detection results (optional)
-  //     })
-  //   });
-  //   return await response.json(); // Returns: { card: bestCard, savingsPercentage: X }
-  // };
-
-  // Dummy card for demonstration (will be replaced with backend response)
   const DUMMY_RECOMMENDED_CARD = {
     id: "1",
     name: "Chase Freedom Unlimited",
@@ -143,7 +126,6 @@ export function CheckoutDetector() {
           if (resp.detection.isCheckout) {
             console.log('Checkout detected on URL:', window.location.href);
             
-      /////////////////////////////////////////////////////////////////////
             // Call recommendations API with all cards
         const cardsArray = Array.isArray(savedCards)
           ? savedCards
@@ -159,7 +141,7 @@ export function CheckoutDetector() {
         const cardIds = cardsArray.map(c => c.id || c);
         
 
-        /////////////////////////////////////////////////
+
         console.log("[CARDS ARRAY]", cardsArray);
         console.log("[CARD IDS SENT]", cardIds);
 
@@ -171,7 +153,7 @@ export function CheckoutDetector() {
         });
 
         const body = await res.json();
-        /////////////////////////////////////////////////////////
+
         console.log("[API RESPONSE]", body);
         console.log("[CARDS ARRAY IDS]", cardsArray.map(c => String(c.id || c)));
         console.log("[RETURNED CARD ID]", String(body.card?.cardId));
@@ -190,8 +172,6 @@ export function CheckoutDetector() {
             setRecommendedCard(null);
             setShowRecommendation(false);
         }
-
-     ///////////////////////////////////////////////////////////////////
 
           }
         } else if (resp === null) {
