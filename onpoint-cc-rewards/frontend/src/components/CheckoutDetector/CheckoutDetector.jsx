@@ -260,6 +260,31 @@ export function CheckoutDetector() {
         </div>
       )}
 
+      <section
+        style={{
+          marginTop: '12px',
+          marginBottom: '12px',
+          padding: '12px',
+          borderRadius: '8px',
+          background: isDark ? '#1e293b' : '#f8fafc',
+          border: isDark ? '1px solid #334155' : '1px solid #e5e7eb'
+        }}
+      >
+        <h2
+          style={{
+            margin: '0 0 8px 0',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: isDark ? '#f0f9ff' : '#0f172a'
+          }}
+        >
+          Savings Estimate
+        </h2>
+        <p style={{ margin: 0, fontSize: '13px', color: isDark ? '#cbd5e1' : '#4b5563' }}>
+          Estimated Reward: <strong>{'-- points'}</strong>
+        </p>
+      </section>
+
       <button
         onClick={() => {
           // Open the main dashboard
