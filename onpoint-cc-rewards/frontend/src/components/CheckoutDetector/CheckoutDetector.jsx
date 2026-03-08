@@ -143,66 +143,55 @@ export function CheckoutDetector() {
           if (resp.detection.isCheckout) {
             console.log('Checkout detected on URL:', window.location.href);
             
-            // TODO: Call backend API with:
-            // 1. Current page URL
-            // 2. User's card list (from localStorage or props)
-            // 3. Get back the recommended card
-            
-            // For now, show dummy card immediately
-            /*fetch("http://localhost:3000/recommendations", {
-              method: 'POST',
-              body: JSON.stringify({
-                url: window.location.href,
-                cards: savedCards
-              })
-            }).then(response => response.json())
-              .then(body => {
-                //setRecommendedCard(savedCards.filter(c => c.id == body.card.cardId)[0]);
-                //setShowRecommendation(true);
-                if (resp.detection.isCheckout) {
-                  console.log("Checkout detected on URL:", tab.url);
+      /////////////////////////////////////////////////////////////////////
+            // Call recommendations API with all cards
+        const cardsArray = Array.isArray(savedCards)
+          ? savedCards
+          : Array.isArray(savedCards?.value)
+            ? savedCards.value
+            : [];
 
-                  // TEMP: bypass backend to test UI + images
-                  const card = savedCards?.[0];
+        if (!cardsArray.length) {
+          console.log("[CHECKOUT] No saved card IDs yet");
+          return;
+        }
 
-                  console.log(
-                    "[CARD IMAGE TEST]",
-                    card?.name,
-                    card?.imageKey,
-                    getCardImage(card?.imageKey)
-                  );
+        const cardIds = cardsArray.map(c => c.id || c);
+        
 
-                  setRecommendedCard(card || null);
-                  setShowRecommendation(!!card);
-                }
+        /////////////////////////////////////////////////
+        console.log("[CARDS ARRAY]", cardsArray);
+        console.log("[CARD IDS SENT]", cardIds);
 
-              }*/
-            // TEMP: bypass backend to test UI + images
-            console.log("[SAVED CARDS RAW]", savedCards);
 
-            //const card = savedCards?.[0];
-            const cardsArray = Array.isArray(savedCards)
-              ? savedCards
-              : Array.isArray(savedCards?.value)
-                ? savedCards.value
-                : [];
+        const res = await fetch('http://localhost:3000/api/recommendations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cards: cardIds, url: tab.url, amount: 1 })
+        });
 
-            const firstId = cardsArray[0];
+        const body = await res.json();
+        /////////////////////////////////////////////////////////
+        console.log("[API RESPONSE]", body);
+        console.log("[CARDS ARRAY IDS]", cardsArray.map(c => String(c.id || c)));
+        console.log("[RETURNED CARD ID]", String(body.card?.cardId));
 
-            if (!firstId) {
-              console.log("[CHECKOUT] No saved card IDs yet");
-              return;
-            }
+        const bestCard = cardsArray.find(c => String(c.id || c) === String(body.card?.cardId));
 
-            const res = await fetch(`http://localhost:3000/api/cards/${firstId}`);
-            const card = await res.json();
-
-            console.log("[CARD FROM API]", card);
-            console.log("[CARD IMAGE TEST]", card?.name, card?.imageKey, getCardImage(card?.imageKey));
-
-            setRecommendedCard(card);
+        // bestCard is just an ID string, fetch the full card object
+        if (bestCard) {
+            const cardRes = await fetch(`http://localhost:3000/api/cards/${bestCard}`);
+            const cardData = await cardRes.json();
+            console.log("[BEST CARD DATA]", cardData);
+            setRecommendedCard(cardData);
             setShowRecommendation(true);
+        } else {
+            console.log("[NO MATCH] Card not found in wallet");
+            setRecommendedCard(null);
+            setShowRecommendation(false);
+        }
 
+     ///////////////////////////////////////////////////////////////////
 
           }
         } else if (resp === null) {
