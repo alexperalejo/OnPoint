@@ -4,7 +4,7 @@ const https = require('https');
 const http = require('http');
 const { JSDOM } = require('jsdom');
 
-const detect = require(path.resolve(__dirname, '..', 'content', 'detect-core.js'));
+const detect = require(path.resolve(__dirname, '..', 'extension', 'content', 'detect-core.js'));
 
 const urls = [
   { name: 'Amazon checkout (example)', url: 'https://www.amazon.com/gp/buy/' },
@@ -39,9 +39,7 @@ async function analyzeUrl(obj) {
   try {
     const fetched = await fetchUrl(url);
     if (!fetched || !fetched.body) return { name, url, error: `Empty response (status ${fetched && fetched.status})` };
-    // Create a JSDOM with the fetched HTML. Note: dynamic JS-driven content (SPA) may not be fully rendered.
     const dom = new JSDOM(fetched.body, { runScripts: 'dangerously', resources: 'usable', url });
-    // give some time for resources to load (best-effort)
     await new Promise(r => setTimeout(r, 1200));
     const result = detect(dom.window.document);
     return { name, url, status: fetched.status, result };

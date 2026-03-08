@@ -1,0 +1,28 @@
+/* Styles for PurchaseVerification component - mirrors CheckoutDetector look */
+.purchase-verification {
+  width: 400px;
+  padding: 16px;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.pv-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.pv-icon { width: 18px; height: 18px; display:flex; align-items:center; justify-content:center; font-size:12px; }
+.pv-title { font-size: 16px; font-weight:700; margin:0; color: var(--title-color); }
+
+.pv-muted { color: var(--muted); }
+.pv-error { color: var(--error-text); padding: 10px; background: var(--error-bg); border-radius:4px; border: var(--error-border); }
+
+.pv-summary { margin-bottom: 12px; }
+.pv-summary p { margin-bottom: 8px; }
+.pv-summary p.small { margin-bottom: 4px; font-weight:500; color: var(--secondary); }
+
+.pv-cta { padding: 10px 14px; background: #3b82f6; color: white; border: none; border-radius:6px; cursor:pointer; font-weight:500; }
+.pv-cta:hover { background:#2563eb }
+.pv-secondary { margin-left:8px; padding:8px 12px; background:transparent; border:1px solid #e5e7eb; border-radius:6px; cursor:pointer; }
+
+.pv-actions { margin-top:12px; }
+.pv-footer { margin-top: 12px; font-size: 12px; color: var(--footer); }

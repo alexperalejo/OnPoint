@@ -1,6 +1,6 @@
 **OnPoint — Project Spec**
 
-Last updated: 2026-02-05
+Last updated: 2026-03-06
 
 Overview
 - **Purpose:** OnPoint is a browser-extension + web app project that detects checkout flows, recommends credit cards and rewards, and provides a dashboard and onboarding flow.
@@ -48,7 +48,11 @@ Data models & storage
 
 Tests & tooling
 - Backend tests exist under `onpoint-cc-rewards/backend-api/tests/` (e.g., `testCardService.js`).
-- Root-level `tests/` contains `run-tests.js` and `run-report.js` (integration/custom test runners).
+- Top-level `testScripts/` contains `run-tests.js` and `run-report.js` (integration/custom test runners):
+  - `run-tests.js`: jsdom-based assertions against `extension/test-pages` — fast local/CI checks.
+  - `run-report.js`: network scanner that fetches sites, runs detection, and emits `report.json` for ad-hoc sampling.
+- Playwright E2E tests live in `testScripts/playwright` and are configured in `playwright.config.js` (testDir: `testScripts/playwright`, outputDir: `testScripts/test-results`).
+- Root `package.json` provides convenience scripts: `test:e2e` (Playwright), `run-tests`, and `run-report`.
 
 Run / Dev notes (assumptions — verify before running)
 - Backend:
@@ -59,8 +63,8 @@ Run / Dev notes (assumptions — verify before running)
   - cd `onpoint-cc-rewards/frontend`
   - `npm install`
   - `npm run dev` (Vite) and `npm run build` for production
-- Extension / popup:
-  - The extension likely consumes built bundles from `extension/assets/` or `popup/dist`.
+-- Extension / popup:
+  - The extension consumes built bundles from `extension/dist/` (output of the frontend build).
   - Load `extension/manifest.json` as an unpacked extension in the browser for testing.
 
 Known gaps & assumptions
@@ -129,9 +133,6 @@ OnPoint/
 │  ├─ test-pages/
 │  │  ├─ checkout-sample.html
 │  │  └─ non-checkout.html
-│  ├─ tests/
-│  │  ├─ run-report.js
-│  │  └─ run-tests.js
 │  ├─ vite.svg
 │  └─ dist/                         (Vite build output)
 │     ├─ dashboard.html             (built)

@@ -1,0 +1,77 @@
+/* Styles for CheckoutDetector component - uses CSS variables for theme colors */
+.checkout-detector {
+  width: 400px;
+  padding: 16px;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.cd-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.cd-icon {
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.cd-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--title-color);
+}
+
+.cd-muted {
+  color: var(--muted);
+}
+
+.cd-error {
+  color: var(--error-text);
+  padding: 12px;
+  background: var(--error-bg);
+  border-radius: 4px;
+  border: var(--error-border);
+}
+
+.cd-summary { margin-bottom: 12px; }
+.cd-summary p { margin-bottom: 8px; }
+.cd-summary p.small { margin-bottom: 4px; font-weight: 500; color: var(--secondary); }
+
+.cd-cta {
+  width: 100%;
+  padding: 10px 16px;
+  margin-top: 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.cd-cta:hover { background: #2563eb; }
+
+.cd-refresh { margin-top: 12px; }
+.cd-refresh button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cd-footer { margin-top: 12px; font-size: 12px; color: var(--footer); }

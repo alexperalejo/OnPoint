@@ -3,6 +3,7 @@ import { getCardImage } from "../../utils/cardImageMap"; // Utility to get card 
 import { useEffect, useState } from "react"; // React hooks for state and lifecycle
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation"; // Card recommendation component
 import { useChromeStorageSync } from "use-chrome-storage" // Custom hook to access chrome.storage.sync for saved cards
+import './CheckoutDetector.css';
 
 export function CheckoutDetector() {
   const [savedCards] = useChromeStorageSync('cardinfo')
@@ -225,54 +226,39 @@ export function CheckoutDetector() {
   const isDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches || document.documentElement.classList.contains('dark');
   
   return (
-    <div style={{ 
-      width: '400px', 
-      padding: '16px', 
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      background: isDark ? '#0f172a' : '#ffffff',
-      color: isDark ? '#e2e8f0' : '#1f2937',
-      transition: 'background 0.3s ease, color 0.3s ease'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
-        <div style={{ 
-          width: '16px', 
-          height: '16px', 
-          background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-          borderRadius: '3px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '10px'
-        }}>
-          💳
-        </div>
-        <h1 style={{ fontSize: '16px', fontWeight: 'bold', margin: 0, color: isDark ? '#f0f9ff' : '#0f172a' }}>Checkout Detector</h1>
+    <div
+      className="checkout-detector"
+      style={{
+        '--bg': isDark ? '#0f172a' : '#ffffff',
+        '--text': isDark ? '#e2e8f0' : '#1f2937',
+        '--title-color': isDark ? '#f0f9ff' : '#0f172a',
+        '--muted': isDark ? '#94a3b8' : '#666',
+        '--secondary': isDark ? '#cbd5e1' : '#4b5563',
+        '--error-text': isDark ? '#fca5a5' : '#dc2626',
+        '--error-bg': isDark ? 'rgba(220, 38, 38, 0.1)' : '#fee',
+        '--error-border': isDark ? '1px solid rgba(220, 38, 38, 0.2)' : 'none',
+        '--footer': isDark ? '#64748b' : '#999'
+      }}
+    >
+      <div className="cd-header">
+        <div className="cd-icon">💳</div>
+        <h1 className="cd-title">Checkout Detector</h1>
       </div>
 
-      {loading && <p style={{ color: isDark ? '#94a3b8' : '#666' }}>Detecting...</p>}
+      {loading && <p className="cd-muted">Detecting...</p>}
       
       {error && (
-        <p style={{ 
-          color: isDark ? '#fca5a5' : '#dc2626', 
-          padding: '12px', 
-          background: isDark ? 'rgba(220, 38, 38, 0.1)' : '#fee', 
-          borderRadius: '4px',
-          border: isDark ? '1px solid rgba(220, 38, 38, 0.2)' : 'none'
-        }}>
+        <p className="cd-error">
           {error}
         </p>
       )}
 
       {detection && (
         <div>
-          <div style={{ marginBottom: '12px' }}>
-            <p style={{ marginBottom: '8px', color: isDark ? '#e2e8f0' : '#1f2937' }}>
-              Is checkout (detector): <strong>{detection.isCheckout ? 'Yes' : 'No'}</strong>
-            </p>
-            <p style={{ marginBottom: '8px', color: isDark ? '#e2e8f0' : '#1f2937' }}>Score: {detection.score.toFixed(2)}</p>
-            <p style={{ marginBottom: '4px', fontWeight: '500', color: isDark ? '#cbd5e1' : '#4b5563' }}>
-              Rationale hidden in UI. Check `lastDetectionDebug` in chrome.storage.local.
-            </p>
+          <div className="cd-summary">
+            <p>Is checkout (detector): <strong>{detection.isCheckout ? 'Yes' : 'No'}</strong></p>
+            <p>Score: {detection.score.toFixed(2)}</p>
+            <p className="small">Rationale hidden in UI. Check `lastDetectionDebug` in chrome.storage.local.</p>
           </div>
 
           {showRecommendation && recommendedCard && (
@@ -298,37 +284,18 @@ export function CheckoutDetector() {
             url: chrome.runtime.getURL('dist/dashboard.html') 
           });
         }}
-        style={{
-          width: '100%',
-          padding: '10px 16px',
-          marginTop: '16px',
-          background: '#3b82f6',
-          color: 'white',
-          border: 'none',
-          borderRadius: '6px',
-          fontWeight: '500',
-          cursor: 'pointer',
-          fontSize: '14px',
-          boxSizing: 'border-box'
-        }}
-        onMouseOver={(e) => e.target.style.background = '#2563eb'}
-        onMouseOut={(e) => e.target.style.background = '#3b82f6'}
+        className="cd-cta"
       >
         Get Card Recommendations
       </button>
 
-      <div style={{ marginTop: '12px' }}>
-        <button 
+      <div className="cd-refresh">
+        <button
           onClick={() => location.reload()}
           style={{
             background: isDark ? '#334155' : '#eee',
             color: isDark ? '#e2e8f0' : '#1f2937',
-            border: isDark ? '1px solid #475569' : 'none',
-            padding: '6px 12px',
-            borderRadius: '4px',
-            fontSize: '13px',
-            cursor: 'pointer',
-            transition: 'background 0.2s ease'
+            border: isDark ? '1px solid #475569' : 'none'
           }}
           onMouseOver={(e) => e.target.style.background = isDark ? '#475569' : '#ddd'}
           onMouseOut={(e) => e.target.style.background = isDark ? '#334155' : '#eee'}
@@ -337,7 +304,7 @@ export function CheckoutDetector() {
         </button>
       </div>
 
-      <footer style={{ marginTop: '12px', fontSize: '12px', color: isDark ? '#64748b' : '#999' }}>
+      <footer className="cd-footer">
         <div>Local-only detection · Manifest V3</div>
       </footer>
     </div>

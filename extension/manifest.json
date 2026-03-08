@@ -20,7 +20,7 @@
         "content/detect.js",
         "content/purchase-detect-core.js",
         "content/purchase.js",
-        "content/recommendation-ui.js"
+        "content/checkCardUsed.js"
       ],
       "run_at": "document_idle"
     }
