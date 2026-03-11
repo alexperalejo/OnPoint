@@ -1,5 +1,4 @@
 /* global chrome */
-import { getCardImage } from "../../utils/cardImageMap"; // Utility to get card image URL based on imageKey
 import { useEffect, useState } from "react"; // React hooks for state and lifecycle
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation"; // Card recommendation component
 import { useChromeStorageSync } from "use-chrome-storage" // Custom hook to access chrome.storage.sync for saved cards
@@ -32,22 +31,6 @@ export function CheckoutDetector() {
     }
   }
 
-  // BACKEND API INTEGRATION PLACEHOLDER
-  // When checkout is detected, call backend like this:
-  // const fetchRecommendedCard = async (userCards, pageUrl) => {
-  //   const response = await fetch('/api/recommend-card', {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({
-  //       userCards: userCards,  // List of user's cards with their categories/tags
-  //       currentUrl: pageUrl,   // URL of checkout page
-  //       pageContent: detection // Detection results (optional)
-  //     })
-  //   });
-  //   return await response.json(); // Returns: { card: bestCard, savingsPercentage: X }
-  // };
-
-  // Dummy card for demonstration (will be replaced with backend response)
   const DUMMY_RECOMMENDED_CARD = {
     id: "1",
     name: "Chase Freedom Unlimited",
@@ -144,66 +127,52 @@ export function CheckoutDetector() {
           if (resp.detection.isCheckout) {
             console.log('Checkout detected on URL:', window.location.href);
             
-            // TODO: Call backend API with:
-            // 1. Current page URL
-            // 2. User's card list (from localStorage or props)
-            // 3. Get back the recommended card
-            
-            // For now, show dummy card immediately
-            /*fetch("http://localhost:3000/recommendations", {
-              method: 'POST',
-              body: JSON.stringify({
-                url: window.location.href,
-                cards: savedCards
-              })
-            }).then(response => response.json())
-              .then(body => {
-                //setRecommendedCard(savedCards.filter(c => c.id == body.card.cardId)[0]);
-                //setShowRecommendation(true);
-                if (resp.detection.isCheckout) {
-                  console.log("Checkout detected on URL:", tab.url);
+            // Call recommendations API with all cards
+        const cardsArray = Array.isArray(savedCards)
+          ? savedCards
+          : Array.isArray(savedCards?.value)
+            ? savedCards.value
+            : [];
 
-                  // TEMP: bypass backend to test UI + images
-                  const card = savedCards?.[0];
+        if (!cardsArray.length) {
+          console.log("[CHECKOUT] No saved card IDs yet");
+          return;
+        }
 
-                  console.log(
-                    "[CARD IMAGE TEST]",
-                    card?.name,
-                    card?.imageKey,
-                    getCardImage(card?.imageKey)
-                  );
+        const cardIds = cardsArray.map(c => c.id || c);
+        
 
-                  setRecommendedCard(card || null);
-                  setShowRecommendation(!!card);
-                }
 
-              }*/
-            // TEMP: bypass backend to test UI + images
-            console.log("[SAVED CARDS RAW]", savedCards);
+        console.log("[CARDS ARRAY]", cardsArray);
+        console.log("[CARD IDS SENT]", cardIds);
 
-            //const card = savedCards?.[0];
-            const cardsArray = Array.isArray(savedCards)
-              ? savedCards
-              : Array.isArray(savedCards?.value)
-                ? savedCards.value
-                : [];
 
-            const firstId = cardsArray[0];
+        const res = await fetch('http://localhost:3000/api/recommendations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cards: cardIds, url: tab.url, amount: 1 })
+        });
 
-            if (!firstId) {
-              console.log("[CHECKOUT] No saved card IDs yet");
-              return;
-            }
+        const body = await res.json();
 
-            const res = await fetch(`http://localhost:3000/api/cards/${firstId}`);
-            const card = await res.json();
+        console.log("[API RESPONSE]", body);
+        console.log("[CARDS ARRAY IDS]", cardsArray.map(c => String(c.id || c)));
+        console.log("[RETURNED CARD ID]", String(body.card?.cardId));
 
-            console.log("[CARD FROM API]", card);
-            console.log("[CARD IMAGE TEST]", card?.name, card?.imageKey, getCardImage(card?.imageKey));
+        const bestCard = cardsArray.find(c => String(c.id || c) === String(body.card?.cardId));
 
-            setRecommendedCard(card);
+        // bestCard is just an ID string, fetch the full card object
+        if (bestCard) {
+            const cardRes = await fetch(`http://localhost:3000/api/cards/${bestCard}`);
+            const cardData = await cardRes.json();
+            console.log("[BEST CARD DATA]", cardData);
+            setRecommendedCard(cardData);
             setShowRecommendation(true);
-
+        } else {
+            console.log("[NO MATCH] Card not found in wallet");
+            setRecommendedCard(null);
+            setShowRecommendation(false);
+        }
 
           }
         } else if (resp === null) {
@@ -276,6 +245,31 @@ export function CheckoutDetector() {
 
         </div>
       )}
+
+      <section
+        style={{
+          marginTop: '12px',
+          marginBottom: '12px',
+          padding: '12px',
+          borderRadius: '8px',
+          background: isDark ? '#1e293b' : '#f8fafc',
+          border: isDark ? '1px solid #334155' : '1px solid #e5e7eb'
+        }}
+      >
+        <h2
+          style={{
+            margin: '0 0 8px 0',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: isDark ? '#f0f9ff' : '#0f172a'
+          }}
+        >
+          Savings Estimate
+        </h2>
+        <p style={{ margin: 0, fontSize: '13px', color: isDark ? '#cbd5e1' : '#4b5563' }}>
+          Estimated Reward: <strong>{'-- points'}</strong>
+        </p>
+      </section>
 
       <button
         onClick={() => {

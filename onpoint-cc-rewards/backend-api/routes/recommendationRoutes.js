@@ -23,6 +23,7 @@ const auth = require('../middleware/auth');
 const Merchant = require('../models/Merchant');
 const Card = require('../models/Card');
 
+
 // POST /api/recommendations
 router.post('/', async function(req, res) {
     if(!Array.isArray(req.body.cards)) {
@@ -38,10 +39,21 @@ router.post('/', async function(req, res) {
     let merchantTags = [];
     try {
         // Find merchant whose url_keywords match the url
-        const merchant = await Merchant.findOne({ url_keywords: req.body.url }).lean();
+        const hostname = (() => {
+            try { return new URL(req.body.url).hostname.replace('www.', ''); }
+            catch { return req.body.url; }
+        })();
+        const merchant = await Merchant.findOne({ 
+            url_keywords: { $in: [hostname] }
+        }).lean();
+        
+
         if(merchant && Array.isArray(merchant.tags)) {
             merchantTags = merchant.tags;
         }
+        console.log("Looking for url:", req.body.url);
+        console.log("Merchant found:", merchant);
+        console.log("Tags:", merchantTags);
     } catch (err) {
         console.error('Error querying Merchant:', err);
     }
@@ -79,12 +91,36 @@ router.post('/', async function(req, res) {
 
     // pick best: highest points
     const results = candidates.sort((a, b) => {
-        if(a.results.rewardPoints != b.results.rewardPoints) b.results.rewardPoints - a.results.rewardPoints;
-        return b.additionalInfo.annualFee - a.additionalInfo.annualFee;
+        if(a.results.rewardPoints != b.results.rewardPoints) 
+            return b.results.rewardPoints - a.results.rewardPoints; 
+        return a.additionalInfo.annualFee - b.additionalInfo.annualFee; // tiebreaker: lower annual fee wins
     }).map(a => {return a.results});
 
     const best = results[0] || null;
-    return res.json({ card: best, alternatives: results.slice(1,4) });
+
+/**
+ * Builds a human-readable string explaining why a particular card is the best recommendation
+ * @param {Object} best - The best card recommendation
+ * @param {Object[]} cardDocs - Array of card documents
+ * @returns {String} A human-readable string explaining why the card is the best recommendation
+ */
+    function buildReason(best, cardDocs) {
+    if (!best || best.rewardPoints === 0) return "No special rewards for this purchase.";
+    const card = cardDocs.find(c => String(c._id) === String(best.cardId));
+    const name = card?.name || "This card";
+    const parts = best.breakdown.map(b => {
+        const pct = Math.round(b.contribution * 100);
+        if (b.from === 'cashback') return `${pct}% base cashback`;
+        return `${pct}% from ${b.from} bonus`;
+    });
+    return `${name} earns ${best.rewardPoints} pts here: ${parts.join(', ')}.`;
+    }
+    
+    return res.json({ 
+    card: best, 
+    reason: buildReason(best, cardDocs),  // added reason field to explain why this card is the best recommendation
+    alternatives: results.slice(1, 4) 
+    });
 });
 
 module.exports = router;

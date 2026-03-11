@@ -101,6 +101,295 @@ html.dark .nav-item.is-active {
   gap: 1.25rem;
 }
 
+.savings-main {
+  gap: 1rem;
+}
+
+.savings-panel {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+}
+
+html.dark .savings-panel {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.savings-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.savings-title {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--text-primary);
+}
+
+.savings-subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.savings-overview-grid {
+  padding: 1.25rem;
+}
+
+.savings-stat-card {
+  min-height: 170px;
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.savings-stat-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.savings-stat-head .stat-label {
+  margin: 0.35rem 0 0;
+}
+
+.savings-helper-text {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.savings-monthly-header {
+  align-items: flex-start;
+}
+
+.savings-monthly-header .savings-title {
+  margin-bottom: 0.35rem;
+}
+
+.savings-month-select {
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: 0.65rem;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.savings-month-select:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.savings-monthly-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.savings-total-banner {
+  background: rgba(96, 165, 250, 0.16);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.95rem;
+  padding: 1rem 1.15rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.savings-total-label {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.savings-total-value {
+  margin: 0.25rem 0 0;
+  color: var(--accent-blue-hover);
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.savings-total-icon {
+  width: 42px;
+  height: 42px;
+  border: none;
+  padding: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  text-align: center;
+}
+
+html.dark .savings-total-icon {
+  background: rgba(15, 23, 42, 0.55);
+  color: #bfdbfe;
+}
+
+.savings-two-col-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.savings-col-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.95rem;
+  padding: 1rem;
+}
+
+.savings-col-title {
+  margin: 0 0 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.savings-contribution-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.savings-contribution-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+.savings-contribution-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.savings-item-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.2);
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+}
+
+.savings-item-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.savings-item-subtitle {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.savings-contribution-right {
+  text-align: right;
+}
+
+.savings-item-amount {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #16a34a;
+  font-weight: 800;
+}
+
+html.dark .savings-item-amount {
+  color: #4ade80;
+}
+
+.savings-item-earned {
+  margin: 0.15rem 0 0;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.savings-donut-placeholder {
+  height: 190px;
+  border: 1px solid var(--border-color);
+  border-radius: 0.85rem;
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.savings-donut-ring {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #2563eb 0deg 115deg,
+    #3b82f6 115deg 205deg,
+    #60a5fa 205deg 230deg,
+    #22d3ee 230deg 330deg,
+    #cbd5e1 330deg 360deg
+  );
+  position: relative;
+}
+
+.savings-donut-ring::after {
+  content: "";
+  position: absolute;
+  inset: 24px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+}
+
+.savings-legend-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 0.8rem;
+}
+
+.savings-legend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+
+.savings-legend-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+}
+
+.savings-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.savings-dot.travel { background: #2563eb; }
+.savings-dot.groceries { background: #3b82f6; }
+.savings-dot.gas { background: #60a5fa; }
+.savings-dot.dining { background: #22d3ee; }
+.savings-dot.general { background: #cbd5e1; }
+
 /* =========================
    STATS
    ========================= */
@@ -461,6 +750,22 @@ html.dark .remove-card-btn:hover {
   }
 
   .user-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .savings-monthly-header {
+    gap: 0.75rem;
+  }
+
+  .savings-month-select {
+    width: 100%;
+  }
+
+  .savings-two-col-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .savings-legend-list {
     grid-template-columns: 1fr;
   }
 }

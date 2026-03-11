@@ -12,7 +12,7 @@ export default function Dashboard({ onSignOut }) {
   useDarkMode();
 
   const [storedCards, setStoredCards] = useChromeStorageSync("cardinfo", []);
-  const [currentView, setCurrentView] = useState("dashboard"); // dashboard | library | profile
+  const [currentView, setCurrentView] = useState("dashboard"); // dashboard | library | savings | profile
   const [userCards, setUserCards] = useState([]);
 
   useEffect(() => {
@@ -118,6 +118,12 @@ export default function Dashboard({ onSignOut }) {
           onClick={() => setCurrentView("library")}
         >
           Card Library
+        </button>
+        <button
+          className={`nav-item ${currentView === "savings" ? "is-active" : ""}`}
+          onClick={() => setCurrentView("savings")}
+        >
+          Savings Analysis
         </button>
         <button
           className={`nav-item ${currentView === "profile" ? "is-active" : ""}`}
@@ -242,6 +248,188 @@ export default function Dashboard({ onSignOut }) {
       )}
 
       {currentView === "library" && <CardLibrary userCards={userCards} addCard={addCard} />}
+
+      {currentView === "savings" && (
+        <main className="dash-main savings-main">
+          <section className="savings-panel">
+            <header className="savings-header">
+              <h2 className="savings-title">Rewards Overview</h2>
+              <p className="savings-subtitle">
+                See how much value you’re getting from your cards and where you could improve.
+              </p>
+            </header>
+
+            <div className="savings-overview-grid stats-grid" data-section="cashback-overview">
+              <div className="stat-card savings-stat-card" data-card="total-rewards">
+                <div className="savings-stat-head">
+                  <p className="stat-label">Total Rewards</p>
+                  <div className="stat-icon" aria-hidden="true">
+                    💵
+                  </div>
+                </div>
+                <p
+                  className="stat-value"
+                  id="totalCashbackValue"
+                  data-metric="total-cashback"
+                >
+                  $1,245.50
+                </p>
+                <p className="savings-helper-text">All-time rewards earned</p>
+              </div>
+
+              <div className="stat-card savings-stat-card" data-card="monthly-average">
+                <div className="savings-stat-head">
+                  <p className="stat-label">Monthly Average</p>
+                  <div className="stat-icon violet" aria-hidden="true">
+                    📅
+                  </div>
+                </div>
+                <p
+                  className="stat-value"
+                  id="monthlyAverageValue"
+                  data-metric="monthly-average"
+                >
+                  $103.79
+                </p>
+                <p className="savings-helper-text">Average per month</p>
+              </div>
+
+              <div className="stat-card savings-stat-card" data-card="top-card">
+                <div className="savings-stat-head">
+                  <p className="stat-label">Top Card</p>
+                  <div className="stat-icon success" aria-hidden="true">
+                    🏆
+                  </div>
+                </div>
+                <p className="stat-value" id="topCardValue" data-metric="top-card">
+                  Sapphire
+                </p>
+                <p className="savings-helper-text" id="topCardSubtext" data-metric="top-card-share">
+                  42% of total savings
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="cards-panel savings-monthly-panel">
+            <header className="cards-header savings-monthly-header">
+              <div>
+                <h2 className="savings-title">Monthly Savings Analysis</h2>
+                <p className="savings-subtitle">Reward breakdown per card and category</p>
+              </div>
+
+              <select id="selectedSavingsMonth" className="savings-month-select" defaultValue="March 2026">
+                <option value="March 2026">March 2026</option>
+              </select>
+            </header>
+
+            <div className="savings-monthly-content">
+              <section className="savings-total-banner" aria-label="total-monthly-savings">
+                <div>
+                  <p className="savings-total-label">TOTAL SAVINGS FOR MARCH 2026</p>
+                  <p className="savings-total-value" id="monthlySavingsValue">
+                    $134.50
+                  </p>
+                </div>
+
+                <button className="savings-total-icon" type="button" aria-label="Monthly savings summary icon">
+                  💳
+                </button>
+              </section>
+
+              <div className="savings-two-col-layout">
+                <section className="savings-col-card">
+                  <p className="savings-col-title">Card Contributions</p>
+
+                  <div id="contributionList" className="savings-contribution-list">
+                    <article className="savings-contribution-item">
+                      <div className="savings-contribution-left">
+                        <div className="savings-item-icon" aria-hidden="true">
+                          💳
+                        </div>
+                        <div>
+                          <p className="savings-item-title">Sapphire Preferred</p>
+                          <p className="savings-item-subtitle">Chase</p>
+                        </div>
+                      </div>
+
+                      <div className="savings-contribution-right">
+                        <p className="savings-item-amount">+$54.50</p>
+                        <p className="savings-item-earned">Earned</p>
+                      </div>
+                    </article>
+
+                    <article className="savings-contribution-item">
+                      <div className="savings-contribution-left">
+                        <div className="savings-item-icon" aria-hidden="true">
+                          💳
+                        </div>
+                        <div>
+                          <p className="savings-item-title">Blue Cash Everyday</p>
+                          <p className="savings-item-subtitle">Amex</p>
+                        </div>
+                      </div>
+
+                      <div className="savings-contribution-right">
+                        <p className="savings-item-amount">+$45.00</p>
+                        <p className="savings-item-earned">Earned</p>
+                      </div>
+                    </article>
+
+                    <article className="savings-contribution-item">
+                      <div className="savings-contribution-left">
+                        <div className="savings-item-icon" aria-hidden="true">
+                          💳
+                        </div>
+                        <div>
+                          <p className="savings-item-title">Custom Cash</p>
+                          <p className="savings-item-subtitle">Citi</p>
+                        </div>
+                      </div>
+
+                      <div className="savings-contribution-right">
+                        <p className="savings-item-amount">+$35.00</p>
+                        <p className="savings-item-earned">Earned</p>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+
+                <section className="savings-col-card">
+                  <p className="savings-col-title">Category Breakdown</p>
+
+                  <div id="categoryBreakdownChart" className="savings-donut-placeholder" aria-label="donut-chart-placeholder">
+                    <div className="savings-donut-ring" />
+                  </div>
+
+                  <div id="categoryLegendList" className="savings-legend-list">
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot travel" />Travel</span>
+                      <span>$42.50</span>
+                    </div>
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot groceries" />Groceries</span>
+                      <span>$36.00</span>
+                    </div>
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot gas" />Gas</span>
+                      <span>$9.00</span>
+                    </div>
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot dining" />Dining</span>
+                      <span>$37.00</span>
+                    </div>
+                    <div className="savings-legend-item">
+                      <span className="savings-legend-left"><span className="savings-dot general" />General</span>
+                      <span>$10.00</span>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </section>
+        </main>
+      )}
 
       {currentView === "profile" && <UserProfile onSignOut={onSignOut} />}
     </div>

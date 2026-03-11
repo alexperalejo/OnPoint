@@ -252,10 +252,12 @@
         lastUrl = currentUrl;
         if (changed) {
           persistDetection(lastDetection);
-          // helpful page-visible log for manual QA
           try { console.info('checkout-detection:update', lastDetection); } catch (e) { }
+          
+          if (newDet.isCheckout && newDet.score >= 0.7) {
+            chrome.runtime.sendMessage({ type: "checkoutDetected" });
+          }
         } else {
-          // still persist to keep capturedAt fresh even if detection unchanged
           persistDetection(lastDetection);
         }
       } catch (e) {
