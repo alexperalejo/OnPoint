@@ -3,8 +3,8 @@
   "name": "On Point - Credit Card Rewards",
   "version": "0.1.1",
   "description": "Helps you maximize your credit card rewards by detecting checkout pages and providing relevant information.",
-  "permissions": ["storage", "scripting", "activeTab"],
-  "host_permissions": ["https://*/*", "http://*/*"],
+  "permissions": ["storage", "scripting", "activeTab", "tabs","cookies", "notifications"],
+  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
   },
@@ -14,7 +14,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*/*", "http://*/*"],
+      "matches": ["<all_urls>"],
       "js": [
         "content/detect-core.js",
         "content/detect.js",

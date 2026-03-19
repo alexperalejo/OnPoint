@@ -1,6 +1,8 @@
 {
   "dependencies": {
-    "jsdom": "^27.0.1"
+    "jsdom": "^27.0.1",
+    "markdown-it": "^14.1.1",
+    "puppeteer": "^24.39.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.35.0",

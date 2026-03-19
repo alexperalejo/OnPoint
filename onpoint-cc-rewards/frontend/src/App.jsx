@@ -28,72 +28,40 @@ export default function App() {
   const [stage, setStage] = useState(startStage); // landing | onboarding | dashboard | extension-detector
   const [authMode, setAuthMode] = useState('signup');
   useDarkMode(); // Hook applies dark mode side effects
-  const [detectorType, setDetectorType] = useState(null); // 'checkout' | 'purchase' | null
+  const [detectorType] = useState(null); // 'checkout' | 'purchase' | null
 
   useEffect(() => {
-    // Only run detection check when showing the extension detector UI
-    if (stage !== 'extension-detector' || typeof chrome === 'undefined') return;
+  if (stage !== 'extension-detector' || detectorType !== 'purchase' || typeof chrome === 'undefined') return;
+  let mounted = true;
 
-    let mounted = true;
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!mounted) return;
+    const tab = tabs && tabs[0];
+    if (!tab) return;
+    const tabId = tab.id;
 
-    (async function detectForActiveTab() {
-      try {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          if (!mounted) return;
-          if (!tabs || !tabs[0]) {
-            setDetectorType('checkout');
-            return;
-          }
-          const tabId = tabs[0].id;
-          const storageKey = `detector_${tabId}`;
+    chrome.storage.local.get(['purchaseCandidate'], (data) => {
+      const candidate = data?.purchaseCandidate || null;
+      const uiMsg = { type: 'showRecommendation', candidate, recommendation: candidate?.recommendation || null };
 
-          chrome.storage.local.get([storageKey], (res) => {
-            if (!mounted) return;
-
-            // Check for async runtime errors first
-            if (chrome.runtime.lastError) {
-              console.warn('chrome.storage.local.get failed:', chrome.runtime.lastError);
-              // Try asking the background script if storage failed
-              chrome.runtime.sendMessage({ action: 'getDetector', tabId }, (resp) => {
-                if (!mounted) return;
-                if (chrome.runtime.lastError) {
-                  console.warn('chrome.runtime.sendMessage failed:', chrome.runtime.lastError);
-                  setDetectorType('checkout');
-                  return;
-                }
-                const d = resp && resp.detector;
-                setDetectorType(d === 'purchase' ? 'purchase' : 'checkout');
-              });
-              return;
+      chrome.tabs.sendMessage(tabId, uiMsg, () => {
+        if (!chrome.runtime.lastError) return;
+        // If no listener, inject UI content script then retry
+        if (chrome.scripting && typeof chrome.scripting.executeScript === 'function') {
+          chrome.scripting.executeScript(
+            { target: { tabId }, files: ['content/checkCardUsed.js'] },
+            () => {
+              if (chrome.runtime.lastError) return;
+              try { chrome.tabs.sendMessage(tabId, uiMsg); } catch{ /* ignore */ }
             }
+          );
+        }
+      });
+    });
+  });
+  return () => { mounted = false; };
+}, [stage, detectorType]);
 
-            const val = res && res[storageKey];
-            if (val === 'purchase' || val === 'checkout') {
-              setDetectorType(val);
-              return;
-            }
-
-            // Ask background as a fallback
-            chrome.runtime.sendMessage({ action: 'getDetector', tabId }, (resp) => {
-              if (!mounted) return;
-              if (chrome.runtime.lastError) {
-                console.warn('chrome.runtime.sendMessage failed:', chrome.runtime.lastError);
-                setDetectorType('checkout');
-                return;
-              }
-              const d = resp && resp.detector;
-              setDetectorType(d === 'purchase' ? 'purchase' : 'checkout');
-            });
-          });
-        });
-      } catch {
-        setDetectorType('checkout');
-      }
-    })();
-
-    return () => { mounted = false; };
-  }, [stage]);
-  
   // In extension mode, decide which detector UI to show
   if (stage === 'extension-detector') {
     // while unknown, show a compact wrapper
