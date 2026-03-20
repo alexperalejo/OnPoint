@@ -241,10 +241,8 @@ export default function Dashboard({ onSignOut }) {
         <main className="dash-main savings-main">
           <section className="savings-panel">
             <header className="savings-header">
-              <h2 className="savings-title">Rewards Overview</h2>
-              <p className="savings-subtitle">
-                See how much value you’re getting from your cards and where you could improve.
-              </p>
+              <h2 className="savings-title">{translate("savings.title")}</h2>
+              <p className="savings-subtitle">{translate("savings.subtitle")}</p>
             </header>
 
             <div className="savings-overview-grid stats-grid" data-section="cashback-overview">

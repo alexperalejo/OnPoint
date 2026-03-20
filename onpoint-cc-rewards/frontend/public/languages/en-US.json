@@ -26,6 +26,9 @@
     "card-library.filter.cashback":"Cashback",
     "card-library.filter.travel":"Travel",
     
+    "savings.title": "Rewards Overview",
+    "savings.subtitle": "See how much value you're getting from your cards and where you could improve.",
+
     "card-display.annual-fee":"Annual Fee",
     "card-display.rewards":"Rewards:",
     "card-display.extra-rewards":"+{count} more",
