@@ -1,0 +1,11 @@
+{
+    "card-library.title": "Card Library",
+    "card-library.subtitle":"Browse popular credit cards and add them to your wallet. Each card's rewards structure is pre-configured so you can immediately start getting recommendations.",
+    "card-library.search-cards-placeholder":"Search cards by name or issuer...",
+    "card-library.filter.all":"All",
+    "card-library.filter.cashback":"Cashback",
+    "card-library.filter.travel":"Torvel",
+    "card-library.annual-fee":"Annual Fee",
+    "card-library.rewards":"Rewards:",
+    "card-library.card-already-added": "Already Added"
+}

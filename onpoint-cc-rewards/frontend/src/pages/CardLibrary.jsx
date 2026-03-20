@@ -1,8 +1,8 @@
 import { getCardImage } from '../utils/cardImageMap';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './CardLibrary.css';
 import { useDarkMode } from '../hooks/useDarkMode';
-
+import { useTranslation } from '../utils/translation';
 
 const POPULAR_CARDS = [
   {
@@ -134,6 +134,8 @@ export default function CardLibrary({ userCards = [], addCard }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [availableCards, setAvailableCards] = useState(POPULAR_CARDS);
   const [filterType, setFilterType] = useState('all');
+  const translate = useTranslation();
+
 
   useEffect(() => {
     fetch("http://localhost:3000/api/cards").then(r => r.json())
@@ -154,6 +156,8 @@ export default function CardLibrary({ userCards = [], addCard }) {
       }))
     });
   }, []);
+
+  useCallback()
 
 
   const isCardAdded = (cardName) => {
@@ -183,11 +187,8 @@ export default function CardLibrary({ userCards = [], addCard }) {
   return (
     <div className="card-library-shell">
       <div className="library-header">
-        <h2 className="library-title">Card Library</h2>
-        <p className="library-subtitle">
-          Browse popular credit cards and add them to your wallet. Each card's rewards structure is
-          pre-configured so you can immediately start getting recommendations.
-        </p>
+        <h2 className="library-title">{translate("card-library.title")}</h2>
+        <p className="library-subtitle">{translate("card-library.subtitle")}</p>
       </div>
 
       <div className="library-controls">
@@ -195,7 +196,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
           <span className="search-icon">🔍</span>
           <input
             type="text"
-            placeholder="Search cards by name or issuer..."
+            placeholder={translate('card-library.search-cards-placeholder')} //Search cards by name or issuer...
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -205,19 +206,19 @@ export default function CardLibrary({ userCards = [], addCard }) {
             className={`filter-pill ${filterType === 'all' ? 'active' : ''}`}
             onClick={() => setFilterType('all')}
           >
-            All
+            {translate("card-library.filter.all")}
           </button>
           <button
             className={`filter-pill ${filterType === 'cashback' ? 'active' : ''}`}
             onClick={() => setFilterType('cashback')}
           >
-            Cashback
+            {translate("card-library.filter.cashback")}
           </button>
           <button
             className={`filter-pill ${filterType === 'travel' ? 'active' : ''}`}
             onClick={() => setFilterType('travel')}
           >
-            Travel
+            {translate("card-library.filter.travel")}
           </button>
         </div>
       </div>
@@ -236,23 +237,23 @@ export default function CardLibrary({ userCards = [], addCard }) {
 
             <div className="card-details">
               <div className="card-meta">
-                <span className="meta-label">Annual Fee</span>
+                <span className="meta-label">{translate("card-library.annual-fee")}</span>
                 <span className={`meta-value ${card.annualFee === 0 ? 'free' : ''}`}>
-                  ${card.annualFee}
+                  {card.annualFee}
                 </span>
               </div>
               <div className="card-rewards">
-                <p className="rewards-label">Rewards:</p>
+                <p className="rewards-label">{translate("card-library.rewards")}</p>
                 <ul className="rewards-list">
                   {card.rewards.slice(0, 3).map((reward, i) => (
-                    <li key={i}>{reward.category}: {reward.rate}%</li>
+                    <li key={i}>{translate("card.category."+reward.category)}: {reward.rate}%</li>
                   ))}
                   {card.rewards.length > 3 && <li>+{card.rewards.length - 3} more</li>}
                 </ul>
               </div>
               {isCardAdded(card.name) ? (
                 <button className="add-card-btn added" disabled>
-                  Already Added
+                  {translate("card-library.card-already-added")}
                 </button>
               ) : (
                 <button
