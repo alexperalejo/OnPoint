@@ -4,7 +4,7 @@ import "./Dashboard.css";
 import CardLibrary from "./CardLibrary.jsx";
 import UserProfile from "./UserProfile.jsx";
 import { useChromeStorageSync } from "use-chrome-storage";
-
+import { useSearchParams } from "react-router-dom"
 import { useDarkMode } from "../hooks/useDarkMode";
 import { useTranslation } from "../utils/translation.js";
 
@@ -12,10 +12,17 @@ export default function Dashboard({ onSignOut }) {
   // ✅ system-following dark mode (adds/removes "dark" on <html>)
   useDarkMode();
 
+  var searchParams = new URLSearchParams(window.location.search);
+
   const [storedCards, setStoredCards] = useChromeStorageSync("cardinfo", []);
-  const [currentView, setCurrentView] = useState("dashboard"); // dashboard | library | savings | profile
+  const [currentView, setCurrentView] = useState(searchParams.get("view") || "dashboard"); // dashboard | library | savings | profile
   const [userCards, setUserCards] = useState([]);
   const translate = useTranslation();
+
+  useEffect(() => {
+    searchParams.set("view", currentView);
+    window.history.pushState({}, "", window.location.pathname.split('?', 2)[0] + "?" + searchParams.toString());
+  }, [currentView]);
 
   useEffect(() => {
     console.log("using cards", storedCards);
