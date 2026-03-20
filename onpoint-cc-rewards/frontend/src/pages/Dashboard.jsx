@@ -141,7 +141,7 @@ export default function Dashboard({ onSignOut }) {
             <div className="stat-card">
               <div className="stat-icon">💳</div>
               <div>
-                <p className="stat-label">Total Cards</p>
+                <p className="stat-label">{translate("dashboard.stats.total-cards")}</p>
                 <p className="stat-value">{userCards.length}</p>
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function Dashboard({ onSignOut }) {
             <div className="stat-card">
               <div className="stat-icon violet">💲</div>
               <div>
-                <p className="stat-label">Annual Fees</p>
+                <p className="stat-label">{translate("dashboard.stats.annual-fees")}</p>
                 <p className="stat-value">${totalAnnualFees}</p>
               </div>
             </div>
@@ -159,13 +159,9 @@ export default function Dashboard({ onSignOut }) {
             <div className="tip-left">
               <div className="tip-icon">🏅</div>
               <div>
-                <p className="tip-title">Smart Tip</p>
+                <p className="tip-title">{translate("dashboard.tip.title")}</p>
                 <p className="tip-text">
-                  {userCards.length === 0
-                    ? "Visit the Card Library to add your first credit card and start getting personalized recommendations!"
-                    : userCards.length === 1
-                    ? "Great start! Add more cards from the Card Library to maximize rewards across different categories."
-                    : "Great wallet! Use the Card Library to discover new cards that complement your spending."}
+                  { translate("dashboard.tip." + Math.min(userCards.length, 2)) }
                 </p>
               </div>
             </div>
@@ -173,16 +169,14 @@ export default function Dashboard({ onSignOut }) {
 
           <section className="cards-panel">
             <header className="cards-header">
-              <p className="panel-title">Your Cards</p>
+              <p className="panel-title">{translate("dashboard.card-list.title")}</p>
             </header>
 
             {userCards.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">💳</div>
-                <p className="empty-title">No Cards Yet</p>
-                <p className="empty-text">
-                  Visit the Card Library tab to browse and add credit cards to your wallet.
-                </p>
+                <p className="empty-title">{translate("dashboard.card-list.empty-title")}</p>
+                <p className="empty-text">{translate("dashboard.card-list.empty-text")}</p>
               </div>
             ) : (
               <div className="user-cards-grid">
@@ -206,18 +200,18 @@ export default function Dashboard({ onSignOut }) {
 
                     <div className="user-card-info">
                       <div className="user-card-meta">
-                        <span>Annual Fee:</span>
+                        <span>{translate("card-display.annual-fee")}</span>
                         <span className={card.annualFee === 0 ? "free" : ""}>
                           ${card.annualFee}
                         </span>
                       </div>
 
                       <div className="user-card-rewards">
-                        <p className="rewards-heading">Reward Categories</p>
+                        <p className="rewards-heading">{translate("card-display.rewards")}</p>
                         <ul>
                           {card.rewards.slice(0, 3).map((r, i) => (
                             <li key={i}>
-                              {r.category}: {r.rate}%
+                              {translate("card.category."+r.category)}: {r.rate}%
                             </li>
                           ))}
                         </ul>
@@ -238,7 +232,7 @@ export default function Dashboard({ onSignOut }) {
                           );
                         }}
                       >
-                        Remove Card
+                        {translate("card-display.remove-from-wallet")}
                       </button>
                     </div>
                   </div>

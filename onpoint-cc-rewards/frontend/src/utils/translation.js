@@ -18,11 +18,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }  
 });
 
+/**
+ * Returns a translator function.
+ * @param {object} translation the locale
+ * @param {string} key the key
+ * @param {object?} values value fill
+ */
 function translate(translation, key, values){
     var message = translation[key] ||= key;
     if(values)
     {
-        for (const [k, v] of values.entries()) {
+        for (const [k, v] of Object.entries(values)) {
             message = message.replace(`{${k}}`, v);
         }
     }
@@ -31,13 +37,22 @@ function translate(translation, key, values){
 /**
  * Returns a translator function.
  * @param {string?} prefix prefix to all translation keys
+ * @param {string} key prefix to all translation keys
+ */
+function combineKey(prefix, key){
+    if(prefix && prefix != null)
+    {
+        if(key.startsWith('.')){
+            key = prefix+key;
+        }
+    }
+    return key;
+}
+/**
+ * Returns a translator function.
+ * @param {string?} prefix prefix to all translation keys
  * @return {(key: string, values: object?) => string} translation function.
  */
 export function useTranslation(prefix){
-    if(prefix && prefix !== ""){
-        prefix = prefix + ".";
-        return useCallback((s, v = {}) => translate(prefix+translation, s, v), [translation]);
-    } else{
-        return useCallback((s, v = {}) => translate(translation, s, v), [translation]);
-    }
+    return useCallback((s, v = {}) => translate(translation, combineKey(prefix,s), v), [translation]);
 }

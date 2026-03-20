@@ -6,14 +6,26 @@
     "main.nav.savings-analysis": "Savings Analysis",
     "main.nav.profile": "Profile",
 
+    "dashboard.stats.total-cards": "Total Cards",
+    "dashboard.stats.annual-fees": "Annual Fees",
+    "dashboard.tip.title": "Smart Tip",
+    "dashboard.tip.tip.0": "Visit the Card Library to add your first credit card and start getting personalized recommendations!",
+    "dashboard.tip.tip.1": "Great start! Add more cards from the Card Library to maximize rewards across different categories.",
+    "dashboard.tip.tip.2": "Great wallet! Use the Card Library to discover new cards that complement your spending.",
+    "dashboard.card-list.title": "Your Cards",
+    "dashboard.card-list.empty-title": "No Cards Yet",
+    "dashboard.card-list.empty-text": "Visit the Card Library tab to browse and add credit cards to your wallet.",
+
     "card-library.title": "Card Library",
     "card-library.subtitle":"Browse popular credit cards and add them to your wallet. Each card's rewards structure is pre-configured so you can immediately start getting recommendations.",
     "card-library.search-cards-placeholder":"Search cards by name or issuer...",
     "card-library.filter.all":"All",
     "card-library.filter.cashback":"Cashback",
     "card-library.filter.travel":"Travel",
-    "card-library.annual-fee":"Annual Fee",
-    "card-library.rewards":"Rewards:",
-    "card-library.card-already-added": "Already Added",
-    "card-library.add-to-wallet": "Add to Wallet"
+    
+    "card-display.annual-fee":"Annual Fee",
+    "card-display.rewards":"Rewards:",
+    "card-display.card-already-added": "Already Added",
+    "card-display.add-to-wallet": "Add to Wallet",
+    "card-display.remove-from-wallet": "Add to Wallet"
 }
