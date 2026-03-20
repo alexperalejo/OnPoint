@@ -6,6 +6,7 @@ import UserProfile from "./UserProfile.jsx";
 import { useChromeStorageSync } from "use-chrome-storage";
 
 import { useDarkMode } from "../hooks/useDarkMode";
+import { useTranslation } from "../utils/translation.js";
 
 export default function Dashboard({ onSignOut }) {
   // ✅ system-following dark mode (adds/removes "dark" on <html>)
@@ -14,6 +15,7 @@ export default function Dashboard({ onSignOut }) {
   const [storedCards, setStoredCards] = useChromeStorageSync("cardinfo", []);
   const [currentView, setCurrentView] = useState("dashboard"); // dashboard | library | savings | profile
   const [userCards, setUserCards] = useState([]);
+  const translate = useTranslation();
 
   useEffect(() => {
     console.log("using cards", storedCards);
@@ -100,8 +102,8 @@ export default function Dashboard({ onSignOut }) {
         <div className="brand">
           <span className="brand-icon">▦</span>
           <div>
-            <p className="brand-name">OnPoint</p>
-            <p className="brand-tag">Maximize Your Rewards</p>
+            <p className="brand-name">{translate("main.brand-name")}</p>
+            <p className="brand-tag">{translate("main.brand-tag")}</p>
           </div>
         </div>
       </header>
@@ -111,25 +113,25 @@ export default function Dashboard({ onSignOut }) {
           className={`nav-item ${currentView === "dashboard" ? "is-active" : ""}`}
           onClick={() => setCurrentView("dashboard")}
         >
-          Dashboard
+          {translate("main.nav.dashboard")}
         </button>
         <button
           className={`nav-item ${currentView === "library" ? "is-active" : ""}`}
           onClick={() => setCurrentView("library")}
         >
-          Card Library
+          {translate("main.nav.card-library")}
         </button>
         <button
-          className={`nav-item ${currentView === "savings" ? "is-active" : ""}`}
+          className={`dashboard.nav.nav-item ${currentView === "savings" ? "is-active" : ""}`}
           onClick={() => setCurrentView("savings")}
         >
-          Savings Analysis
+          {translate("main.nav.savings-analysis")}
         </button>
         <button
           className={`nav-item ${currentView === "profile" ? "is-active" : ""}`}
           onClick={() => setCurrentView("profile")}
         >
-          Profile
+          {translate("main.nav.profile")}
         </button>
       </nav>
 

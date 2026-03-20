@@ -134,7 +134,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [availableCards, setAvailableCards] = useState(POPULAR_CARDS);
   const [filterType, setFilterType] = useState('all');
-  const translate = useTranslation();
+  const translate = useTranslation("card-library");
 
 
   useEffect(() => {
@@ -187,8 +187,8 @@ export default function CardLibrary({ userCards = [], addCard }) {
   return (
     <div className="card-library-shell">
       <div className="library-header">
-        <h2 className="library-title">{translate("card-library.title")}</h2>
-        <p className="library-subtitle">{translate("card-library.subtitle")}</p>
+        <h2 className="library-title">{translate("title")}</h2>
+        <p className="library-subtitle">{translate("subtitle")}</p>
       </div>
 
       <div className="library-controls">
@@ -196,7 +196,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
           <span className="search-icon">🔍</span>
           <input
             type="text"
-            placeholder={translate('card-library.search-cards-placeholder')} //Search cards by name or issuer...
+            placeholder={translate('search-cards-placeholder')} //Search cards by name or issuer...
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -206,19 +206,19 @@ export default function CardLibrary({ userCards = [], addCard }) {
             className={`filter-pill ${filterType === 'all' ? 'active' : ''}`}
             onClick={() => setFilterType('all')}
           >
-            {translate("card-library.filter.all")}
+            {translate("filter.all")}
           </button>
           <button
             className={`filter-pill ${filterType === 'cashback' ? 'active' : ''}`}
             onClick={() => setFilterType('cashback')}
           >
-            {translate("card-library.filter.cashback")}
+            {translate("filter.cashback")}
           </button>
           <button
             className={`filter-pill ${filterType === 'travel' ? 'active' : ''}`}
             onClick={() => setFilterType('travel')}
           >
-            {translate("card-library.filter.travel")}
+            {translate("filter.travel")}
           </button>
         </div>
       </div>
@@ -237,13 +237,13 @@ export default function CardLibrary({ userCards = [], addCard }) {
 
             <div className="card-details">
               <div className="card-meta">
-                <span className="meta-label">{translate("card-library.annual-fee")}</span>
+                <span className="meta-label">{translate("annual-fee")}</span>
                 <span className={`meta-value ${card.annualFee === 0 ? 'free' : ''}`}>
                   {card.annualFee}
                 </span>
               </div>
               <div className="card-rewards">
-                <p className="rewards-label">{translate("card-library.rewards")}</p>
+                <p className="rewards-label">{translate("rewards")}</p>
                 <ul className="rewards-list">
                   {card.rewards.slice(0, 3).map((reward, i) => (
                     <li key={i}>{translate("card.category."+reward.category)}: {reward.rate}%</li>
@@ -253,14 +253,14 @@ export default function CardLibrary({ userCards = [], addCard }) {
               </div>
               {isCardAdded(card.name) ? (
                 <button className="add-card-btn added" disabled>
-                  {translate("card-library.card-already-added")}
+                  {translate("card-already-added")}
                 </button>
               ) : (
                 <button
                   className="add-card-btn"
                   onClick={() => handleAddCard(card)}
                 >
-                  Add to Wallet
+                  {translate("add-to-wallet")}
                 </button>
               )}
             </div>

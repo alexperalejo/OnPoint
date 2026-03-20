@@ -18,13 +18,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }  
 });
 
-function translate(translation, key){
-    return translation[key] ||= key;
+function translate(translation, key, values){
+    var message = translation[key] ||= key;
+    if(values)
+    {
+        for (const [k, v] of values.entries()) {
+            message = message.replace(`{${k}}`, v);
+        }
+    }
+    return message;
 }
 /**
  * Returns a translator function.
- * @return {(key: string) => string} author - The author of the book.
+ * @param {string?} prefix prefix to all translation keys
+ * @return {(key: string, values: object?) => string} translation function.
  */
-export function useTranslation(){
-    return useCallback((s) => translate(translation, s), [translation]);
+export function useTranslation(prefix){
+    if(prefix && prefix !== ""){
+        prefix = prefix + ".";
+        return useCallback((s, v = {}) => translate(prefix+translation, s, v), [translation]);
+    } else{
+        return useCallback((s, v = {}) => translate(translation, s, v), [translation]);
+    }
 }
