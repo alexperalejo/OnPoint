@@ -109,30 +109,15 @@ export default function Dashboard({ onSignOut }) {
       </header>
 
       <nav className="dash-nav">
-        <button
-          className={`nav-item ${currentView === "dashboard" ? "is-active" : ""}`}
-          onClick={() => setCurrentView("dashboard")}
-        >
-          {translate("main.nav.dashboard")}
-        </button>
-        <button
-          className={`nav-item ${currentView === "library" ? "is-active" : ""}`}
-          onClick={() => setCurrentView("library")}
-        >
-          {translate("main.nav.card-library")}
-        </button>
-        <button
-          className={`nav-item ${currentView === "savings" ? "is-active" : ""}`}
-          onClick={() => setCurrentView("savings")}
-        >
-          {translate("main.nav.savings-analysis")}
-        </button>
-        <button
-          className={`nav-item ${currentView === "profile" ? "is-active" : ""}`}
-          onClick={() => setCurrentView("profile")}
-        >
-          {translate("main.nav.profile")}
-        </button>
+        {
+          ["dashboard", "library", "savings", "profile"].map(page => (
+            <button
+              className={`nav-item ${currentView === page ? "is-active" : ""}`}
+              onClick={() => setCurrentView(page)}>
+                {translate("main.nav." + page)}
+            </button>
+          ))
+        }
       </nav>
 
       {currentView === "dashboard" && (

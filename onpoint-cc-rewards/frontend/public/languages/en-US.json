@@ -5,8 +5,8 @@
     "main.brand-name": "OnPoint",
     "main.brand-tag": "Maximize Your Rewards",
     "main.nav.dashboard": "Dashboard",
-    "main.nav.card-library": "Card Library",
-    "main.nav.savings-analysis": "Savings Analysis",
+    "main.nav.library": "Card Library",
+    "main.nav.savings": "Savings Analysis",
     "main.nav.profile": "Profile",
 
     "dashboard.stats.total-cards": "Total Cards",
