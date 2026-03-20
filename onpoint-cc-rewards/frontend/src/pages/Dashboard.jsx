@@ -122,7 +122,7 @@ export default function Dashboard({ onSignOut }) {
           {translate("main.nav.card-library")}
         </button>
         <button
-          className={`dashboard.nav.nav-item ${currentView === "savings" ? "is-active" : ""}`}
+          className={`nav-item ${currentView === "savings" ? "is-active" : ""}`}
           onClick={() => setCurrentView("savings")}
         >
           {translate("main.nav.savings-analysis")}

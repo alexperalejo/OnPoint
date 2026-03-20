@@ -239,7 +239,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
               <div className="card-meta">
                 <span className="meta-label">{translate("card-display.annual-fee")}</span>
                 <span className={`meta-value ${card.annualFee === 0 ? 'free' : ''}`}>
-                  {card.annualFee}
+                  ${card.annualFee}
                 </span>
               </div>
               <div className="card-rewards">
@@ -248,7 +248,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
                   {card.rewards.slice(0, 3).map((reward, i) => (
                     <li key={i}>{translate("card.category."+reward.category)}: {reward.rate}%</li>
                   ))}
-                  {card.rewards.length > 3 && <li>+{card.rewards.length - 3} more</li>}
+                  {card.rewards.length > 3 && <li>{translate("card-display.extra-rewards", {count: card.rewards.length - 3})}</li>}
                 </ul>
               </div>
               {isCardAdded(card.name) ? (
