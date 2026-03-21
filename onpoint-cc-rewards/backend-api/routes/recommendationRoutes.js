@@ -6,6 +6,12 @@ const mongoose = require('mongoose')
 const recommendationService = require('../services/recommendationService');
 const auth = require('../middleware/auth');
 
+//URL resolver for card images - converts stored relative path to full URL
+function resolveImageUrl(req, relativePath) {
+    if (!relativePath) return null;
+    return `${req.protocol}://${req.get('host')}/${relativePath}`;
+}
+
 /**
  * @typedef {object} Body
  * @property {string[]} cards
@@ -96,7 +102,6 @@ router.post('/', async function(req, res) {
         return a.additionalInfo.annualFee - b.additionalInfo.annualFee; // tiebreaker: lower annual fee wins
     }).map(a => {return a.results});
 
-    const best = results[0] || null;
 
 /**
  * Builds a human-readable string explaining why a particular card is the best recommendation
@@ -116,8 +121,15 @@ router.post('/', async function(req, res) {
     return `${name} earns ${best.rewardPoints} pts here: ${parts.join(', ')}.`;
     }
     
+    const best = results[0] || null;
+    const bestCardDoc = cardDocs.find(c => String(c._id) === String(best.cardId));
+
     return res.json({ 
-    card: best, 
+    card: {
+        ...best, 
+        image_url: resolveImageUrl(req, bestCardDoc?.image_path)
+    },
+        // example:"https://your-server.com/assets/cards/chase-freedom-flex.png"
     reason: buildReason(best, cardDocs),  // added reason field to explain why this card is the best recommendation
     alternatives: results.slice(1, 4) 
     });

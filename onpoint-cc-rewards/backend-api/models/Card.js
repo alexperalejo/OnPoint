@@ -25,7 +25,7 @@ const cardSchema = new mongoose.Schema({
   benefit_title: String,
   benefit_description: String,
   annualFee: Number,
-  imageKey: { type: String },
+  image_path: { type: String }, // renamed from imageKey, stores relative path
 
 });
 

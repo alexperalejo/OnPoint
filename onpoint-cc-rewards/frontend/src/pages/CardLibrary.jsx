@@ -1,5 +1,4 @@
-import { getCardImage } from '../utils/cardImageMap';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import './CardLibrary.css';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useTranslation } from '../utils/translation';
@@ -147,7 +146,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
           name: v.name,
           issuer: v.issuer,
           annualFee: v.annualFee,
-          imageKey: v.imageKey,
+          image_url: `http://localhost:3000/${v.image_path}`,  // changed from imageKey
           rewards: v.attributes.filter(a => a.type != 'url').map(a => {
             if (a.type == "all") return { category: 'all', rate: a.multiplier };
             return { category: a.category, rate: a.multiplier };
@@ -157,7 +156,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
     });
   }, []);
 
-  useCallback()
+ 
 
 
   const isCardAdded = (cardName) => {
@@ -229,7 +228,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
 
             <div className="card-visual">
               <img
-                src={getCardImage(card.imageKey)}
+                src={card.image_url}
                 alt={card.name}
                 className="card-img"
               />
@@ -246,7 +245,8 @@ export default function CardLibrary({ userCards = [], addCard }) {
                 <p className="rewards-label">{translate("card-display.rewards")}</p>
                 <ul className="rewards-list">
                   {card.rewards.slice(0, 3).map((reward, i) => (
-                    <li key={i}>{translate("card.category."+reward.category)}: {reward.rate}%</li>
+                    //<li key={i}>{translate("card.category."+reward.category)}: {reward.rate}%</li>
+                    <li key={i}>{reward.category}: {reward.rate}%</li> // recommended fix
                   ))}
                   {card.rewards.length > 3 && <li>{translate("card-display.extra-rewards", {count: card.rewards.length - 3})}</li>}
                 </ul>

@@ -9,7 +9,7 @@
       { "type": "tag", "category": "travel_chase", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1.5 }
     ],
-    "imageKey": "chase-freedom-unlimited"
+    "image_path": "assets/cards/chase-freedom-unlimited.png"
   },
 
   {
@@ -24,7 +24,7 @@
       { "type": "tag", "category": "streaming", "multiplier": 3 },
       { "type": "all", "category": "all", "multiplier": 1 }
     ],
-    "imageKey": "chase-sapphire-preferred"
+    "image_path": "assets/cards/chase-sapphire-preferred.png"
   },
 
   {
@@ -37,7 +37,7 @@
       { "type": "tag", "category": "flights", "multiplier": 3 },
       { "type": "all", "category": "all", "multiplier": 1 }
     ],
-    "imageKey": "amex-gold"
+    "image_path": "assets/cards/amex-gold.png"
   },
 
   {
@@ -47,7 +47,7 @@
     "attributes": [
       { "type": "all", "category": "all", "multiplier": 2 }
     ],
-    "imageKey": "citi-double-cash"
+    "image_path": "assets/cards/citi-double-cash.png"
   },
 
   {
@@ -62,7 +62,7 @@
       { "type": "tag", "category": "travel_capital_one", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1 }
     ],
-    "imageKey": "capital-one-savor-one"
+    "image_path": "assets/cards/capital-one-savor-one.png"
   },
 
   {
@@ -73,7 +73,7 @@
       { "type": "tag", "category": "rotating", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1 }
     ],
-    "imageKey": "discover-it"
+    "image_path": "assets/cards/discover-it.png"
   },
 
   {
@@ -85,7 +85,7 @@
       { "type": "tag", "category": "travel_capital_one_hotels_cars", "multiplier": 10 },
       { "type": "all", "category": "all", "multiplier": 2 }
     ],
-    "imageKey": "capital-one-venture-x"
+    "image_path": "assets/cards/capital-one-venture-x.png"
   },
 
   {
@@ -99,7 +99,7 @@
       { "type": "tag", "category": "gas", "multiplier": 3 },
       { "type": "all", "category": "all", "multiplier": 1 }
     ],
-    "imageKey": "amex-blue-cash-preferred"
+    "image_path": "assets/cards/amex-blue-cash-preferred.png"
   },
 
   {
@@ -113,6 +113,6 @@
       { "type": "tag", "category": "travel_chase", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1 }
     ],
-    "imageKey": "chase-freedom-flex"
+    "image_path": "assets/cards/chase-freedom-flex.png"
   }
 ]

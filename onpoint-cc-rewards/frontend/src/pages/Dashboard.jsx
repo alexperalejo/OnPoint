@@ -1,10 +1,8 @@
-import { getCardImage } from "../utils/cardImageMap";
 import { useState, useEffect, useCallback } from "react";
 import "./Dashboard.css";
 import CardLibrary from "./CardLibrary.jsx";
 import UserProfile from "./UserProfile.jsx";
 import { useChromeStorageSync } from "use-chrome-storage";
-import { useSearchParams } from "react-router-dom"
 import { useDarkMode } from "../hooks/useDarkMode";
 import { useTranslation } from "../utils/translation.js";
 
@@ -53,7 +51,7 @@ export default function Dashboard({ onSignOut }) {
               name: data.name,
               issuer: data.issuer,
               annualFee: data.annualFee,
-              imageKey: data.imageKey,
+              image_url: `http://localhost:3000/${data.image_path}`,  // replaced imageKey
               rewards: (data.attributes || [])
                 .filter((a) => a.type != "url")
                 .map((a_1) => {
@@ -176,7 +174,7 @@ export default function Dashboard({ onSignOut }) {
                   <div key={card.id} className="user-card-item">
                     <div className="user-card-visual">
                       <img
-                        src={getCardImage(card.imageKey)}
+                        src={card.image_url}
                         alt={card.name}
                         style={{
                           width: "100%",
@@ -203,7 +201,8 @@ export default function Dashboard({ onSignOut }) {
                         <ul>
                           {card.rewards.slice(0, 3).map((r, i) => (
                             <li key={i}>
-                              {translate("card.category."+r.category)}: {r.rate}%
+                              //{translate("card.category."+r.category)}: {r.rate}%
+                              {r.category}: {r.rate}%
                             </li>
                           ))}
                         </ul>
