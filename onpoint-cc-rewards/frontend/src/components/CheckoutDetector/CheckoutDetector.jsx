@@ -212,7 +212,7 @@ export function CheckoutDetector() {
     >
       <div className="cd-header">
         <div className="cd-icon">💳</div>
-        <h1 className="cd-title">Checkout Detector</h1>
+        <h1 className="cd-title">OnPoint</h1>
       </div>
 
       {loading && <p className="cd-muted">Detecting...</p>}
@@ -225,11 +225,6 @@ export function CheckoutDetector() {
 
       {detection && (
         <div>
-          <div className="cd-summary">
-            <p>Is checkout (detector): <strong>{detection.isCheckout ? 'Yes' : 'No'}</strong></p>
-            <p>Score: {detection.score.toFixed(2)}</p>
-          </div>
-
           {showRecommendation && recommendedCard && (
             <CardRecommendation 
               card={recommendedCard}
@@ -297,10 +292,6 @@ export function CheckoutDetector() {
           Refresh
         </button>
       </div>
-
-      <footer className="cd-footer">
-        <div>Local-only detection · Manifest V3</div>
-      </footer>
     </div>
   );
 }

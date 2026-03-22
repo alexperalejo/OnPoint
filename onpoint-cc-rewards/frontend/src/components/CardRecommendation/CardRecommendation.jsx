@@ -1,23 +1,31 @@
 
 import { getCardImage } from "../../utils/cardImageMap";
 import './CardRecommendation.css';
-
+// This will be redesigned as cardChoice since i can use for both checkout and purchase recommendations,
+// but for now just reuse the component and styles from the purchase recommendation work.
 export function CardRecommendation({ card, onApply, onDismiss }) {
   if (!card) return null;
   return (
-    <div className="card-recommendation">
+    <div className="card-recommendation" role="region" aria-label="Card Recommendation">
       <div className="cr-header">
-        <h3 className="cr-title">💡 Recommended Card</h3>
-        <button onClick={onDismiss} className="cr-close">✕</button>
+        <h3 className="cr-title">Recommended card for this transaction</h3>
       </div>
 
-      <div className="cr-visual" style={{ background: card.color || '#1E3A8A' }}>
-        <img src={getCardImage(card.imageKey)} alt={card.name} className="cr-image" />
-
+      {/* Clickable card visual — keyboard-accessible via role+tabIndex */}
+      <div
+        className="cr-visual"
+        onClick={() => onApply(card)}
+        role="button"
+        tabIndex={0}
+        aria-label={`Select ${card.name}`}
+        title={`Use ${card.name}`}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onApply(card); } }}
+      >
         <div className="cr-name">{card.name}</div>
+        <img src={getCardImage(card.imageKey)} alt={card.name} className="cr-image" />
+        
       </div>
 
-      <div className="cr-issuer">{card.issuer}</div>
       {card.annualFee !== undefined && (
         <div className="cr-fee">Annual Fee: ${card.annualFee}</div>
       )}
@@ -33,9 +41,7 @@ export function CardRecommendation({ card, onApply, onDismiss }) {
         </div>
       )}
 
-      <button onClick={() => onApply(card)} className="cr-apply">Use This Card</button>
-
-      <div className="cr-info">ℹ️ This card offers the best rewards for this type of purchase based on your profile.</div>
+      <button onClick={() => onDismiss(card)} className="cr-dismiss">Dismiss</button>
     </div>
   );
 }
