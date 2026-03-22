@@ -124,6 +124,27 @@
     return true;
   };
 
+  function emitPurchaseSignalIfDetected() {
+    try {
+      const detection = runDetect(document);
+      persistDebug(detection);
+      if (!detection?.isPurchase) return;
+
+      const purchase = {
+        id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        ts: Date.now(),
+        host: safeHost(),
+        url: (() => { try { return location.href; } catch { return ''; } })(),
+        orderId: extractOrderId(),
+        detection,
+      };
+
+      try { chrome.runtime.sendMessage({ type: 'purchaseDetected', purchase }); } catch (e) { /* ignore */ }
+    } catch (e) {
+      // ignore to avoid breaking page scripts
+    }
+  }
+
   try {
     if (chrome && chrome.runtime && chrome.runtime.onMessage && typeof chrome.runtime.onMessage.addListener === 'function') {
       try { console.log('purchase.js: calling chrome.runtime.onMessage.addListener'); } catch (e) {}
@@ -134,6 +155,12 @@
   } catch (e) {
     // ignore if chrome isn't available in this environment
   }
+
+  // Passive auto-detection on load + a short delayed pass for SPA/late-rendered confirmation pages.
+  try {
+    emitPurchaseSignalIfDetected();
+    setTimeout(emitPurchaseSignalIfDetected, 900);
+  } catch (e) { /* ignore */ }
 
   try {
     if (typeof module !== 'undefined' && module.exports) {

@@ -6,13 +6,6 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 console.log("[bg] service worker boot", new Date().toISOString());
-
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  console.log("[bg] onMessage", msg, { sender });
-  // temporary: always respond so sendMessage doesn't fail silently
-  sendResponse({ ok: true, echo: msg });
-  return true; // safe even if not async
-});
 // In-memory cache of recent checkout totals keyed by host
 const CHECKOUT_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
 const checkoutCache = new Map(); // host -> { amount, currency, raw, url, host, ts }
@@ -81,7 +74,7 @@ async function fetchRecommendation(endpoint, payload) {
 }
 
 // Send a message to a tab (falls back to active tab)
-/*  function sendToTab(tabId, message) {
+function sendToTab(tabId, message) {
   if (tabId) {
     try { chrome.tabs.sendMessage(tabId, message); return; } catch (e) { }
   }
@@ -89,7 +82,7 @@ async function fetchRecommendation(endpoint, payload) {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
     if (tabs && tabs[0]) chrome.tabs.sendMessage(tabs[0].id, message);
   });
-}*/
+}
 
 // Main message router
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -117,6 +110,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       try {
         const purchase = message.purchase;
         const host = purchase?.host || message.host || (sender && sender.url && new URL(sender.url).hostname) || '';
+        const tabId = sender && sender.tab && sender.tab.id;
+
+        // Mark tab as purchase as soon as any confirmation signal is detected.
+        // Linking to checkout may still fail later, but popup should not get stuck in checkout mode.
+        try { if (tabId) setDetectorForTab(tabId, 'purchase'); } catch (e) { /* ignore */ }
 
         // try in-memory cache first
         let checkout = host ? checkoutCache.get(host) : null;
@@ -160,10 +158,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
           // send UI message to the originating tab (or active tab)
           const uiMsg = { type: 'showRecommendation', candidate, recommendation: rec };
-          const tabId = sender && sender.tab && sender.tab.id;
-
-          // Mark this tab as a purchase detector so the popup shows PurchaseVerification
-          try { if (tabId) setDetectorForTab(tabId, 'purchase'); } catch (e) { /* ignore */ }
 
           sendToTab(tabId, uiMsg);
         } else {
@@ -173,6 +167,60 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } catch (e) { console.warn('background purchase handling failed', e); }
     })();
     return true;
+  }
+
+  if (message.type === 'REQUEST_CHECKOUT_SNAPSHOT') {
+    try {
+      chrome.storage.local.get(['purchaseCandidate', 'checkoutTotal'], (data) => {
+        try {
+          const candidate = data?.purchaseCandidate || null;
+          const checkout = data?.checkoutTotal || null;
+
+          if (candidate) {
+            sendResponse({
+              ok: true,
+              snapshot: {
+                merchantId: candidate.host || null,
+                merchantName: candidate.host || null,
+                total: candidate.checkout?.amount ?? null,
+                currency: candidate.checkout?.currency || '$',
+                ts: candidate.ts || Date.now(),
+                orderId: candidate.orderId || null,
+                tags: ['purchase-candidate'],
+                checkout: candidate.checkout || null,
+                detection: candidate.detection || null,
+              },
+              recommended: candidate.recommendation || null,
+            });
+            return;
+          }
+
+          if (checkout) {
+            sendResponse({
+              ok: true,
+              snapshot: {
+                merchantId: checkout.host || null,
+                merchantName: checkout.host || null,
+                total: checkout.amount ?? null,
+                currency: checkout.currency || '$',
+                ts: checkout.ts || Date.now(),
+                tags: ['checkout-total'],
+                checkout,
+              },
+            });
+            return;
+          }
+
+          sendResponse({ ok: true, snapshot: null });
+        } catch (e) {
+          try { sendResponse({ ok: false, snapshot: null }); } catch (er) { }
+        }
+      });
+      return true;
+    } catch (e) {
+      try { sendResponse({ ok: false, snapshot: null }); } catch (er) { }
+      return false;
+    }
   }
 
   // Backwards-compatible handler for UI requests that use { action: 'getDetector', tabId }

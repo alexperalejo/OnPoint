@@ -131,7 +131,8 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
     }
     setShowRecommendation(false);
   }
-
+  
+  // UI rendering
   return (
     <div
       className="purchase-verification"

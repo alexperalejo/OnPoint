@@ -194,6 +194,7 @@ export function CheckoutDetector() {
 
   const isDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches || document.documentElement.classList.contains('dark');
   
+  //Checkout Detector UI
   return (
     <div
       className="checkout-detector"
@@ -227,7 +228,6 @@ export function CheckoutDetector() {
           <div className="cd-summary">
             <p>Is checkout (detector): <strong>{detection.isCheckout ? 'Yes' : 'No'}</strong></p>
             <p>Score: {detection.score.toFixed(2)}</p>
-            <p className="small">Rationale hidden in UI. Check `lastDetectionDebug` in chrome.storage.local.</p>
           </div>
 
           {showRecommendation && recommendedCard && (

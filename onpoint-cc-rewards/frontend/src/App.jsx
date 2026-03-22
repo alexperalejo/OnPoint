@@ -28,7 +28,91 @@ export default function App() {
   const [stage, setStage] = useState(startStage); // landing | onboarding | dashboard | extension-detector
   const [authMode, setAuthMode] = useState('signup');
   useDarkMode(); // Hook applies dark mode side effects
-  const [detectorType] = useState(null); // 'checkout' | 'purchase' | null
+  const [detectorType, setDetectorType] = useState(null); // 'checkout' | 'purchase' | null
+
+  useEffect(() => {
+    if (stage !== 'extension-detector' || typeof chrome === 'undefined') return;
+    let mounted = true;
+
+    const probePurchase = async (tabId) => {
+      const sendReq = () =>
+        new Promise((resolve) => chrome.tabs.sendMessage(tabId, { type: 'getPurchaseDetection' }, resolve));
+
+      const trySend = async (attemptsLeft = 1) => {
+        const resp = await sendReq();
+        if (chrome.runtime.lastError) {
+          if (attemptsLeft > 0 && chrome.scripting) {
+            try {
+              await new Promise((res, rej) => {
+                chrome.scripting.executeScript(
+                  {
+                    target: { tabId },
+                    files: ['content/purchase-detect-core.js', 'content/purchase.js'],
+                  },
+                  () => {
+                    if (chrome.runtime.lastError) return rej(chrome.runtime.lastError);
+                    res();
+                  }
+                );
+              });
+              await new Promise((r) => setTimeout(r, 120));
+              return trySend(attemptsLeft - 1);
+            } catch {
+              return null;
+            }
+          }
+          return null;
+        }
+        return resp;
+      };
+
+      const resp = await trySend(1);
+      return !!resp?.detection?.isPurchase;
+    };
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!mounted) return;
+      const tab = tabs && tabs[0];
+      if (!tab?.id) {
+        setDetectorType('checkout');
+        return;
+      }
+
+      const resolveByProbe = () => {
+        probePurchase(tab.id)
+          .then((isPurchasePage) => {
+            if (!mounted) return;
+            setDetectorType(isPurchasePage ? 'purchase' : 'checkout');
+          })
+          .catch(() => {
+            if (!mounted) return;
+            setDetectorType('checkout');
+          });
+      };
+
+      try {
+        chrome.runtime.sendMessage({ action: 'getDetector', tabId: tab.id }, (res) => {
+          if (!mounted) return;
+          if (chrome.runtime.lastError) {
+            resolveByProbe();
+            return;
+          }
+          const kind = res?.detector;
+          if (kind === 'purchase') {
+            setDetectorType('purchase');
+            return;
+          }
+
+          // If state is missing or says checkout, directly probe purchase detection to avoid stale routing.
+          resolveByProbe();
+        });
+      } catch {
+        resolveByProbe();
+      }
+    });
+
+    return () => { mounted = false; };
+  }, [stage]);
 
   useEffect(() => {
   if (stage !== 'extension-detector' || detectorType !== 'purchase' || typeof chrome === 'undefined') return;
