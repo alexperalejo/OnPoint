@@ -1,12 +1,19 @@
+import { useState } from 'react';
 import './CardRecommendation.css';
 // This will be redesigned as cardChoice since i can use for both checkout and purchase recommendations,
 // but for now just reuse the component and styles from the purchase recommendation work.
-export function CardRecommendation({ card, onApply, onDismiss }) {
+export function CardRecommendation({ card, onApply, onDismiss, total, reason }) {
+  const [showDetails, setShowDetails] = useState(false);
+
   if (!card) return null;
 
   const isDark =
     window.matchMedia?.('(prefers-color-scheme: dark)').matches ||
     document.documentElement.classList.contains('dark');
+
+  // Calculate rewards earned if total is available
+  const rewardRate = card.rewardPoints || 0;
+  const rewardsEarned = total ? ((rewardRate / 100) * total).toFixed(2) : null;
 
   return (
     <div
@@ -44,10 +51,11 @@ export function CardRecommendation({ card, onApply, onDismiss }) {
         title={`Use ${card.name}`}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onApply(card); } }}
       >
-        <div className="cr-name">{card.name}</div>
         <img src={card.image_url} alt={card.name} className="cr-image" />
         
       </div>
+
+      <div className="cr-card-name">{card.name}</div>
 
       {card.annualFee !== undefined && (
         <div className="cr-fee">Annual Fee: ${card.annualFee}</div>
@@ -65,6 +73,42 @@ export function CardRecommendation({ card, onApply, onDismiss }) {
       )}
 
       <button onClick={() => onDismiss(card)} className="cr-dismiss">Dismiss</button>
+      <button
+        className="cr-details-toggle"
+        onClick={() => setShowDetails(!showDetails)}
+      >
+        Show Details {showDetails ? '▲' : '▼'}
+      </button>
+
+      {showDetails && (
+        <div className="cr-details-panel">
+          {total && (
+            <div className="cr-details-row">
+              <span>Total:</span>
+              <span>${Number(total).toFixed(2)}</span>
+            </div>
+          )}
+          <div className="cr-details-row">
+            <span>Reward Rate:</span>
+            <span>{rewardRate}% Cashback</span>
+          </div>
+          {rewardsEarned && (
+            <div className="cr-details-row">
+              <span>Rewards Earned:</span>
+              <span>${rewardsEarned}</span>
+            </div>
+          )}
+          {reason && (
+            <div className="cr-details-reason">{reason}</div>
+          )}
+          <button
+            className="cr-details-close"
+            onClick={() => setShowDetails(false)}
+          >
+            Close
+          </button>
+        </div>
+      )}
     </div>
   );
 }

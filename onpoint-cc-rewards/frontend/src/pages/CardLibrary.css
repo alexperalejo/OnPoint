@@ -126,6 +126,14 @@ html.dark .card-library-shell {
   flex-direction: column;
 }
 
+.library-card-name {
+  font-weight: 700;
+  font-size: 16px;
+  padding: 0 10px;
+  margin: 0;
+  color: var(--text-primary);
+}
+
 .library-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 16px 40px rgba(37, 99, 235, 0.12);

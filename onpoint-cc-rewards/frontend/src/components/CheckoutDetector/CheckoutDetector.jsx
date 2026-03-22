@@ -11,6 +11,7 @@ export function CheckoutDetector() {
   const [error, setError] = useState(null);
   const [showRecommendation, setShowRecommendation] = useState(false);
   const [recommendedCard, setRecommendedCard] = useState(null);
+  const [reason] = useState(null);
   const FIXED_THRESHOLD = 0.7;
 
   function handleClosePopup() {
@@ -262,6 +263,7 @@ export function CheckoutDetector() {
           {showRecommendation && recommendedCard && (
             <CardRecommendation 
               card={recommendedCard}
+              reason={reason}
               onApply={(card) => {
                 console.log('User selected card:', card);
                 // TODO: Backend flag - send to backend that user selected this card for transaction

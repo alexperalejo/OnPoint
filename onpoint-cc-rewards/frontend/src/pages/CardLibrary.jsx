@@ -234,6 +234,8 @@ export default function CardLibrary({ userCards = [], addCard }) {
               />
             </div>
 
+            <p className="library-card-name">{card.name}</p>
+
             <div className="card-details">
               <div className="card-meta">
                 <span className="meta-label">{translate("card-display.annual-fee")}</span>

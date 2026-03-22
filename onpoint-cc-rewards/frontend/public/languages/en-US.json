@@ -37,8 +37,8 @@
     "card-display.remove-from-wallet": "Remove Card",
 
     "category.dining": "Dining",
-    "category.travel_chase": "Travel",
-    "category.travel_general": "Travel",
+    "category.travel_chase": "Chase Travel",
+    "category.travel_general": "Other Travel",
     "category.groceries": "Groceries",
     "category.drugstore": "Drugstore",
     "category.streaming": "Streaming",
@@ -47,5 +47,7 @@
     "category.entertainment": "Entertainment",
     "category.gas": "Gas",
     "category.transit": "Transit",
-    "category.all": "All Purchases"
+    "category.all": "All Purchases",
+    "category.travel_capital_one_flights": "Sky Miles",
+    "category.travel_capital_one_hotels_cars": "Travel"
 }

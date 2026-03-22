@@ -185,9 +185,10 @@ export default function Dashboard({ onSignOut }) {
                           display: "block",
                         }}
                       />
-                      <p className="user-card-name">{card.name}</p>
-                      <p className="user-card-issuer">{card.issuer}</p>
+                      
                     </div>
+                    <p className="user-card-name">{card.name}</p>
+                    
 
                     <div className="user-card-info">
                       <div className="user-card-meta">
