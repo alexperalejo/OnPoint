@@ -3,7 +3,7 @@ import { useTranslation } from '../../utils/translation';
 import './CardRecommendation.css';
 // This will be redesigned as cardChoice since i can use for both checkout and purchase recommendations,
 // but for now just reuse the component and styles from the purchase recommendation work.
-export function CardRecommendation({ card, onApply, onDismiss, total, reason, breakdown }) {
+export function CardRecommendation({ card, onApply, onDismiss, total, reason }) {
   const [showDetails, setShowDetails] = useState(false);
   const translate = useTranslation('card-recommendation');
   if (!card) return null;

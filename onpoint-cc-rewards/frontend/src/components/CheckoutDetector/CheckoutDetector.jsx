@@ -286,7 +286,10 @@ export function CheckoutDetector() {
                 // This is where we'd track which card was recommended and if user used it
                 setShowRecommendation(false);
               }}
-              onDismiss={() => setShowRecommendation(false)}
+              onDismiss={() => {
+                setShowRecommendation(false);
+                window.close();
+              }}
             />
           )}
 
