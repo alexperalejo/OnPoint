@@ -3,7 +3,7 @@ import { useTranslation } from '../../utils/translation';
 import './CardRecommendation.css';
 // This will be redesigned as cardChoice since i can use for both checkout and purchase recommendations,
 // but for now just reuse the component and styles from the purchase recommendation work.
-export function CardRecommendation({ card, onApply, onDismiss, total, reason }) {
+export function CardRecommendation({ card, onApply, onDismiss, total, reason, breakdown }) {
   const [showDetails, setShowDetails] = useState(false);
   const translate = useTranslation('card-recommendation');
   if (!card) return null;
@@ -14,7 +14,10 @@ export function CardRecommendation({ card, onApply, onDismiss, total, reason }) 
 
   // Calculate rewards earned if total is available
   const rewardRate = card.rewardPoints || 0;
-  const rewardsEarned = total ? ((rewardRate / 100) * total).toFixed(2) : null;
+  const isPointsCard = card.cardType === 'points';
+  console.log("[IS POINTS CARD]", card.cardType, isPointsCard);
+  const cashbackEarned = total ? ((rewardRate / 100) * total).toFixed(2) : null;
+  const pointsEarned = total ? Math.round(rewardRate * total) : null;
 
   return (
     <div
@@ -85,19 +88,24 @@ export function CardRecommendation({ card, onApply, onDismiss, total, reason }) 
         <div className="cr-details-panel">
           {total && (
             <div className="cr-details-row">
-              <span>Total:</span>
+              <span>{translate('.details.total')}:</span>
               <span>${Number(total).toFixed(2)}</span>
             </div>
           )}
           <div className="cr-details-row">
             <span>{translate('.details.reward-rate')}:</span>
-            <span>{rewardRate}% {translate('.details.cashback')}</span>
+            <span>{rewardRate}x {isPointsCard ? 'Points' : '% Cashback'}</span>
           </div>
-          {rewardsEarned && (
+          {total && (
             <div className="cr-details-row">
               <span>{translate('.details.rewards-earned')}:</span>
-              <span>${rewardsEarned}</span>
+              {isPointsCard ? (
+                <span>{pointsEarned?.toLocaleString()} pts</span>
+              ) : (
+                <span>${cashbackEarned}</span>
+              )}
             </div>
+
           )}
           {reason && (
             <div className="cr-details-reason">{reason}</div>

@@ -11,8 +11,10 @@ export function CheckoutDetector() {
   const [error, setError] = useState(null);
   const [showRecommendation, setShowRecommendation] = useState(false);
   const [recommendedCard, setRecommendedCard] = useState(null);
+  const [breakdown, setBreakdown] = useState(null); // for detailed recommendation breakdown
   const [reason] = useState(null);
   const FIXED_THRESHOLD = 0.7;
+  const [purchaseTotal, setPurchaseTotal] = useState(null);
 
   function handleClosePopup() {
     try {
@@ -142,6 +144,13 @@ export function CheckoutDetector() {
           // When checkout detected, prepare to fetch card recommendation from backend
           if (resp.detection.isCheckout) {
             console.log('Checkout detected on URL:', window.location.href);
+                
+                // Get checkout total from content script (which extracted it from the page) for use in recommendation and display
+                chrome.storage.local.get(['checkoutTotal'], (data) => {
+                  if (data.checkoutTotal && data.checkoutTotal.amount) {
+                    setPurchaseTotal(data.checkoutTotal.amount);
+                  }
+                });
             
             // Call recommendations API with all cards
         const cardsArray = Array.isArray(savedCards)
@@ -182,11 +191,16 @@ export function CheckoutDetector() {
             const cardId = bestCard.id || bestCard; // handle both object and string cases
             const cardRes = await fetch(`http://localhost:3000/api/cards/${cardId}`);
             const cardData = await cardRes.json();
-
+            const tagBreakdown = body.card.breakdown.find(b => b.from !== 'cashback');
+            console.log("[CARD TYPE]", cardData.cardType); 
             cardData.image_url = `http://localhost:3000/${cardData.image_path}`;
+            cardData.rewardPoints = body.card.rewardPoints; // attach reward points info to card data for display
+            // Use the highest non-cashback breakdown points for display
+            cardData.rewardPoints = tagBreakdown ? tagBreakdown.points : body.card.rewardPoints;
 
             console.log("[IMAGE URL]", cardData.image_url);
             setRecommendedCard(cardData);
+            setBreakdown(body.card.breakdown); // in case we want to show detailed breakdown
             setShowRecommendation(true);
         } else {
             console.log("[NO MATCH] Card not found in wallet");
@@ -264,6 +278,8 @@ export function CheckoutDetector() {
             <CardRecommendation 
               card={recommendedCard}
               reason={reason}
+              total={purchaseTotal}
+              breakdown={breakdown}
               onApply={(card) => {
                 console.log('User selected card:', card);
                 // TODO: Backend flag - send to backend that user selected this card for transaction

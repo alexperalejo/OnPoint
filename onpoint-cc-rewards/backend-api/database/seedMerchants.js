@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // load .env from backend-api/.env
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config({ path: './.env' });
 
 // load Merchant model
 const Merchant = require('../models/Merchant.js');

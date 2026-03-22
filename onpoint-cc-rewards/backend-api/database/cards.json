@@ -1,6 +1,7 @@
 [
   {
     "name": "Chase Freedom Unlimited",
+    "cardType": "cashback",
     "issuer": "Chase",
     "annualFee": 0,
     "attributes": [
@@ -14,6 +15,7 @@
 
   {
     "name": "Chase Sapphire Preferred",
+    "cardType": "points",
     "issuer": "Chase",
     "annualFee": 95,
     "attributes": [
@@ -29,6 +31,7 @@
 
   {
     "name": "American Express Gold",
+    "cardType": "points",
     "issuer": "Amex",
     "annualFee": 250,
     "attributes": [
@@ -42,6 +45,7 @@
 
   {
     "name": "Citi Double Cash",
+    "cardType": "cashback",
     "issuer": "Citi",
     "annualFee": 0,
     "attributes": [
@@ -53,6 +57,7 @@
   {
     "name": "Capital One SavorOne",
     "issuer": "Capital One",
+    "cardType": "cashback",
     "annualFee": 0,
     "attributes": [
       { "type": "tag", "category": "dining", "multiplier": 3 },
@@ -68,6 +73,7 @@
   {
     "name": "Discover it Cash Back",
     "issuer": "Discover",
+    "cardType": "cashback",
     "annualFee": 0,
     "attributes": [
       { "type": "tag", "category": "rotating", "multiplier": 5 },
@@ -79,6 +85,7 @@
   {
     "name": "Capital One Venture X",
     "issuer": "Capital One",
+    "cardType": "points",
     "annualFee": 395,
     "attributes": [
       { "type": "tag", "category": "travel_capital_one_flights", "multiplier": 5 },
@@ -91,6 +98,7 @@
   {
     "name": "American Express Blue Cash Preferred",
     "issuer": "Amex",
+    "cardType": "cashback",
     "annualFee": 95,
     "attributes": [
       { "type": "tag", "category": "groceries", "multiplier": 6 },
@@ -105,6 +113,7 @@
   {
     "name": "Chase Freedom Flex",
     "issuer": "Chase",
+    "cardType": "cashback",
     "annualFee": 0,
     "attributes": [
       { "type": "tag", "category": "rotating", "multiplier": 5 },

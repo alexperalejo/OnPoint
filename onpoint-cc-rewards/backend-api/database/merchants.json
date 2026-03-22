@@ -15,8 +15,13 @@
     "tags": ["travel", "flights", "hotels"]
   },
   {
-    "merchant_name": "Walmart",
-    "url_keywords": ["walmart.com"],
-    "tags": ["groceries", "shopping"]
+    "merchant_name": "Ralphs",
+    "url_keywords": ["ralphs.com"],
+    "tags": ["groceries"]
+  },
+  {
+    "merchant_name": "Amazon",
+    "url_keywords": ["amazon.com"],
+    "tags": ["shopping"]
   }
 ]

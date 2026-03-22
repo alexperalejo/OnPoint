@@ -48,8 +48,10 @@
     "category.gas": "Gas",
     "category.transit": "Transit",
     "category.all": "All Purchases",
-    "category.travel_capital_one_flights": "Sky Miles",
+    "category.travel_capital_one_flights": "Flights",
     "category.travel_capital_one_hotels_cars": "Travel",
+    "category.shopping": "Shopping",
+    "category.flights": "Flights",
 
     "card-recommendation.title": "Recommended card for this transaction",
     "card-recommendation.annual-fee": "Annual Fee",

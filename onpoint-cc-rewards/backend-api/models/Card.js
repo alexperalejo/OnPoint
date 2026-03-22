@@ -20,6 +20,11 @@ const cardSchema = new mongoose.Schema({
     required: true
   },
   issuer: String,
+  cardType: { 
+    type: String,
+    enum: ['cashback', 'points'],
+          default: 'cashback'
+  },
   attributes: [attributeSchema],  // ex: [{ type: "reward", category: "dining", multiplier: 3 }]
   notes: String,
   benefit_title: String,
