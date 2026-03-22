@@ -245,8 +245,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
                 <p className="rewards-label">{translate("card-display.rewards")}</p>
                 <ul className="rewards-list">
                   {card.rewards.slice(0, 3).map((reward, i) => (
-                    //<li key={i}>{translate("card.category."+reward.category)}: {reward.rate}%</li>
-                    <li key={i}>{reward.category}: {reward.rate}%</li> // recommended fix
+                    <li key={i}>{translate("category." + reward.category)}: {reward.rate}%</li>
                   ))}
                   {card.rewards.length > 3 && <li>{translate("card-display.extra-rewards", {count: card.rewards.length - 3})}</li>}
                 </ul>

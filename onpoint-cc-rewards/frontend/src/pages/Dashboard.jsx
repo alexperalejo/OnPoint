@@ -180,6 +180,7 @@ export default function Dashboard({ onSignOut }) {
                           width: "100%",
                           height: "140px",
                           objectFit: "cover",
+                          objectPosition: "top",
                           borderRadius: "14px",
                           display: "block",
                         }}
@@ -201,8 +202,8 @@ export default function Dashboard({ onSignOut }) {
                         <ul>
                           {card.rewards.slice(0, 3).map((r, i) => (
                             <li key={i}>
-                              //{translate("card.category."+r.category)}: {r.rate}%
-                              {r.category}: {r.rate}%
+                              
+                              {translate("category." + r.category)}: {r.rate}%
                             </li>
                           ))}
                         </ul>

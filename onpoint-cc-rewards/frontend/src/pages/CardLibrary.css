@@ -116,6 +116,9 @@ html.dark .card-library-shell {
   background: var(--bg-secondary);
   border-radius: 1rem;
   border: 1px solid var(--border-color);
+  padding-top: 14px;        /* ← add space above the image */
+  padding-left: 14px;
+  padding-right: 14px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -133,19 +136,20 @@ html.dark .card-library-shell {
    ========================= */
 
 .card-visual {
-  padding: 1rem 1.25rem;
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  height: 140px;        /* same height as dashboard */
   overflow: hidden;
+  border-radius: 12px 12px 0 0;  /* ← top rounded, bottom straight */
+  position: relative;
 }
 
 .card-img {
   width: 100%;
   height: 140px;
   object-fit: cover;
-  border-radius: 14px;
+  object-position: top;  /* shows top half like dashboard */
+  border-radius: 12px 12px 0 0;  /* ← same here */
+  display: block;
 }
 
 /* =========================

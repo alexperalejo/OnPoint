@@ -34,5 +34,18 @@
     "card-display.extra-rewards":"+{count} more",
     "card-display.card-already-added": "Already Added",
     "card-display.add-to-wallet": "Add to Wallet",
-    "card-display.remove-from-wallet": "Remove Card"
+    "card-display.remove-from-wallet": "Remove Card",
+
+    "category.dining": "Dining",
+    "category.travel_chase": "Travel",
+    "category.travel_general": "Travel",
+    "category.groceries": "Groceries",
+    "category.drugstore": "Drugstore",
+    "category.streaming": "Streaming",
+    "category.online_grocery": "Online Grocery",
+    "category.rotating": "Rotating",
+    "category.entertainment": "Entertainment",
+    "category.gas": "Gas",
+    "category.transit": "Transit",
+    "category.all": "All Purchases"
 }
