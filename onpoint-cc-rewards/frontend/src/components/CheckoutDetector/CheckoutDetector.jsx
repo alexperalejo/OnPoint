@@ -66,7 +66,12 @@ export function CheckoutDetector() {
     async function queryContent() {
       try {
         const tabs = await new Promise((resolve) =>
-          chrome.tabs.query({ active: true, currentWindow: true }, resolve)
+  chrome.tabs.query({ 
+    active: true, 
+    lastFocusedWindow: true,
+    url: ['http://*/*', 'https://*/*']
+  }, resolve)
+
         );
         if (!tabs || !tabs[0]) {
           setError("No active tab found");
@@ -77,7 +82,9 @@ export function CheckoutDetector() {
         const tabId = tab.id;
         
         // Check if on a restricted page
-        if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('edge://') || tab.url.startsWith('chrome-extension://'))) {
+        if (tab.url && (tab.url.startsWith('chrome://') || 
+                        tab.url.startsWith('edge://') || 
+                        tab.url.startsWith('chrome-extension://'))) {
           setError("Cannot run on browser internal pages. Please visit a regular website.");
           setLoading(false);
           return;
@@ -171,9 +178,13 @@ export function CheckoutDetector() {
 
         // bestCard is just an ID string, fetch the full card object
         if (bestCard) {
-            const cardRes = await fetch(`http://localhost:3000/api/cards/${bestCard}`);
+            const cardId = bestCard.id || bestCard; // handle both object and string cases
+            const cardRes = await fetch(`http://localhost:3000/api/cards/${cardId}`);
             const cardData = await cardRes.json();
-            console.log("[BEST CARD DATA]", cardData);
+
+            cardData.image_url = `http://localhost:3000/${cardData.image_path}`;
+
+            console.log("[IMAGE URL]", cardData.image_url);
             setRecommendedCard(cardData);
             setShowRecommendation(true);
         } else {

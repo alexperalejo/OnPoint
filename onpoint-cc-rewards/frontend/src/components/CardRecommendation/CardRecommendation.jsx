@@ -1,5 +1,3 @@
-
-import { getCardImage } from "../../utils/cardImageMap";
 import './CardRecommendation.css';
 // This will be redesigned as cardChoice since i can use for both checkout and purchase recommendations,
 // but for now just reuse the component and styles from the purchase recommendation work.
@@ -47,7 +45,7 @@ export function CardRecommendation({ card, onApply, onDismiss }) {
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onApply(card); } }}
       >
         <div className="cr-name">{card.name}</div>
-        <img src={getCardImage(card.imageKey)} alt={card.name} className="cr-image" />
+        <img src={card.image_url} alt={card.name} className="cr-image" />
         
       </div>
 

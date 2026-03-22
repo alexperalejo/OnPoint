@@ -1,7 +1,6 @@
 /* global chrome */
 import React, { useEffect, useState, useRef } from 'react';
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation";
-import { getCardImage } from '../../utils/cardImageMap';
 import { useChromeStorageSync } from "use-chrome-storage";
 import './PurchaseVerification.css';
 
@@ -220,7 +219,7 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
           >
             <div className="pv-card-visual" style={{ background: recommendedCard.color || '#f3c316' }}>
               <img
-                src={getCardImage(recommendedCard.imageKey)}
+                src={recommendedCard.image_url}
                 alt={recommendedCard.name}
                 className="pv-card-image"
               />
