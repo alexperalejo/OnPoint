@@ -5,8 +5,33 @@ import './CardRecommendation.css';
 // but for now just reuse the component and styles from the purchase recommendation work.
 export function CardRecommendation({ card, onApply, onDismiss }) {
   if (!card) return null;
+
+  const isDark =
+    window.matchMedia?.('(prefers-color-scheme: dark)').matches ||
+    document.documentElement.classList.contains('dark');
+
   return (
-    <div className="card-recommendation" role="region" aria-label="Card Recommendation">
+    <div
+      className="card-recommendation"
+      role="region"
+      aria-label="Card Recommendation"
+      style={{
+        '--cr-bg': isDark ? '#111827' : '#ffffff',
+        '--cr-border': isDark ? '#111827' : '#dbe2ea',
+        '--cr-text': isDark ? '#e5e7eb' : '#334155',
+        '--cr-title': isDark ? '#f8fafc' : '#0f172a',
+        '--cr-name': isDark ? '#f8fafc' : '#0f172a',
+        '--cr-subtle': isDark ? '#d1d5db' : '#475569',
+        '--cr-muted': isDark ? '#9ca3af' : '#64748b',
+        '--cr-dismiss': isDark ? '#f87171' : '#dc2626',
+        '--cr-dismiss-border': isDark ? '#f87171' : '#ef4444',
+        '--cr-dismiss-hover-bg': isDark ? 'rgba(248, 113, 113, 0.12)' : 'rgba(239, 68, 68, 0.09)',
+        '--cr-dismiss-hover': isDark ? '#fca5a5' : '#b91c1c',
+        '--cr-info-bg': isDark ? '#1f2937' : '#f8fafc',
+        '--cr-info-border': isDark ? '#374151' : '#e2e8f0',
+        '--cr-info-text': isDark ? '#9ca3af' : '#64748b'
+      }}
+    >
       <div className="cr-header">
         <h3 className="cr-title">Recommended card for this transaction</h3>
       </div>

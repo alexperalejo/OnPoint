@@ -13,6 +13,14 @@ export function CheckoutDetector() {
   const [recommendedCard, setRecommendedCard] = useState(null);
   const FIXED_THRESHOLD = 0.7;
 
+  function handleClosePopup() {
+    try {
+      window.close();
+    } catch {
+      // Ignore when not running as an extension popup.
+    }
+  }
+
   // Persist the latest detection plus a small history for developer inspection.
   async function persistDetectionDebug(payload) {
     try {
@@ -199,20 +207,35 @@ export function CheckoutDetector() {
     <div
       className="checkout-detector"
       style={{
-        '--bg': isDark ? '#0f172a' : '#ffffff',
+        '--bg': isDark ? '#111827' : '#ffffff',
         '--text': isDark ? '#e2e8f0' : '#1f2937',
-        '--title-color': isDark ? '#f0f9ff' : '#0f172a',
+        '--title-color': isDark ? '#f8fafc' : '#0f172a',
         '--muted': isDark ? '#94a3b8' : '#666',
         '--secondary': isDark ? '#cbd5e1' : '#4b5563',
         '--error-text': isDark ? '#fca5a5' : '#dc2626',
-        '--error-bg': isDark ? 'rgba(220, 38, 38, 0.1)' : '#fee',
-        '--error-border': isDark ? '1px solid rgba(220, 38, 38, 0.2)' : 'none',
-        '--footer': isDark ? '#64748b' : '#999'
+        '--error-bg': isDark ? 'rgba(220, 38, 38, 0.08)' : '#fee',
+        '--error-border': isDark ? '1px solid rgba(220, 38, 38, 0.18)' : 'none',
+        '--footer': isDark ? '#64748b' : '#999',
+        '--panel-bg': isDark ? 'rgba(255,255,255,0.04)' : '#f8fafc',
+        '--panel-border': isDark ? '1px solid rgba(148,163,184,0.35)' : '1px solid #e5e7eb',
+        '--panel-title': isDark ? '#f8fafc' : '#0f172a',
+        '--panel-text': isDark ? '#cbd5e1' : '#4b5563',
+        '--refresh-bg': isDark ? '#334155' : '#eee',
+        '--refresh-hover-bg': isDark ? '#475569' : '#ddd',
+        '--refresh-border': isDark ? '1px solid #475569' : '1px solid #d1d5db',
+        '--refresh-text': isDark ? '#e2e8f0' : '#1f2937'
       }}
     >
       <div className="cd-header">
         <div className="cd-icon">💳</div>
         <h1 className="cd-title">OnPoint</h1>
+        <button
+          type="button"
+          onClick={handleClosePopup}
+          className="cd-close"
+          aria-label="Close detector"
+          title="Close"
+        >✕</button>
       </div>
 
       {loading && <p className="cd-muted">Detecting...</p>}
@@ -241,27 +264,11 @@ export function CheckoutDetector() {
         </div>
       )}
 
-      <section
-        style={{
-          marginTop: '12px',
-          marginBottom: '12px',
-          padding: '12px',
-          borderRadius: '8px',
-          background: isDark ? '#1e293b' : '#f8fafc',
-          border: isDark ? '1px solid #334155' : '1px solid #e5e7eb'
-        }}
-      >
-        <h2
-          style={{
-            margin: '0 0 8px 0',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: isDark ? '#f0f9ff' : '#0f172a'
-          }}
-        >
+      <section className="cd-savings">
+        <h2 className="cd-savings-title">
           Savings Estimate
         </h2>
-        <p style={{ margin: 0, fontSize: '13px', color: isDark ? '#cbd5e1' : '#4b5563' }}>
+        <p className="cd-savings-copy">
           Estimated Reward: <strong>{'-- points'}</strong>
         </p>
       </section>
@@ -275,19 +282,13 @@ export function CheckoutDetector() {
         }}
         className="cd-cta"
       >
-        Get Card Recommendations
+        Get more card recommendations
       </button>
 
       <div className="cd-refresh">
         <button
           onClick={() => location.reload()}
-          style={{
-            background: isDark ? '#334155' : '#eee',
-            color: isDark ? '#e2e8f0' : '#1f2937',
-            border: isDark ? '1px solid #475569' : 'none'
-          }}
-          onMouseOver={(e) => e.target.style.background = isDark ? '#475569' : '#ddd'}
-          onMouseOut={(e) => e.target.style.background = isDark ? '#334155' : '#eee'}
+          className="cd-refresh-btn"
         >
           Refresh
         </button>

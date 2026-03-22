@@ -1,6 +1,7 @@
 /* global chrome */
 import React, { useEffect, useState, useRef } from 'react';
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation";
+import { getCardImage } from '../../utils/cardImageMap';
 import { useChromeStorageSync } from "use-chrome-storage";
 import './PurchaseVerification.css';
 
@@ -14,6 +15,15 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
   const refSnapshot = useRef(null);
   const [capturedAt, setCapturedAt] = useState(null);
 
+  function handleClosePopup() {
+    setShowRecommendation(false);
+    try {
+      window.close();
+    } catch {
+      // Ignore when not running as an extension popup.
+    }
+  }
+
   useEffect(() => {
     let mounted = true;
 
@@ -26,7 +36,7 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
         setCapturedAt(new Date(pageSnapshot.ts || Date.now()).toLocaleString());
         setRecommendedCard(pageSnapshot.recommended || null);
         setLoading(false);
-        setShowRecommendation(!!pageSnapshot.recommended);
+        setShowRecommendation(false);
         return;
       }
 
@@ -43,7 +53,7 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
             refSnapshot.current = resp.snapshot;
             setCapturedAt(new Date(resp.snapshot.ts || Date.now()).toLocaleString());
             setRecommendedCard(resp.recommended || resp.snapshot.recommended || null);
-            setShowRecommendation(!!(resp.recommended || resp.snapshot.recommended));
+            setShowRecommendation(false);
             setLoading(false);
             return; // done
           } else {
@@ -71,7 +81,7 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
           snapshotRef.current = snap;
           setCapturedAt(new Date(snap.ts || Date.now()).toLocaleString());
           setRecommendedCard(event.data.recommended || snap.recommended || null);
-          setShowRecommendation(!!(event.data.recommended || snap.recommended));
+          setShowRecommendation(false);
         }
         setLoading(false);
         window.removeEventListener('message', handleMessage);
@@ -137,49 +147,109 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
     <div
       className="purchase-verification"
       style={{
-        '--bg': isDark ? '#0f172a' : '#ffffff',
+        '--bg': isDark ? '#111827' : '#ffffff',
         '--text': isDark ? '#e2e8f0' : '#1f2937',
-        '--title-color': isDark ? '#f0f9ff' : '#0f172a',
+        '--title-color': isDark ? '#f8fafc' : '#0f172a',
         '--muted': isDark ? '#94a3b8' : '#666',
         '--secondary': isDark ? '#cbd5e1' : '#4b5563',
         '--error-text': isDark ? '#fca5a5' : '#dc2626',
-        '--error-bg': isDark ? 'rgba(220, 38, 38, 0.1)' : '#fee',
-        '--error-border': isDark ? '1px solid rgba(220, 38, 38, 0.2)' : 'none',
-        '--footer': isDark ? '#64748b' : '#999'
+        '--error-bg': isDark ? 'rgba(220, 38, 38, 0.08)' : '#fee',
+        '--error-border': isDark ? '1px solid rgba(220, 38, 38, 0.18)' : 'none',
+        '--footer': isDark ? '#64748b' : '#999',
+        '--panel-bg': isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255, 255, 255, 0.68)',
+        '--panel-border': isDark ? '2px solid rgba(255,255,255,0.06)' : '2px solid #6eaef7',
+        '--panel-shadow': isDark ? '0 10px 24px rgba(2,6,23,0.6)' : '0 10px 24px rgba(37, 99, 235, 0.14)',
+        '--meta-bg': isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255, 255, 255, 0.72)',
+        '--meta-border': isDark ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(110, 174, 247, 0.5)',
+        '--card-border': isDark ? '3px solid rgba(255,255,255,0.06)' : '3px solid #d9a600',
+        '--card-name': isDark ? '#e6b95a' : '#7c5d00',
+        '--close-bg': isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.9)',
+        '--close-hover-bg': isDark ? 'rgba(255,255,255,0.14)' : '#eef2ff',
+        '--close-border': isDark ? '1px solid rgba(148,163,184,0.45)' : '1px solid rgba(107,112,128,0.6)',
+        '--close-color': isDark ? '#e2e8f0' : '#4b5563',
+        '--close-hover-color': isDark ? '#ffffff' : '#1f2937',
+        '--secondary-bg': '#3b82f6',
+        '--secondary-border': '#2563eb',
+        '--secondary-color': '#ffffff',
+        '--secondary-shadow': '0 3px 0 rgba(37, 99, 235, 0.35)',
+        '--secondary-hover-bg': '#2563eb',
+        '--dismiss-bg': 'transparent',
+        '--dismiss-border': isDark ? '#f87171' : '#ef4444',
+        '--dismiss-color': isDark ? '#f87171' : '#dc2626',
+        '--dismiss-shadow': 'none',
+        '--dismiss-hover-bg': isDark ? 'rgba(248, 113, 113, 0.12)' : 'rgba(239, 68, 68, 0.09)'
       }}
     >
-      <div className="pv-header">
-        <div className="pv-icon">🧾</div>
-        <h1 className="pv-title">Purchase Verification</h1>
+      <div className="pv-panel">
+        <div className="pv-header">
+          <div>
+            <p className="pv-eyebrow">Purchase verification</p>
+            <h1 className="pv-title">Looks like you just completed a purchase!</h1>
+          </div>
+          <button
+            type="button"
+            className="pv-close"
+            onClick={handleClosePopup}
+            aria-label="Close purchase verification"
+            title="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        {loading && <p className="pv-muted">Requesting page snapshot…</p>}
+        {error && <p className="pv-error">{error}</p>}
+
+        {snapshot && (
+          <>
+            <div className="pv-meta">
+              <span>{snapshot.merchantName || snapshot.merchantId || 'Unknown merchant'}</span>
+              <span>{snapshot.total ? `$${snapshot.total}` : 'Amount unavailable'}</span>
+            </div>
+            <p className="pv-question">Which card did you end up using?</p>
+            {capturedAt && <p className="pv-captured">Captured {capturedAt}</p>}
+          </>
+        )}
+
+        {!showRecommendation && recommendedCard && (
+          <button
+            type="button"
+            className="pv-card-choice"
+            onClick={() => handleConfirmCard(recommendedCard)}
+            aria-label={`Confirm ${recommendedCard.name}`}
+          >
+            <div className="pv-card-visual" style={{ background: recommendedCard.color || '#f3c316' }}>
+              <img
+                src={getCardImage(recommendedCard.imageKey)}
+                alt={recommendedCard.name}
+                className="pv-card-image"
+              />
+            </div>
+            <div className="pv-card-name">{recommendedCard.name}</div>
+          </button>
+        )}
+
+        {!showRecommendation && snapshot && (
+          <div className="pv-actions">
+            <button type="button" className="pv-secondary" onClick={() => setShowRecommendation(!!recommendedCard)}>
+              Another Card
+            </button>
+            <button type="button" className="pv-dismiss" onClick={handleClosePopup}>
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {showRecommendation && recommendedCard && (
+          <div className="pv-recommendation-wrap">
+            <CardRecommendation
+              card={recommendedCard}
+              onApply={(card) => handleConfirmCard(card)}
+              onDismiss={() => setShowRecommendation(false)}
+            />
+          </div>
+        )}
       </div>
-
-      {loading && <p className="pv-muted">Requesting page snapshot…</p>}
-      {error && <p className="pv-error">{error}</p>}
-
-      {snapshot && (
-        <div className="pv-summary">
-          <p>Merchant: <strong>{snapshot.merchantName || snapshot.merchantId || 'Unknown'}</strong></p>
-          <p>Total: {snapshot.total ? `$${snapshot.total}` : '—'}</p>
-          <p className="small">Captured at: {capturedAt || new Date().toLocaleString()}</p>
-        </div>
-      )}
-
-      {showRecommendation && recommendedCard && (
-        <CardRecommendation
-          card={recommendedCard}
-          onApply={(card) => handleConfirmCard(card)}
-          onDismiss={() => setShowRecommendation(false)}
-        />
-      )}
-
-      {!showRecommendation && snapshot && (
-        <div className="pv-actions">
-          <button className="pv-cta" onClick={() => setShowRecommendation(!!recommendedCard)}>Confirm Card</button>
-          <button className="pv-secondary" onClick={() => { setShowRecommendation(false); }}>Dismiss</button>
-        </div>
-      )}
-
-      <footer className="pv-footer">Local snapshot · Manifest V3</footer>
     </div>
   );
 }

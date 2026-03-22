@@ -1,28 +1,194 @@
-/* Styles for PurchaseVerification component - mirrors CheckoutDetector look */
+/* Compact purchase confirmation panel inspired by the provided mock. */
 .purchase-verification {
   width: 400px;
-  padding: 16px;
+  padding: 14px;
   font-family: system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  transition: background 0.3s ease, color 0.3s ease;
+  background: var(--bg, linear-gradient(180deg, #d9ecff 0%, #c8def5 100%));
+  color: var(--text, #1f2937);
+  transition: background 0.2s ease, color 0.2s ease;
   box-sizing: border-box;
 }
 
-.pv-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.pv-icon { width: 18px; height: 18px; display:flex; align-items:center; justify-content:center; font-size:12px; }
-.pv-title { font-size: 16px; font-weight:700; margin:0; color: var(--title-color); }
+.pv-panel {
+  background: var(--panel-bg, rgba(255, 255, 255, 0.68));
+  border: var(--panel-border, 2px solid #6eaef7);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: var(--panel-shadow, 0 10px 24px rgba(37, 99, 235, 0.14));
+  backdrop-filter: blur(2px);
+}
 
-.pv-muted { color: var(--muted); }
-.pv-error { color: var(--error-text); padding: 10px; background: var(--error-bg); border-radius:4px; border: var(--error-border); }
+.pv-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
 
-.pv-summary { margin-bottom: 12px; }
-.pv-summary p { margin-bottom: 8px; }
-.pv-summary p.small { margin-bottom: 4px; font-weight:500; color: var(--secondary); }
+.pv-eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--secondary, #4b77b3);
+}
 
-.pv-cta { padding: 10px 14px; background: #3b82f6; color: white; border: none; border-radius:6px; cursor:pointer; font-weight:500; }
-.pv-cta:hover { background:#2563eb }
-.pv-secondary { margin-left:8px; padding:8px 12px; background:transparent; border:1px solid #e5e7eb; border-radius:6px; cursor:pointer; }
+.pv-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--title-color, #243b53);
+}
 
-.pv-actions { margin-top:12px; }
-.pv-footer { margin-top: 12px; font-size: 12px; color: var(--footer); }
+.pv-close {
+  border: var(--close-border, 1px solid rgba(107,112,128,0.6));
+  background: var(--close-bg, rgba(255, 255, 255, 0.9));
+  color: var(--close-color, #4b5563);
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pv-close:hover {
+  background: var(--close-hover-bg, #eef2ff);
+  color: var(--close-hover-color, #1f2937);
+}
+
+.pv-close:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+.pv-muted {
+  margin: 8px 0;
+  color: var(--muted, #52606d);
+}
+
+.pv-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--secondary, #486581);
+}
+.pv-meta span {
+  background: var(--meta-bg, rgba(255, 255, 255, 0.72));
+  border: var(--meta-border, 1px solid rgba(110, 174, 247, 0.5));
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-weight: 600;
+  color: var(--secondary, #486581);
+}
+
+.pv-question {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--title-color, #243b53);
+}
+
+.pv-captured {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--footer, #627d98);
+}
+
+.pv-card-choice {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pv-card-choice:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 4px;
+  border-radius: 16px;
+}
+
+.pv-card-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 152px;
+  border-radius: 18px;
+  border: var(--card-border, 3px solid #d9a600);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.12);
+  transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pv-card-choice:hover .pv-card-visual {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(217, 166, 0, 0.22);
+}
+
+.pv-card-image {
+  width: 100%;
+  max-width: 232px;
+  display: block;
+}
+
+.pv-card-name {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--card-name, #7c5d00);
+  text-align: center;
+}
+
+.pv-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.pv-secondary,
+.pv-dismiss {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.pv-secondary {
+  background: var(--secondary-bg, #ffffff);
+  border-color: var(--secondary-border, #94a3b8);
+  color: var(--secondary-color, #334155);
+  box-shadow: var(--secondary-shadow, 0 3px 0 rgba(148, 163, 184, 0.35));
+}
+
+.pv-secondary:hover {
+  background: var(--secondary-hover-bg, #f8fafc);
+}
+
+.pv-dismiss {
+  background: var(--dismiss-bg, #ffd7d9);
+  border-color: var(--dismiss-border, #ef6f7d);
+  color: var(--dismiss-color, #c2414f);
+  box-shadow: var(--dismiss-shadow, 0 3px 0 rgba(239, 111, 125, 0.28));
+}
+
+.pv-dismiss:hover {
+  background: var(--dismiss-hover-bg, #ffc7cc);
+}
+
+.pv-recommendation-wrap {
+  margin-top: 14px;
+}
