@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from '../../utils/translation';
 import './CardRecommendation.css';
 // This will be redesigned as cardChoice since i can use for both checkout and purchase recommendations,
 // but for now just reuse the component and styles from the purchase recommendation work.
 export function CardRecommendation({ card, onApply, onDismiss, total, reason }) {
   const [showDetails, setShowDetails] = useState(false);
-
+  const translate = useTranslation('card-recommendation');
   if (!card) return null;
 
   const isDark =
@@ -38,7 +39,7 @@ export function CardRecommendation({ card, onApply, onDismiss, total, reason }) 
       }}
     >
       <div className="cr-header">
-        <h3 className="cr-title">Recommended card for this transaction</h3>
+        <h3 className="cr-title">{translate('.title')}</h3>
       </div>
 
       {/* Clickable card visual — keyboard-accessible via role+tabIndex */}
@@ -72,12 +73,12 @@ export function CardRecommendation({ card, onApply, onDismiss, total, reason }) 
         </div>
       )}
 
-      <button onClick={() => onDismiss(card)} className="cr-dismiss">Dismiss</button>
+      <button onClick={() => onDismiss(card)} className="cr-dismiss">{translate('.dismiss')}</button>
       <button
         className="cr-details-toggle"
         onClick={() => setShowDetails(!showDetails)}
       >
-        Show Details {showDetails ? '▲' : '▼'}
+        {showDetails ? translate('.hide-details') : translate('.show-details')} {showDetails ? '▲' : '▼'}
       </button>
 
       {showDetails && (
@@ -89,12 +90,12 @@ export function CardRecommendation({ card, onApply, onDismiss, total, reason }) 
             </div>
           )}
           <div className="cr-details-row">
-            <span>Reward Rate:</span>
-            <span>{rewardRate}% Cashback</span>
+            <span>{translate('.details.reward-rate')}:</span>
+            <span>{rewardRate}% {translate('.details.cashback')}</span>
           </div>
           {rewardsEarned && (
             <div className="cr-details-row">
-              <span>Rewards Earned:</span>
+              <span>{translate('.details.rewards-earned')}:</span>
               <span>${rewardsEarned}</span>
             </div>
           )}

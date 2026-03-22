@@ -277,35 +277,6 @@ export function CheckoutDetector() {
         </div>
       )}
 
-      <section className="cd-savings">
-        <h2 className="cd-savings-title">
-          Savings Estimate
-        </h2>
-        <p className="cd-savings-copy">
-          Estimated Reward: <strong>{'-- points'}</strong>
-        </p>
-      </section>
-
-      <button
-        onClick={() => {
-          // Open the main dashboard
-          chrome.tabs.create({ 
-            url: chrome.runtime.getURL('dist/dashboard.html') 
-          });
-        }}
-        className="cd-cta"
-      >
-        Get more card recommendations
-      </button>
-
-      <div className="cd-refresh">
-        <button
-          onClick={() => location.reload()}
-          className="cd-refresh-btn"
-        >
-          Refresh
-        </button>
-      </div>
     </div>
   );
 }

@@ -49,5 +49,16 @@
     "category.transit": "Transit",
     "category.all": "All Purchases",
     "category.travel_capital_one_flights": "Sky Miles",
-    "category.travel_capital_one_hotels_cars": "Travel"
+    "category.travel_capital_one_hotels_cars": "Travel",
+
+    "card-recommendation.title": "Recommended card for this transaction",
+    "card-recommendation.annual-fee": "Annual Fee",
+    "card-recommendation.dismiss": "Dismiss",
+    "card-recommendation.show-details": "Show Details",
+    "card-recommendation.hide-details": "Hide Details",
+    "card-recommendation.details.total": "Total",
+    "card-recommendation.details.reward-rate": "Reward Rate",
+    "card-recommendation.details.rewards-earned": "Rewards Earned",
+    "card-recommendation.details.cashback": "Cashback",
+    "card-recommendation.details.close": "Close"
 }
