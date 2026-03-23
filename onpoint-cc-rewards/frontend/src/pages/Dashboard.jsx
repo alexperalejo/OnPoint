@@ -15,6 +15,7 @@ export default function Dashboard({ onSignOut }) {
   const [storedCards, setStoredCards] = useChromeStorageSync("cardinfo", []);
   const [currentView, setCurrentView] = useState(searchParams.get("view") || "dashboard"); // dashboard | library | savings | profile
   const [userCards, setUserCards] = useState([]);
+  const [allTimeSavingsTotal, setAllTimeSavingsTotal] = useState(0);
   const translate = useTranslation();
 
   useEffect(() => {
@@ -100,6 +101,36 @@ export default function Dashboard({ onSignOut }) {
   );
 
   const totalAnnualFees = userCards.reduce((sum, card) => sum + card.annualFee, 0);
+
+  useEffect(() => {
+    if (typeof chrome === "undefined" || !chrome.storage?.local) return;
+
+    const toNumber = (value) => {
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+      if (typeof value === "string") {
+        const parsed = Number(value.replace(/[^\d.-]/g, ""));
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      return 0;
+    };
+
+    const refreshAllTimeSavings = () => {
+      chrome.storage.local.get(["savings_all_time_total"], (data) => {
+        setAllTimeSavingsTotal(toNumber(data?.savings_all_time_total));
+      });
+    };
+
+    refreshAllTimeSavings();
+
+    const handleStorageChange = (changes, areaName) => {
+      if (areaName !== "local") return;
+      if (!changes?.savings_all_time_total) return;
+      setAllTimeSavingsTotal(toNumber(changes.savings_all_time_total.newValue));
+    };
+
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    return () => chrome.storage.onChanged.removeListener(handleStorageChange);
+  }, []);
 
   return (
     <div className="dash-shell">
@@ -259,7 +290,7 @@ export default function Dashboard({ onSignOut }) {
                   id="totalCashbackValue"
                   data-metric="total-cashback"
                 >
-                  $1,245.50
+                  ${allTimeSavingsTotal.toFixed(2)}
                 </p>
                 <p className="savings-helper-text">All-time rewards earned</p>
               </div>

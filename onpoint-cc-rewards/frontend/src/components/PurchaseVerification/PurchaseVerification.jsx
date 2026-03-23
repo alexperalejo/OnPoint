@@ -4,6 +4,117 @@ import { CardRecommendation } from "../CardRecommendation/CardRecommendation";
 import { useChromeStorageSync } from "use-chrome-storage";
 import './PurchaseVerification.css';
 
+const SAVINGS_TOTAL_KEY = 'savings_all_time_total';
+const SAVINGS_DEDUPE_KEY = 'savings_processed_purchase_keys';
+
+function toNumber(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[^\d.-]/g, '');
+    const parsed = Number(cleaned);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function hasPurchaseDetectorYes(snapshot) {
+  const direct = snapshot?.purchaseDetector;
+  if (direct === true) return true;
+  if (typeof direct === 'string' && direct.toLowerCase() === 'yes') return true;
+
+  const detection = snapshot?.detection;
+  if (detection === true) return true;
+  if (typeof detection === 'string' && detection.toLowerCase() === 'yes') return true;
+  if (detection && detection.isPurchase === true) return true;
+  if (typeof detection?.isPurchase === 'string' && detection.isPurchase.toLowerCase() === 'yes') return true;
+
+  return false;
+}
+
+function getCardRate(card) {
+  if (!card || typeof card !== 'object') return 0;
+
+  const directRate = toNumber(card.rate || card.cashbackRate || card.rewardRate);
+  if (directRate > 0) return directRate / (directRate > 1 ? 100 : 1);
+
+  if (Array.isArray(card.rewards) && card.rewards.length) {
+    const allRate = card.rewards.find((reward) => String(reward?.category || '').toLowerCase() === 'all');
+    const candidate = allRate || card.rewards[0];
+    const rewardRate = toNumber(candidate?.rate);
+    if (rewardRate > 0) return rewardRate / (rewardRate > 1 ? 100 : 1);
+  }
+
+  if (Array.isArray(card.attributes) && card.attributes.length) {
+    const allAttr = card.attributes.find((attribute) => String(attribute?.type || '').toLowerCase() === 'all');
+    const candidate = allAttr || card.attributes[0];
+    const attrRate = toNumber(candidate?.multiplier || candidate?.points || candidate?.rate);
+    if (attrRate > 0) return attrRate / (attrRate > 1 ? 100 : 1);
+  }
+
+  return 0;
+}
+
+function computeRewardValue(amount, selectedCard) {
+  const purchaseAmount = toNumber(amount);
+  if (purchaseAmount <= 0) return 0;
+
+  const points = toNumber(selectedCard?.rewardPoints);
+  const pointValue = toNumber(selectedCard?.pointValue || selectedCard?.pointToDollar || selectedCard?.pointToCashValue);
+  if (points > 0 && pointValue > 0) {
+    return points * pointValue;
+  }
+  if (points > 0 && pointValue === 0 && Number.isFinite(points)) {
+    return points;
+  }
+
+  const rate = getCardRate(selectedCard);
+  if (rate <= 0) return 0;
+  return purchaseAmount * rate;
+}
+
+function buildPurchaseFingerprint(snapshot, amount, selectedCard) {
+  const pageUrl = String(snapshot?.url || snapshot?.checkout?.url || snapshot?.merchantId || 'unknown-url');
+  const numericAmount = toNumber(amount).toFixed(2);
+  const cardRef = String(selectedCard?.id || selectedCard?.name || selectedCard?.cardId || 'unknown-card');
+  const orderRef = String(snapshot?.orderId || snapshot?.checkout?.orderId || '');
+  return orderRef
+    ? `${pageUrl}|${numericAmount}|${cardRef}|${orderRef}`
+    : `${pageUrl}|${numericAmount}|${cardRef}`;
+}
+
+async function applyAllTimeSavings(snapshot, selectedCard) {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) return;
+  if (!hasPurchaseDetectorYes(snapshot)) return;
+
+  const amount = toNumber(snapshot?.total || snapshot?.checkout?.amount);
+  if (amount <= 0) return;
+
+  const rewardValue = computeRewardValue(amount, selectedCard);
+  if (rewardValue <= 0) return;
+
+  const dedupeKey = buildPurchaseFingerprint(snapshot, amount, selectedCard);
+  const data = await new Promise((resolve) => {
+    chrome.storage.local.get([SAVINGS_TOTAL_KEY, SAVINGS_DEDUPE_KEY], resolve);
+  });
+
+  const processed = Array.isArray(data?.[SAVINGS_DEDUPE_KEY]) ? data[SAVINGS_DEDUPE_KEY] : [];
+  if (processed.includes(dedupeKey)) return;
+
+  const currentTotal = toNumber(data?.[SAVINGS_TOTAL_KEY]);
+  const nextTotal = Number((currentTotal + rewardValue).toFixed(2));
+  const nextProcessed = [...processed, dedupeKey].slice(-200);
+
+  await new Promise((resolve) => {
+    chrome.storage.local.set(
+      {
+        [SAVINGS_TOTAL_KEY]: nextTotal,
+        [SAVINGS_DEDUPE_KEY]: nextProcessed,
+      },
+      resolve
+    );
+  });
+}
+
 export default function PurchaseVerification({ pageSnapshot, onSaved }) {
   const [_savedCards] = useChromeStorageSync('cardinfo');
   const [loading, setLoading] = useState(true);
@@ -117,6 +228,13 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
 
   async function handleConfirmCard(card) {
     if (!snapshot) return;
+
+    try {
+      await applyAllTimeSavings(snapshot, card || recommendedCard);
+    } catch (e) {
+      console.warn('Failed to update all-time savings', e);
+    }
+
     // Minimal record to send to backend
     const record = {
       idempotencyKey: `pv_${Date.now()}`,
