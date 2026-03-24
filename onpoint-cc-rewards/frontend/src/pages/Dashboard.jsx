@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import "./Dashboard.css";
 import CardLibrary from "./CardLibrary.jsx";
 import UserProfile from "./UserProfile.jsx";
@@ -17,6 +17,8 @@ export default function Dashboard({ onSignOut }) {
   const [userCards, setUserCards] = useState([]);
   const [allTimeSavingsTotal, setAllTimeSavingsTotal] = useState(0);
   const [accountCreatedAt, setAccountCreatedAt] = useState(null);
+  const [cardTransactionCounts, setCardTransactionCounts] = useState({});
+  const [qualifyingTransactionTotal, setQualifyingTransactionTotal] = useState(0);
   const translate = useTranslation();
 
   const calculateMonthsSinceAccountCreation = useCallback((createdAtTs) => {
@@ -39,6 +41,30 @@ export default function Dashboard({ onSignOut }) {
       ? allTimeSavingsTotal / calculateMonthsSinceAccountCreation(accountCreatedAt)
       : 0;
   const monthlyAverageMonthsUsed = calculateMonthsSinceAccountCreation(accountCreatedAt);
+
+  const topCardSummary = useMemo(() => {
+    const entries = Object.entries(cardTransactionCounts || {});
+    if (!entries.length || qualifyingTransactionTotal <= 0) {
+      return {
+        name: "No data",
+        percentageText: "0% of total transactions",
+      };
+    }
+
+    const [topName, topCountRaw] = entries.reduce((maxEntry, currentEntry) => {
+      const currentCount = Number(currentEntry[1]) || 0;
+      const maxCount = Number(maxEntry[1]) || 0;
+      return currentCount > maxCount ? currentEntry : maxEntry;
+    }, entries[0]);
+
+    const topCount = Number(topCountRaw) || 0;
+    const percentage = (topCount / qualifyingTransactionTotal) * 100;
+
+    return {
+      name: topName,
+      percentageText: `${Math.round(percentage)}% of total transactions`,
+    };
+  }, [cardTransactionCounts, qualifyingTransactionTotal]);
 
   useEffect(() => {
     searchParams.set("view", currentView);
@@ -138,8 +164,20 @@ export default function Dashboard({ onSignOut }) {
     };
 
     const refreshSavingsMetrics = () => {
-      chrome.storage.local.get(["savings_all_time_total", "accountCreatedAt"], (data) => {
+      chrome.storage.local.get([
+        "savings_all_time_total",
+        "accountCreatedAt",
+        "savings_card_transaction_counts",
+        "savings_qualifying_transaction_total",
+      ], (data) => {
         setAllTimeSavingsTotal(toNumber(data?.savings_all_time_total));
+
+        const nextCardCounts =
+          data?.savings_card_transaction_counts && typeof data.savings_card_transaction_counts === "object"
+            ? data.savings_card_transaction_counts
+            : {};
+        setCardTransactionCounts(nextCardCounts);
+        setQualifyingTransactionTotal(toNumber(data?.savings_qualifying_transaction_total));
 
         const existingAccountCreatedAt = Number(data?.accountCreatedAt);
         if (Number.isFinite(existingAccountCreatedAt) && existingAccountCreatedAt > 0) {
@@ -198,6 +236,15 @@ export default function Dashboard({ onSignOut }) {
         if (Number.isFinite(nextAccountCreatedAt) && nextAccountCreatedAt > 0) {
           setAccountCreatedAt(nextAccountCreatedAt);
         }
+      }
+
+      if (changes?.savings_card_transaction_counts) {
+        const nextCounts = changes.savings_card_transaction_counts.newValue;
+        setCardTransactionCounts(nextCounts && typeof nextCounts === "object" ? nextCounts : {});
+      }
+
+      if (changes?.savings_qualifying_transaction_total) {
+        setQualifyingTransactionTotal(toNumber(changes.savings_qualifying_transaction_total.newValue));
       }
 
       if (changes?.savings_all_time_total || changes?.monthlySavings) {
@@ -399,10 +446,10 @@ export default function Dashboard({ onSignOut }) {
                   </div>
                 </div>
                 <p className="stat-value" id="topCardValue" data-metric="top-card">
-                  Sapphire
+                  {topCardSummary.name}
                 </p>
                 <p className="savings-helper-text" id="topCardSubtext" data-metric="top-card-share">
-                  42% of total savings
+                  {topCardSummary.percentageText}
                 </p>
               </div>
             </div>

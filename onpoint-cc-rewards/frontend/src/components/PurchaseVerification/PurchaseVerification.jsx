@@ -7,6 +7,8 @@ import './PurchaseVerification.css';
 const SAVINGS_TOTAL_KEY = 'savings_all_time_total';
 const SAVINGS_DEDUPE_KEY = 'savings_processed_purchase_keys';
 const SAVINGS_MONTHLY_KEY = 'monthlySavings';
+const SAVINGS_CARD_USAGE_KEY = 'savings_card_transaction_counts';
+const SAVINGS_QUALIFYING_TOTAL_KEY = 'savings_qualifying_transaction_total';
 
 function toNumber(value) {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -82,6 +84,12 @@ function buildMonthKeyFromTimestamp(timestamp) {
   return `${year}-${month}`;
 }
 
+function getCardUsageKey(selectedCard) {
+  if (!selectedCard) return 'Unknown Card';
+  if (typeof selectedCard === 'string') return selectedCard;
+  return String(selectedCard.name || selectedCard.id || selectedCard.cardId || 'Unknown Card');
+}
+
 function buildPurchaseFingerprint(snapshot, amount, selectedCard) {
   const pageUrl = String(snapshot?.url || snapshot?.checkout?.url || snapshot?.merchantId || 'unknown-url');
   const numericAmount = toNumber(amount).toFixed(2);
@@ -104,7 +112,16 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
 
   const dedupeKey = buildPurchaseFingerprint(snapshot, amount, selectedCard);
   const data = await new Promise((resolve) => {
-    chrome.storage.local.get([SAVINGS_TOTAL_KEY, SAVINGS_DEDUPE_KEY, SAVINGS_MONTHLY_KEY], resolve);
+    chrome.storage.local.get(
+      [
+        SAVINGS_TOTAL_KEY,
+        SAVINGS_DEDUPE_KEY,
+        SAVINGS_MONTHLY_KEY,
+        SAVINGS_CARD_USAGE_KEY,
+        SAVINGS_QUALIFYING_TOTAL_KEY,
+      ],
+      resolve
+    );
   });
 
   const processed = Array.isArray(data?.[SAVINGS_DEDUPE_KEY]) ? data[SAVINGS_DEDUPE_KEY] : [];
@@ -115,12 +132,23 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
   const currentMonthlySavings = data?.[SAVINGS_MONTHLY_KEY] && typeof data[SAVINGS_MONTHLY_KEY] === 'object'
     ? data[SAVINGS_MONTHLY_KEY]
     : {};
+  const currentCardUsageCounts = data?.[SAVINGS_CARD_USAGE_KEY] && typeof data[SAVINGS_CARD_USAGE_KEY] === 'object'
+    ? data[SAVINGS_CARD_USAGE_KEY]
+    : {};
+  const currentQualifyingTotal = toNumber(data?.[SAVINGS_QUALIFYING_TOTAL_KEY]);
   const monthKey = buildMonthKeyFromTimestamp(snapshot?.ts || snapshot?.checkout?.ts || Date.now());
+  const cardUsageKey = getCardUsageKey(selectedCard);
   const currentMonthTotal = toNumber(currentMonthlySavings[monthKey]);
+  const currentCardCount = toNumber(currentCardUsageCounts[cardUsageKey]);
   const nextMonthlySavings = {
     ...currentMonthlySavings,
     [monthKey]: Number((currentMonthTotal + rewardValue).toFixed(2)),
   };
+  const nextCardUsageCounts = {
+    ...currentCardUsageCounts,
+    [cardUsageKey]: Number((currentCardCount + 1).toFixed(0)),
+  };
+  const nextQualifyingTotal = Number((currentQualifyingTotal + 1).toFixed(0));
   const nextProcessed = [...processed, dedupeKey].slice(-200);
 
   await new Promise((resolve) => {
@@ -129,6 +157,8 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
         [SAVINGS_TOTAL_KEY]: nextTotal,
         [SAVINGS_DEDUPE_KEY]: nextProcessed,
         [SAVINGS_MONTHLY_KEY]: nextMonthlySavings,
+        [SAVINGS_CARD_USAGE_KEY]: nextCardUsageCounts,
+        [SAVINGS_QUALIFYING_TOTAL_KEY]: nextQualifyingTotal,
       },
       resolve
     );
