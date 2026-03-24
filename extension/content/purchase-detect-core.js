@@ -23,6 +23,7 @@
     const reasons = [];
     let score = 0;
 
+    // Amazon specific fast path because page text can't be read (blocked by Amazon)
    const url = safeLower((typeof location !== 'undefined' && location.href) || '');
     if (url.includes('amazon.com') && url.includes('thankyou')) {
       return {
