@@ -6,6 +6,7 @@ import './PurchaseVerification.css';
 
 const SAVINGS_TOTAL_KEY = 'savings_all_time_total';
 const SAVINGS_DEDUPE_KEY = 'savings_processed_purchase_keys';
+const SAVINGS_MONTHLY_KEY = 'monthlySavings';
 
 function toNumber(value) {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -72,6 +73,15 @@ function computeRewardValue(amount, selectedCard) {
   return purchaseAmount * rate;
 }
 
+function buildMonthKeyFromTimestamp(timestamp) {
+  const numericTs = toNumber(timestamp);
+  const parsedDate = new Date(numericTs || Date.now());
+  const safeDate = Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+  const year = safeDate.getFullYear();
+  const month = String(safeDate.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
 function buildPurchaseFingerprint(snapshot, amount, selectedCard) {
   const pageUrl = String(snapshot?.url || snapshot?.checkout?.url || snapshot?.merchantId || 'unknown-url');
   const numericAmount = toNumber(amount).toFixed(2);
@@ -94,7 +104,7 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
 
   const dedupeKey = buildPurchaseFingerprint(snapshot, amount, selectedCard);
   const data = await new Promise((resolve) => {
-    chrome.storage.local.get([SAVINGS_TOTAL_KEY, SAVINGS_DEDUPE_KEY], resolve);
+    chrome.storage.local.get([SAVINGS_TOTAL_KEY, SAVINGS_DEDUPE_KEY, SAVINGS_MONTHLY_KEY], resolve);
   });
 
   const processed = Array.isArray(data?.[SAVINGS_DEDUPE_KEY]) ? data[SAVINGS_DEDUPE_KEY] : [];
@@ -102,6 +112,15 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
 
   const currentTotal = toNumber(data?.[SAVINGS_TOTAL_KEY]);
   const nextTotal = Number((currentTotal + rewardValue).toFixed(2));
+  const currentMonthlySavings = data?.[SAVINGS_MONTHLY_KEY] && typeof data[SAVINGS_MONTHLY_KEY] === 'object'
+    ? data[SAVINGS_MONTHLY_KEY]
+    : {};
+  const monthKey = buildMonthKeyFromTimestamp(snapshot?.ts || snapshot?.checkout?.ts || Date.now());
+  const currentMonthTotal = toNumber(currentMonthlySavings[monthKey]);
+  const nextMonthlySavings = {
+    ...currentMonthlySavings,
+    [monthKey]: Number((currentMonthTotal + rewardValue).toFixed(2)),
+  };
   const nextProcessed = [...processed, dedupeKey].slice(-200);
 
   await new Promise((resolve) => {
@@ -109,6 +128,7 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
       {
         [SAVINGS_TOTAL_KEY]: nextTotal,
         [SAVINGS_DEDUPE_KEY]: nextProcessed,
+        [SAVINGS_MONTHLY_KEY]: nextMonthlySavings,
       },
       resolve
     );

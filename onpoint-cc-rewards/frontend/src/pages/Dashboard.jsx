@@ -16,7 +16,29 @@ export default function Dashboard({ onSignOut }) {
   const [currentView, setCurrentView] = useState(searchParams.get("view") || "dashboard"); // dashboard | library | savings | profile
   const [userCards, setUserCards] = useState([]);
   const [allTimeSavingsTotal, setAllTimeSavingsTotal] = useState(0);
+  const [accountCreatedAt, setAccountCreatedAt] = useState(null);
   const translate = useTranslation();
+
+  const calculateMonthsSinceAccountCreation = useCallback((createdAtTs) => {
+    if (!createdAtTs || !Number.isFinite(createdAtTs)) return 1;
+
+    const startDate = new Date(createdAtTs);
+    if (Number.isNaN(startDate.getTime())) return 1;
+
+    const currentDate = new Date();
+    const months =
+      (currentDate.getFullYear() - startDate.getFullYear()) * 12 +
+      (currentDate.getMonth() - startDate.getMonth()) +
+      1;
+
+    return Math.max(1, months);
+  }, []);
+
+  const monthlyAverage =
+    allTimeSavingsTotal > 0
+      ? allTimeSavingsTotal / calculateMonthsSinceAccountCreation(accountCreatedAt)
+      : 0;
+  const monthlyAverageMonthsUsed = calculateMonthsSinceAccountCreation(accountCreatedAt);
 
   useEffect(() => {
     searchParams.set("view", currentView);
@@ -104,6 +126,7 @@ export default function Dashboard({ onSignOut }) {
 
   useEffect(() => {
     if (typeof chrome === "undefined" || !chrome.storage?.local) return;
+    const CONSISTENCY_TOLERANCE = 0.01;
 
     const toNumber = (value) => {
       if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -114,18 +137,72 @@ export default function Dashboard({ onSignOut }) {
       return 0;
     };
 
-    const refreshAllTimeSavings = () => {
-      chrome.storage.local.get(["savings_all_time_total"], (data) => {
+    const refreshSavingsMetrics = () => {
+      chrome.storage.local.get(["savings_all_time_total", "accountCreatedAt"], (data) => {
         setAllTimeSavingsTotal(toNumber(data?.savings_all_time_total));
+
+        const existingAccountCreatedAt = Number(data?.accountCreatedAt);
+        if (Number.isFinite(existingAccountCreatedAt) && existingAccountCreatedAt > 0) {
+          setAccountCreatedAt(existingAccountCreatedAt);
+          return;
+        }
+
+        const now = Date.now();
+        chrome.storage.local.set({ accountCreatedAt: now }, () => {
+          setAccountCreatedAt(now);
+        });
       });
     };
 
-    refreshAllTimeSavings();
+    const verifySavingsConsistency = () => {
+      chrome.storage.local.get(["savings_all_time_total", "monthlySavings"], (data) => {
+        const allTimeTotal = toNumber(data?.savings_all_time_total);
+        const monthlySavings =
+          data?.monthlySavings && typeof data.monthlySavings === "object"
+            ? data.monthlySavings
+            : {};
+
+        let monthlySum = 0;
+        Object.keys(monthlySavings).forEach((monthKey) => {
+          monthlySum += toNumber(monthlySavings[monthKey]);
+        });
+
+        const normalizedMonthlySum = Number(monthlySum.toFixed(2));
+        const normalizedAllTimeTotal = Number(allTimeTotal.toFixed(2));
+        const difference = Math.abs(normalizedMonthlySum - normalizedAllTimeTotal);
+
+        if (difference < CONSISTENCY_TOLERANCE) {
+          console.log("Monthly data matches all-time total");
+          return;
+        }
+
+        console.warn("Mismatch detected");
+        console.warn("monthlySum:", normalizedMonthlySum);
+        console.warn("allTimeTotal:", normalizedAllTimeTotal);
+        console.warn("difference:", Number(difference.toFixed(2)));
+      });
+    };
+
+    refreshSavingsMetrics();
+    verifySavingsConsistency();
 
     const handleStorageChange = (changes, areaName) => {
       if (areaName !== "local") return;
-      if (!changes?.savings_all_time_total) return;
-      setAllTimeSavingsTotal(toNumber(changes.savings_all_time_total.newValue));
+
+      if (changes?.savings_all_time_total) {
+        setAllTimeSavingsTotal(toNumber(changes.savings_all_time_total.newValue));
+      }
+
+      if (changes?.accountCreatedAt) {
+        const nextAccountCreatedAt = Number(changes.accountCreatedAt.newValue);
+        if (Number.isFinite(nextAccountCreatedAt) && nextAccountCreatedAt > 0) {
+          setAccountCreatedAt(nextAccountCreatedAt);
+        }
+      }
+
+      if (changes?.savings_all_time_total || changes?.monthlySavings) {
+        verifySavingsConsistency();
+      }
     };
 
     chrome.storage.onChanged.addListener(handleStorageChange);
@@ -307,9 +384,11 @@ export default function Dashboard({ onSignOut }) {
                   id="monthlyAverageValue"
                   data-metric="monthly-average"
                 >
-                  $103.79
+                  ${monthlyAverage.toFixed(2)}
                 </p>
-                <p className="savings-helper-text">Average per month</p>
+                <p className="savings-helper-text">
+                  Average per month · based on {monthlyAverageMonthsUsed} month{monthlyAverageMonthsUsed === 1 ? "" : "s"}
+                </p>
               </div>
 
               <div className="stat-card savings-stat-card" data-card="top-card">
