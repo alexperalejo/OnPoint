@@ -335,9 +335,40 @@
     return true;
   }); // end message listener
 
+
   // expose for debugging
   window.__checkoutDetection = {
     get: () => lastDetection,
     recompute: () => { lastDetection = runDetect(document); return lastDetection; }
   };
+
+  //for Amazon SPC page which loads slowly, we can trigger recompute a couple times after initial load to catch late-rendered content. 
+  // We could make this more robust by using a MutationObserver to watch for specific elements, but this is a simple start.
+
+  // Amazon SPC-specific detection — polls until the order summary loads
+  try {
+    if (location.hostname.includes('amazon.') && location.href.includes('spc')) {
+      let attempts = 0;
+      const maxAttempts = 10;
+      const amazonSpcInterval = setInterval(() => {
+        attempts++;
+        const orderTotal = document.querySelector(
+          '[data-testid="order-summary-total"], [data-anchor-id="OrderCartTotal"], .grand-total-price, #subtotals-marketplace-table'
+        );
+        if (orderTotal || attempts >= maxAttempts) {
+          clearInterval(amazonSpcInterval);
+          if (orderTotal) {
+            scheduleRecompute();
+            // Send checkout detected directly
+            try {
+              chrome.runtime.sendMessage({ type: "checkoutDetected" });
+            } catch(e) { /* ignore */ }
+          }
+        }
+      }, 500); // check every 500ms
+    }
+  } catch(e) { /* ignore */ }
+  
+  //This polls every 500ms up to 10 times (5 seconds total) waiting for Amazon's order summary to load, then triggers detection when it finds it.
+
 })();

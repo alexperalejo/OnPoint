@@ -1,0 +1,92 @@
+ONPOINT - CREDIT CARD REWARD RATE SOURCES
+==========================================
+Last Updated: March 2026
+
+CARD REWARD MULTIPLIER SOURCES
+--------------------------------
+
+1. Chase Freedom Unlimited
+   - Dining: 3x | Drugstore: 3x | Travel (Chase): 5x | All: 1.5x
+   - Source: https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited
+   - Backup: https://www.nerdwallet.com/credit-cards/reviews/chase-freedom-unlimited
+
+2. Chase Sapphire Preferred
+   - Dining: 3x | Travel General: 2x | Travel (Chase): 5x | Online Grocery: 3x | Streaming: 3x | All: 1x
+   - Source: https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred
+   - Backup: https://www.nerdwallet.com/credit-cards/reviews/chase-sapphire-preferred
+
+3. American Express Gold
+   - Dining: 4x | Groceries: 4x | Flights: 3x | All: 1x
+   - Source: https://www.americanexpress.com/us/credit-cards/card/gold-card/
+   - Backup: https://thepointsguy.com/credit-cards/maximizing-amex-gold-card/
+
+4. Citi Double Cash
+   - All: 2x (1% when you buy + 1% when you pay)
+   - Source: https://www.citi.com/credit-cards/citi-double-cash-credit-card
+   - Backup: https://www.nerdwallet.com/credit-cards/reviews/citi-double-cash-card
+
+5. Capital One SavorOne
+   - Dining: 3x | Entertainment: 3x | Groceries: 3x | Streaming: 3x | Travel (Capital One): 5x | All: 1x
+   - Source: https://www.capitalone.com/credit-cards/savorone/
+   - Backup: https://www.nerdwallet.com/credit-cards/reviews/capital-one-savorone-cash-rewards
+
+6. Discover it Cash Back
+   - Rotating: 5x | All: 1x
+   - Source: https://www.discover.com/credit-cards/cash-back/it-card.html
+   - Backup: https://www.nerdwallet.com/credit-cards/reviews/discover-it-cash-back
+
+7. Capital One Venture X
+   - Travel (Flights): 5x | Travel (Hotels/Cars): 10x | All: 2x
+   - Source: https://www.capitalone.com/credit-cards/venture-x/
+   - Backup: https://thepointsguy.com/credit-cards/reviews/capital-one-venture-x-rewards-credit-card/
+
+8. American Express Blue Cash Preferred
+   - Groceries: 6x | Streaming: 6x | Transit: 3x | Gas: 3x | All: 1x
+   - Source: https://www.americanexpress.com/us/credit-cards/card/blue-cash-preferred/
+   - Backup: https://www.nerdwallet.com/credit-cards/reviews/blue-cash-preferred-card-from-american-express
+
+9. Chase Freedom Flex
+   - Rotating: 5x | Dining: 3x | Drugstore: 3x | Travel (Chase): 5x | All: 1x
+   - Source: https://creditcards.chase.com/cash-back-credit-cards/freedom/flex
+   - Backup: https://www.nerdwallet.com/credit-cards/reviews/chase-freedom-flex
+
+
+PRESENTATION STATISTICS SOURCES
+---------------------------------
+
+1. $27.9 Billion in Unclaimed Rewards (2024)
+   - Source: WalletHub Study 2024
+   - URL: https://thepointsparty.com/articles/why-credit-card-rewards-go-unclaimed
+
+2. 49% of Cardholders Don't Redeem All Rewards
+   - Source: CardRates.com 2025
+   - URL: https://www.cardrates.com/news/credit-card-reward-redemption-statistics/
+
+3. Average 3.7 Active Credit Cards Per Person
+   - Source: Experian 2025
+   - URL: https://www.experian.com/blogs/ask-experian/average-number-of-credit-cards-a-person-has/
+
+4. Only 16% of Gen Z Redeem Points Immediately
+   - Source: CoinLaw.io 2025
+   - URL: https://coinlaw.io/credit-card-rewards-programs-statistics/
+
+5. Average Household Loses $583 Annually in Unclaimed Rewards
+   - Source: WalletHub Study 2024
+   - URL: https://thepointsparty.com/articles/why-credit-card-rewards-go-unclaimed
+
+
+GENERAL CREDIT CARD STATISTICS SOURCES
+----------------------------------------
+
+1. Consumer Financial Protection Bureau (CFPB)
+   - The Consumer Credit Card Market 2023
+   - URL: https://www.consumerfinance.gov/data-research/research-reports/the-consumer-credit-card-market/
+
+2. NerdWallet Credit Card Data
+   - URL: https://www.nerdwallet.com/article/credit-cards/credit-card-data
+
+3. WalletHub Credit Card Statistics 2026
+   - URL: https://wallethub.com/edu/cc/credit-card-statistics/25581
+
+4. Bankrate Credit Card Ownership Statistics
+   - URL: https://www.bankrate.com/credit-cards/news/credit-card-ownership-usage-statistics/

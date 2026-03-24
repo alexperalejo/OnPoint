@@ -1,5 +1,6 @@
 [
   {
+    "_id": "card000000000000000000001",
     "name": "Chase Freedom Unlimited",
     "cardType": "cashback",
     "issuer": "Chase",
@@ -12,8 +13,8 @@
     ],
     "image_path": "assets/cards/chase-freedom-unlimited.png"
   },
-
   {
+    "_id": "card000000000000000000002",
     "name": "Chase Sapphire Preferred",
     "cardType": "points",
     "issuer": "Chase",
@@ -28,8 +29,8 @@
     ],
     "image_path": "assets/cards/chase-sapphire-preferred.png"
   },
-
   {
+    "_id": "card000000000000000000003",
     "name": "American Express Gold",
     "cardType": "points",
     "issuer": "Amex",
@@ -42,8 +43,8 @@
     ],
     "image_path": "assets/cards/amex-gold.png"
   },
-
   {
+    "_id": "card000000000000000000004",
     "name": "Citi Double Cash",
     "cardType": "cashback",
     "issuer": "Citi",
@@ -53,11 +54,11 @@
     ],
     "image_path": "assets/cards/citi-double-cash.png"
   },
-
   {
+    "_id": "card000000000000000000005",
     "name": "Capital One SavorOne",
-    "issuer": "Capital One",
     "cardType": "cashback",
+    "issuer": "Capital One",
     "annualFee": 0,
     "attributes": [
       { "type": "tag", "category": "dining", "multiplier": 3 },
@@ -69,11 +70,11 @@
     ],
     "image_path": "assets/cards/capital-one-savor-one.png"
   },
-
   {
+    "_id": "card000000000000000000006",
     "name": "Discover it Cash Back",
-    "issuer": "Discover",
     "cardType": "cashback",
+    "issuer": "Discover",
     "annualFee": 0,
     "attributes": [
       { "type": "tag", "category": "rotating", "multiplier": 5 },
@@ -81,11 +82,11 @@
     ],
     "image_path": "assets/cards/discover-it.png"
   },
-
   {
+    "_id": "card000000000000000000007",
     "name": "Capital One Venture X",
-    "issuer": "Capital One",
     "cardType": "points",
+    "issuer": "Capital One",
     "annualFee": 395,
     "attributes": [
       { "type": "tag", "category": "travel_capital_one_flights", "multiplier": 5 },
@@ -94,11 +95,11 @@
     ],
     "image_path": "assets/cards/capital-one-venture-x.png"
   },
-
   {
+    "_id": "card000000000000000000008",
     "name": "American Express Blue Cash Preferred",
-    "issuer": "Amex",
     "cardType": "cashback",
+    "issuer": "Amex",
     "annualFee": 95,
     "attributes": [
       { "type": "tag", "category": "groceries", "multiplier": 6 },
@@ -109,11 +110,11 @@
     ],
     "image_path": "assets/cards/amex-blue-cash-preferred.png"
   },
-
   {
+    "_id": "card000000000000000000009",
     "name": "Chase Freedom Flex",
-    "issuer": "Chase",
     "cardType": "cashback",
+    "issuer": "Chase",
     "annualFee": 0,
     "attributes": [
       { "type": "tag", "category": "rotating", "multiplier": 5 },

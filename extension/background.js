@@ -166,8 +166,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
       } catch (e) { console.warn('background purchase handling failed', e); }
     })();
+
+      //auto pop up for purchase detction
+      const tabId = sender?.tab?.id;
+      if (tabId) {
+          chrome.action.setBadgeText({ text: "✓", tabId });
+          chrome.action.setBadgeBackgroundColor({ color: "#10b981", tabId });
+      }
+      chrome.action.openPopup().catch(() => {});
+
     return true;
-  }
+
+  } // end purchaseDetected
 
   if (message.type === 'REQUEST_CHECKOUT_SNAPSHOT') {
     try {
