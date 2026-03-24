@@ -9,6 +9,7 @@ const SAVINGS_DEDUPE_KEY = 'savings_processed_purchase_keys';
 const SAVINGS_MONTHLY_KEY = 'monthlySavings';
 const SAVINGS_CARD_USAGE_KEY = 'savings_card_transaction_counts';
 const SAVINGS_QUALIFYING_TOTAL_KEY = 'savings_qualifying_transaction_total';
+const SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY = 'savings_monthly_card_contributions';
 
 function toNumber(value) {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -119,6 +120,7 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
         SAVINGS_MONTHLY_KEY,
         SAVINGS_CARD_USAGE_KEY,
         SAVINGS_QUALIFYING_TOTAL_KEY,
+        SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY,
       ],
       resolve
     );
@@ -135,11 +137,27 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
   const currentCardUsageCounts = data?.[SAVINGS_CARD_USAGE_KEY] && typeof data[SAVINGS_CARD_USAGE_KEY] === 'object'
     ? data[SAVINGS_CARD_USAGE_KEY]
     : {};
+  const currentMonthlyCardContributions = data?.[SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY] && typeof data[SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY] === 'object'
+    ? data[SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY]
+    : {};
   const currentQualifyingTotal = toNumber(data?.[SAVINGS_QUALIFYING_TOTAL_KEY]);
   const monthKey = buildMonthKeyFromTimestamp(snapshot?.ts || snapshot?.checkout?.ts || Date.now());
   const cardUsageKey = getCardUsageKey(selectedCard);
   const currentMonthTotal = toNumber(currentMonthlySavings[monthKey]);
   const currentCardCount = toNumber(currentCardUsageCounts[cardUsageKey]);
+  const currentMonthCardContributions =
+    currentMonthlyCardContributions[monthKey] && typeof currentMonthlyCardContributions[monthKey] === 'object'
+      ? currentMonthlyCardContributions[monthKey]
+      : {};
+  const currentCardContributionRaw = currentMonthCardContributions[cardUsageKey];
+  const currentCardContributionAmount =
+    currentCardContributionRaw && typeof currentCardContributionRaw === 'object'
+      ? toNumber(currentCardContributionRaw.amount)
+      : toNumber(currentCardContributionRaw);
+  const currentCardContributionIssuer =
+    currentCardContributionRaw && typeof currentCardContributionRaw === 'object'
+      ? String(currentCardContributionRaw.issuer || '')
+      : '';
   const nextMonthlySavings = {
     ...currentMonthlySavings,
     [monthKey]: Number((currentMonthTotal + rewardValue).toFixed(2)),
@@ -147,6 +165,16 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
   const nextCardUsageCounts = {
     ...currentCardUsageCounts,
     [cardUsageKey]: Number((currentCardCount + 1).toFixed(0)),
+  };
+  const nextMonthlyCardContributions = {
+    ...currentMonthlyCardContributions,
+    [monthKey]: {
+      ...currentMonthCardContributions,
+      [cardUsageKey]: {
+        amount: Number((currentCardContributionAmount + rewardValue).toFixed(2)),
+        issuer: currentCardContributionIssuer || String(selectedCard?.issuer || ''),
+      },
+    },
   };
   const nextQualifyingTotal = Number((currentQualifyingTotal + 1).toFixed(0));
   const nextProcessed = [...processed, dedupeKey].slice(-200);
@@ -158,6 +186,7 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
         [SAVINGS_DEDUPE_KEY]: nextProcessed,
         [SAVINGS_MONTHLY_KEY]: nextMonthlySavings,
         [SAVINGS_CARD_USAGE_KEY]: nextCardUsageCounts,
+        [SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY]: nextMonthlyCardContributions,
         [SAVINGS_QUALIFYING_TOTAL_KEY]: nextQualifyingTotal,
       },
       resolve

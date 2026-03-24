@@ -19,7 +19,45 @@ export default function Dashboard({ onSignOut }) {
   const [accountCreatedAt, setAccountCreatedAt] = useState(null);
   const [cardTransactionCounts, setCardTransactionCounts] = useState({});
   const [qualifyingTransactionTotal, setQualifyingTransactionTotal] = useState(0);
+  const [monthlySavings, setMonthlySavings] = useState({});
+  const [monthlyCardContributions, setMonthlyCardContributions] = useState({});
+  const [selectedSavingsMonth, setSelectedSavingsMonth] = useState("");
   const translate = useTranslation();
+
+  const toNumber = useCallback((value) => {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const parsed = Number(value.replace(/[^\d.-]/g, ""));
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+    return 0;
+  }, []);
+
+  const getMonthKeyLabel = useCallback((monthKey) => {
+    const match = String(monthKey || "").match(/^(\d{4})-(\d{2})$/);
+    if (!match) return String(monthKey || "");
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const date = new Date(year, month, 1);
+    if (Number.isNaN(date.getTime())) return String(monthKey || "");
+    return date.toLocaleString("en-US", { month: "long", year: "numeric" });
+  }, []);
+
+  const savingsMonthKeys = useMemo(() => {
+    const monthKeySet = new Set([
+      ...Object.keys(monthlySavings || {}),
+      ...Object.keys(monthlyCardContributions || {}),
+    ]);
+
+    const validMonths = Array.from(monthKeySet).filter((monthKey) => /^\d{4}-\d{2}$/.test(monthKey));
+
+    if (!validMonths.length) {
+      const now = new Date();
+      return [`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`];
+    }
+
+    return validMonths.sort((a, b) => b.localeCompare(a));
+  }, [monthlySavings, monthlyCardContributions]);
 
   const calculateMonthsSinceAccountCreation = useCallback((createdAtTs) => {
     if (!createdAtTs || !Number.isFinite(createdAtTs)) return 1;
@@ -41,6 +79,42 @@ export default function Dashboard({ onSignOut }) {
       ? allTimeSavingsTotal / calculateMonthsSinceAccountCreation(accountCreatedAt)
       : 0;
   const monthlyAverageMonthsUsed = calculateMonthsSinceAccountCreation(accountCreatedAt);
+
+  // selected month is read from state and used as the source of truth for this section
+  const activeSavingsMonth = selectedSavingsMonth || savingsMonthKeys[0] || "";
+
+  // monthly total is read from stored monthlySavings for the selected month
+  const selectedMonthTotalSavings = useMemo(() => {
+    if (!activeSavingsMonth) return 0;
+    return toNumber(monthlySavings?.[activeSavingsMonth]);
+  }, [activeSavingsMonth, monthlySavings, toNumber]);
+
+  // top 3 contributors are selected by sorting selected-month card totals descending
+  const selectedMonthTopContributors = useMemo(() => {
+    if (!activeSavingsMonth) return [];
+    const monthContributions = monthlyCardContributions?.[activeSavingsMonth];
+    if (!monthContributions || typeof monthContributions !== "object") return [];
+
+    return Object.entries(monthContributions)
+      .map(([cardName, rawValue]) => {
+        if (rawValue && typeof rawValue === "object") {
+          return {
+            cardName,
+            issuer: String(rawValue.issuer || ""),
+            amount: toNumber(rawValue.amount),
+          };
+        }
+
+        return {
+          cardName,
+          issuer: "",
+          amount: toNumber(rawValue),
+        };
+      })
+      .filter((entry) => entry.amount > 0)
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 3);
+  }, [activeSavingsMonth, monthlyCardContributions, toNumber]);
 
   const topCardSummary = useMemo(() => {
     const entries = Object.entries(cardTransactionCounts || {});
@@ -151,17 +225,15 @@ export default function Dashboard({ onSignOut }) {
   const totalAnnualFees = userCards.reduce((sum, card) => sum + card.annualFee, 0);
 
   useEffect(() => {
+    if (!savingsMonthKeys.length) return;
+    if (!selectedSavingsMonth || !savingsMonthKeys.includes(selectedSavingsMonth)) {
+      setSelectedSavingsMonth(savingsMonthKeys[0]);
+    }
+  }, [savingsMonthKeys, selectedSavingsMonth]);
+
+  useEffect(() => {
     if (typeof chrome === "undefined" || !chrome.storage?.local) return;
     const CONSISTENCY_TOLERANCE = 0.01;
-
-    const toNumber = (value) => {
-      if (typeof value === "number" && Number.isFinite(value)) return value;
-      if (typeof value === "string") {
-        const parsed = Number(value.replace(/[^\d.-]/g, ""));
-        return Number.isFinite(parsed) ? parsed : 0;
-      }
-      return 0;
-    };
 
     const refreshSavingsMetrics = () => {
       chrome.storage.local.get([
@@ -169,6 +241,8 @@ export default function Dashboard({ onSignOut }) {
         "accountCreatedAt",
         "savings_card_transaction_counts",
         "savings_qualifying_transaction_total",
+        "monthlySavings",
+        "savings_monthly_card_contributions",
       ], (data) => {
         setAllTimeSavingsTotal(toNumber(data?.savings_all_time_total));
 
@@ -178,6 +252,18 @@ export default function Dashboard({ onSignOut }) {
             : {};
         setCardTransactionCounts(nextCardCounts);
         setQualifyingTransactionTotal(toNumber(data?.savings_qualifying_transaction_total));
+
+        const nextMonthlySavings =
+          data?.monthlySavings && typeof data.monthlySavings === "object"
+            ? data.monthlySavings
+            : {};
+        setMonthlySavings(nextMonthlySavings);
+
+        const nextMonthlyCardContributions =
+          data?.savings_monthly_card_contributions && typeof data.savings_monthly_card_contributions === "object"
+            ? data.savings_monthly_card_contributions
+            : {};
+        setMonthlyCardContributions(nextMonthlyCardContributions);
 
         const existingAccountCreatedAt = Number(data?.accountCreatedAt);
         if (Number.isFinite(existingAccountCreatedAt) && existingAccountCreatedAt > 0) {
@@ -247,6 +333,20 @@ export default function Dashboard({ onSignOut }) {
         setQualifyingTransactionTotal(toNumber(changes.savings_qualifying_transaction_total.newValue));
       }
 
+      if (changes?.monthlySavings) {
+        const nextMonthlySavings = changes.monthlySavings.newValue;
+        setMonthlySavings(nextMonthlySavings && typeof nextMonthlySavings === "object" ? nextMonthlySavings : {});
+      }
+
+      if (changes?.savings_monthly_card_contributions) {
+        const nextMonthlyCardContributions = changes.savings_monthly_card_contributions.newValue;
+        setMonthlyCardContributions(
+          nextMonthlyCardContributions && typeof nextMonthlyCardContributions === "object"
+            ? nextMonthlyCardContributions
+            : {}
+        );
+      }
+
       if (changes?.savings_all_time_total || changes?.monthlySavings) {
         verifySavingsConsistency();
       }
@@ -254,7 +354,7 @@ export default function Dashboard({ onSignOut }) {
 
     chrome.storage.onChanged.addListener(handleStorageChange);
     return () => chrome.storage.onChanged.removeListener(handleStorageChange);
-  }, []);
+  }, [toNumber]);
 
   return (
     <div className="dash-shell">
@@ -462,17 +562,29 @@ export default function Dashboard({ onSignOut }) {
                 <p className="savings-subtitle">Reward breakdown per card and category</p>
               </div>
 
-              <select id="selectedSavingsMonth" className="savings-month-select" defaultValue="March 2026">
-                <option value="March 2026">March 2026</option>
+              <select
+                id="selectedSavingsMonth"
+                className="savings-month-select"
+                value={activeSavingsMonth}
+                onChange={(event) => {
+                  // selected month is read here from the existing dropdown
+                  setSelectedSavingsMonth(event.target.value);
+                }}
+              >
+                {savingsMonthKeys.map((monthKey) => (
+                  <option key={monthKey} value={monthKey}>
+                    {getMonthKeyLabel(monthKey)}
+                  </option>
+                ))}
               </select>
             </header>
 
             <div className="savings-monthly-content">
               <section className="savings-total-banner" aria-label="total-monthly-savings">
                 <div>
-                  <p className="savings-total-label">TOTAL SAVINGS FOR MARCH 2026</p>
+                  <p className="savings-total-label">TOTAL SAVINGS FOR {getMonthKeyLabel(activeSavingsMonth).toUpperCase()}</p>
                   <p className="savings-total-value" id="monthlySavingsValue">
-                    $134.50
+                    ${selectedMonthTotalSavings.toFixed(2)}
                   </p>
                 </div>
 
@@ -486,56 +598,29 @@ export default function Dashboard({ onSignOut }) {
                   <p className="savings-col-title">Card Contributions</p>
 
                   <div id="contributionList" className="savings-contribution-list">
-                    <article className="savings-contribution-item">
-                      <div className="savings-contribution-left">
-                        <div className="savings-item-icon" aria-hidden="true">
-                          💳
-                        </div>
-                        <div>
-                          <p className="savings-item-title">Sapphire Preferred</p>
-                          <p className="savings-item-subtitle">Chase</p>
-                        </div>
-                      </div>
+                    {/* Card contributions UI is rendered dynamically for the selected month */}
+                    {selectedMonthTopContributors.length === 0 ? (
+                      <p className="savings-helper-text">No card contributions for this month.</p>
+                    ) : (
+                      selectedMonthTopContributors.map((contributor) => (
+                        <article key={contributor.cardName} className="savings-contribution-item">
+                          <div className="savings-contribution-left">
+                            <div className="savings-item-icon" aria-hidden="true">
+                              💳
+                            </div>
+                            <div>
+                              <p className="savings-item-title">{contributor.cardName}</p>
+                              <p className="savings-item-subtitle">{contributor.issuer || " "}</p>
+                            </div>
+                          </div>
 
-                      <div className="savings-contribution-right">
-                        <p className="savings-item-amount">+$54.50</p>
-                        <p className="savings-item-earned">Earned</p>
-                      </div>
-                    </article>
-
-                    <article className="savings-contribution-item">
-                      <div className="savings-contribution-left">
-                        <div className="savings-item-icon" aria-hidden="true">
-                          💳
-                        </div>
-                        <div>
-                          <p className="savings-item-title">Blue Cash Everyday</p>
-                          <p className="savings-item-subtitle">Amex</p>
-                        </div>
-                      </div>
-
-                      <div className="savings-contribution-right">
-                        <p className="savings-item-amount">+$45.00</p>
-                        <p className="savings-item-earned">Earned</p>
-                      </div>
-                    </article>
-
-                    <article className="savings-contribution-item">
-                      <div className="savings-contribution-left">
-                        <div className="savings-item-icon" aria-hidden="true">
-                          💳
-                        </div>
-                        <div>
-                          <p className="savings-item-title">Custom Cash</p>
-                          <p className="savings-item-subtitle">Citi</p>
-                        </div>
-                      </div>
-
-                      <div className="savings-contribution-right">
-                        <p className="savings-item-amount">+$35.00</p>
-                        <p className="savings-item-earned">Earned</p>
-                      </div>
-                    </article>
+                          <div className="savings-contribution-right">
+                            <p className="savings-item-amount">+${contributor.amount.toFixed(2)}</p>
+                            <p className="savings-item-earned">Earned</p>
+                          </div>
+                        </article>
+                      ))
+                    )}
                   </div>
                 </section>
 
