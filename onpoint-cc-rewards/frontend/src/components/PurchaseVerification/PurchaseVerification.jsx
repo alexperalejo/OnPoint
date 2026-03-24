@@ -10,6 +10,7 @@ const SAVINGS_MONTHLY_KEY = 'monthlySavings';
 const SAVINGS_CARD_USAGE_KEY = 'savings_card_transaction_counts';
 const SAVINGS_QUALIFYING_TOTAL_KEY = 'savings_qualifying_transaction_total';
 const SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY = 'savings_monthly_card_contributions';
+const SAVINGS_MONTHLY_CATEGORY_TOTALS_KEY = 'savings_monthly_category_totals';
 
 function toNumber(value) {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -91,6 +92,80 @@ function getCardUsageKey(selectedCard) {
   return String(selectedCard.name || selectedCard.id || selectedCard.cardId || 'Unknown Card');
 }
 
+function normalizeRecommendationCategory(rawCategory) {
+  const raw = String(rawCategory || '').trim().toLowerCase();
+  if (!raw || raw === 'all') return 'General';
+  if (raw.includes('travel')) return 'Travel';
+  if (raw.includes('grocery')) return 'Groceries';
+  if (raw.includes('dining')) return 'Dining';
+  if (raw.includes('gas')) return 'Gas';
+  if (raw.includes('drugstore')) return 'Drugstore';
+  if (raw.includes('stream')) return 'Streaming';
+  if (raw.includes('transit')) return 'Transit';
+  if (raw.includes('entertain')) return 'Entertainment';
+
+  return raw
+    .split('_')
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function getRecommendationBreakdownEntries(snapshot, selectedCard) {
+  // Reuse recommendation-style matching rules (url/tag/all) so category totals stay aligned with recommendation logic.
+  const paymentInfo = {
+    url: String(snapshot?.url || snapshot?.checkout?.url || ''),
+    tags: Array.isArray(snapshot?.tags) ? snapshot.tags.map(tag => String(tag).toLowerCase()) : [],
+  };
+
+  const rawAttributes = Array.isArray(selectedCard?.attributes) ? selectedCard.attributes : [];
+  const normalizedAttributes = rawAttributes.map((attribute) => ({
+    type: String(attribute?.type || '').toLowerCase(),
+    value: String(attribute?.value || attribute?.category || '').toLowerCase(),
+    points: toNumber(attribute?.points ?? attribute?.multiplier ?? attribute?.rate),
+  }));
+
+  let points = 0;
+  const breakdown = [];
+
+  normalizedAttributes.forEach((attribute) => {
+    if (!attribute.points || attribute.points <= 0) return;
+
+    switch (attribute.type) {
+      case 'url': {
+        if (attribute.value && attribute.value === paymentInfo.url) {
+          points += attribute.points;
+          breakdown.push({ points: attribute.points, from: attribute.value });
+        }
+        break;
+      }
+      case 'tag': {
+        if (attribute.value && paymentInfo.tags.includes(attribute.value)) {
+          points += attribute.points;
+          breakdown.push({ points: attribute.points, from: attribute.value });
+        }
+        break;
+      }
+      case 'all': {
+        points += attribute.points;
+        breakdown.push({ points: attribute.points, from: 'all' });
+        break;
+      }
+      default:
+        break;
+    }
+  });
+
+  if (points <= 0 || !breakdown.length) {
+    return [{ category: 'General', contribution: 1 }];
+  }
+
+  return breakdown.map((entry) => ({
+    category: normalizeRecommendationCategory(entry.from),
+    contribution: entry.points / points,
+  }));
+}
+
 function buildPurchaseFingerprint(snapshot, amount, selectedCard) {
   const pageUrl = String(snapshot?.url || snapshot?.checkout?.url || snapshot?.merchantId || 'unknown-url');
   const numericAmount = toNumber(amount).toFixed(2);
@@ -121,6 +196,7 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
         SAVINGS_CARD_USAGE_KEY,
         SAVINGS_QUALIFYING_TOTAL_KEY,
         SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY,
+        SAVINGS_MONTHLY_CATEGORY_TOTALS_KEY,
       ],
       resolve
     );
@@ -140,6 +216,9 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
   const currentMonthlyCardContributions = data?.[SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY] && typeof data[SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY] === 'object'
     ? data[SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY]
     : {};
+  const currentMonthlyCategoryTotals = data?.[SAVINGS_MONTHLY_CATEGORY_TOTALS_KEY] && typeof data[SAVINGS_MONTHLY_CATEGORY_TOTALS_KEY] === 'object'
+    ? data[SAVINGS_MONTHLY_CATEGORY_TOTALS_KEY]
+    : {};
   const currentQualifyingTotal = toNumber(data?.[SAVINGS_QUALIFYING_TOTAL_KEY]);
   const monthKey = buildMonthKeyFromTimestamp(snapshot?.ts || snapshot?.checkout?.ts || Date.now());
   const cardUsageKey = getCardUsageKey(selectedCard);
@@ -148,6 +227,10 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
   const currentMonthCardContributions =
     currentMonthlyCardContributions[monthKey] && typeof currentMonthlyCardContributions[monthKey] === 'object'
       ? currentMonthlyCardContributions[monthKey]
+      : {};
+  const currentMonthCategoryTotals =
+    currentMonthlyCategoryTotals[monthKey] && typeof currentMonthlyCategoryTotals[monthKey] === 'object'
+      ? currentMonthlyCategoryTotals[monthKey]
       : {};
   const currentCardContributionRaw = currentMonthCardContributions[cardUsageKey];
   const currentCardContributionAmount =
@@ -176,6 +259,20 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
       },
     },
   };
+
+  const recommendationBreakdown = getRecommendationBreakdownEntries(snapshot, selectedCard);
+  const nextMonthCategoryTotals = { ...currentMonthCategoryTotals };
+  recommendationBreakdown.forEach((entry) => {
+    const categoryName = normalizeRecommendationCategory(entry.category);
+    const existingAmount = toNumber(nextMonthCategoryTotals[categoryName]);
+    const increment = rewardValue * (Number(entry.contribution) || 0);
+    nextMonthCategoryTotals[categoryName] = Number((existingAmount + increment).toFixed(2));
+  });
+
+  const nextMonthlyCategoryTotals = {
+    ...currentMonthlyCategoryTotals,
+    [monthKey]: nextMonthCategoryTotals,
+  };
   const nextQualifyingTotal = Number((currentQualifyingTotal + 1).toFixed(0));
   const nextProcessed = [...processed, dedupeKey].slice(-200);
 
@@ -187,6 +284,7 @@ async function applyAllTimeSavings(snapshot, selectedCard) {
         [SAVINGS_MONTHLY_KEY]: nextMonthlySavings,
         [SAVINGS_CARD_USAGE_KEY]: nextCardUsageCounts,
         [SAVINGS_MONTHLY_CARD_CONTRIBUTIONS_KEY]: nextMonthlyCardContributions,
+        [SAVINGS_MONTHLY_CATEGORY_TOTALS_KEY]: nextMonthlyCategoryTotals,
         [SAVINGS_QUALIFYING_TOTAL_KEY]: nextQualifyingTotal,
       },
       resolve

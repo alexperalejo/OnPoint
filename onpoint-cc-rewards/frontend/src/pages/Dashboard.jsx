@@ -21,6 +21,7 @@ export default function Dashboard({ onSignOut }) {
   const [qualifyingTransactionTotal, setQualifyingTransactionTotal] = useState(0);
   const [monthlySavings, setMonthlySavings] = useState({});
   const [monthlyCardContributions, setMonthlyCardContributions] = useState({});
+  const [monthlyCategoryTotals, setMonthlyCategoryTotals] = useState({});
   const [selectedSavingsMonth, setSelectedSavingsMonth] = useState("");
   const translate = useTranslation();
 
@@ -115,6 +116,72 @@ export default function Dashboard({ onSignOut }) {
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 3);
   }, [activeSavingsMonth, monthlyCardContributions, toNumber]);
+
+  // category data is retrieved for the selected month from storage-backed monthly category totals
+  const selectedMonthCategoryTotals = useMemo(() => {
+    if (!activeSavingsMonth) return {};
+
+    const directMonthCategories =
+      monthlyCategoryTotals?.[activeSavingsMonth] && typeof monthlyCategoryTotals[activeSavingsMonth] === "object"
+        ? monthlyCategoryTotals[activeSavingsMonth]
+        : {};
+
+    const legacyMonthValue = monthlySavings?.[activeSavingsMonth];
+    const legacyMonthCategories =
+      legacyMonthValue && typeof legacyMonthValue === "object" && legacyMonthValue.categories && typeof legacyMonthValue.categories === "object"
+        ? legacyMonthValue.categories
+        : {};
+
+    return { ...legacyMonthCategories, ...directMonthCategories };
+  }, [activeSavingsMonth, monthlyCategoryTotals, monthlySavings]);
+
+  // recommendation category naming is reused from saved monthly category keys without introducing a new category system
+  const selectedMonthCategoryEntries = useMemo(() => {
+    return Object.entries(selectedMonthCategoryTotals)
+      .map(([categoryName, rawAmount]) => ({
+        categoryName,
+        amount: toNumber(rawAmount),
+      }))
+      .filter((entry) => entry.amount > 0)
+      .sort((a, b) => b.amount - a.amount);
+  }, [selectedMonthCategoryTotals, toNumber]);
+
+  const selectedMonthCategoryTotalAmount = useMemo(() => {
+    return selectedMonthCategoryEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  }, [selectedMonthCategoryEntries]);
+
+  // donut chart data is constructed as conic-gradient segments from selected-month category totals
+  const donutSegments = useMemo(() => {
+    const palette = ["#2563eb", "#3b82f6", "#60a5fa", "#22d3ee", "#cbd5e1", "#94a3b8"];
+    if (!selectedMonthCategoryEntries.length || selectedMonthCategoryTotalAmount <= 0) {
+      return [];
+    }
+
+    let runningDegrees = 0;
+    return selectedMonthCategoryEntries.map((entry, index) => {
+      const span = (entry.amount / selectedMonthCategoryTotalAmount) * 360;
+      const start = runningDegrees;
+      const end = runningDegrees + span;
+      runningDegrees = end;
+
+      return {
+        ...entry,
+        color: palette[index % palette.length],
+        start,
+        end,
+      };
+    });
+  }, [selectedMonthCategoryEntries, selectedMonthCategoryTotalAmount]);
+
+  const donutBackground = useMemo(() => {
+    if (!donutSegments.length) {
+      return "conic-gradient(#cbd5e1 0deg 360deg)";
+    }
+
+    return `conic-gradient(${donutSegments
+      .map((segment) => `${segment.color} ${segment.start.toFixed(2)}deg ${segment.end.toFixed(2)}deg`)
+      .join(", ")})`;
+  }, [donutSegments]);
 
   const topCardSummary = useMemo(() => {
     const entries = Object.entries(cardTransactionCounts || {});
@@ -243,6 +310,7 @@ export default function Dashboard({ onSignOut }) {
         "savings_qualifying_transaction_total",
         "monthlySavings",
         "savings_monthly_card_contributions",
+        "savings_monthly_category_totals",
       ], (data) => {
         setAllTimeSavingsTotal(toNumber(data?.savings_all_time_total));
 
@@ -264,6 +332,12 @@ export default function Dashboard({ onSignOut }) {
             ? data.savings_monthly_card_contributions
             : {};
         setMonthlyCardContributions(nextMonthlyCardContributions);
+
+        const nextMonthlyCategoryTotals =
+          data?.savings_monthly_category_totals && typeof data.savings_monthly_category_totals === "object"
+            ? data.savings_monthly_category_totals
+            : {};
+        setMonthlyCategoryTotals(nextMonthlyCategoryTotals);
 
         const existingAccountCreatedAt = Number(data?.accountCreatedAt);
         if (Number.isFinite(existingAccountCreatedAt) && existingAccountCreatedAt > 0) {
@@ -343,6 +417,15 @@ export default function Dashboard({ onSignOut }) {
         setMonthlyCardContributions(
           nextMonthlyCardContributions && typeof nextMonthlyCardContributions === "object"
             ? nextMonthlyCardContributions
+            : {}
+        );
+      }
+
+      if (changes?.savings_monthly_category_totals) {
+        const nextMonthlyCategoryTotals = changes.savings_monthly_category_totals.newValue;
+        setMonthlyCategoryTotals(
+          nextMonthlyCategoryTotals && typeof nextMonthlyCategoryTotals === "object"
+            ? nextMonthlyCategoryTotals
             : {}
         );
       }
@@ -628,30 +711,30 @@ export default function Dashboard({ onSignOut }) {
                   <p className="savings-col-title">Category Breakdown</p>
 
                   <div id="categoryBreakdownChart" className="savings-donut-placeholder" aria-label="donut-chart-placeholder">
-                    <div className="savings-donut-ring" />
+                    <div className="savings-donut-ring" style={{ background: donutBackground }} />
                   </div>
 
                   <div id="categoryLegendList" className="savings-legend-list">
-                    <div className="savings-legend-item">
-                      <span className="savings-legend-left"><span className="savings-dot travel" />Travel</span>
-                      <span>$42.50</span>
-                    </div>
-                    <div className="savings-legend-item">
-                      <span className="savings-legend-left"><span className="savings-dot groceries" />Groceries</span>
-                      <span>$36.00</span>
-                    </div>
-                    <div className="savings-legend-item">
-                      <span className="savings-legend-left"><span className="savings-dot gas" />Gas</span>
-                      <span>$9.00</span>
-                    </div>
-                    <div className="savings-legend-item">
-                      <span className="savings-legend-left"><span className="savings-dot dining" />Dining</span>
-                      <span>$37.00</span>
-                    </div>
-                    <div className="savings-legend-item">
-                      <span className="savings-legend-left"><span className="savings-dot general" />General</span>
-                      <span>$10.00</span>
-                    </div>
+                    {/* Legend is rendered dynamically from selected-month category totals */}
+                    {donutSegments.length === 0 ? (
+                      <div className="savings-legend-item">
+                        <span className="savings-legend-left">No data</span>
+                        <span>$0.00</span>
+                      </div>
+                    ) : (
+                      donutSegments.map((segment) => (
+                        <div key={segment.categoryName} className="savings-legend-item">
+                          <span className="savings-legend-left">
+                            <span
+                              className="savings-dot"
+                              style={{ backgroundColor: segment.color }}
+                            />
+                            {segment.categoryName}
+                          </span>
+                          <span>${segment.amount.toFixed(2)}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </section>
               </div>
