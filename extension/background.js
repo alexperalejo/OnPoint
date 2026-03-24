@@ -265,6 +265,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+// When a tab updates, try to inject purchase detector on Amazon thank you pages
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status !== 'complete') return;
+  if (!tab.url) return;
+  
+  if (tab.url.includes('amazon.com') && tab.url.includes('thankyou')) {
+    chrome.scripting.executeScript({
+      target: { tabId },
+      files: [
+        'content/purchase-detect-core.js',
+        'content/purchase.js'
+      ]
+    }).catch(() => { /* ignore */ });
+  }
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "checkoutDetected") {
         // Badge the icon so user knows a recommendation is ready
@@ -275,5 +291,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         chrome.action.openPopup().catch(() => {
             // openPopup() may fail without a user gesture — badge is the fallback
         });
+        
     }
 });

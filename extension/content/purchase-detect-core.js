@@ -23,8 +23,16 @@
     const reasons = [];
     let score = 0;
 
-    const url = safeLower((typeof location !== 'undefined' && location.href) || doc?.location?.href || '');
-
+   const url = safeLower((typeof location !== 'undefined' && location.href) || '');
+    if (url.includes('amazon.com') && url.includes('thankyou')) {
+      return {
+        isPurchase: true,
+        score: 1,
+        reasons: ['amazon-thankyou-fastpath'],
+        isPurchaseByScore: true,
+        hasStrongReceiptSignal: true
+    };
+  }
     // URL heuristics (confirmation pages vary widely)
     const urlChecks = [
       { p: 'thank', w: 0.18 },
