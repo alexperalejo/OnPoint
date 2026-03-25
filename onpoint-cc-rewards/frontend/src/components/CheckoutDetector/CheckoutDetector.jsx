@@ -295,7 +295,18 @@ export function CheckoutDetector() {
 
         </div>
       )}
-
+        <button
+          type="button"
+          onClick={() => {
+          // Open the main dashboard
+          chrome.tabs.create({ 
+            url: chrome.runtime.getURL('dist/dashboard.html') 
+          });
+        }}
+          className="cd-close"
+          aria-label="Close detector"
+          title="Close"
+        >Settings</button>
     </div>
   );
 }

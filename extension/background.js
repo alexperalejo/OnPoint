@@ -106,11 +106,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === 'purchaseDetected') {
+    const tabId = sender?.tab?.id;
+    // Show badge immediately so user knows something happened
+    if (tabId) {
+      chrome.action.setBadgeText({ text: "✓", tabId });
+      chrome.action.setBadgeBackgroundColor({ color: "#10b981", tabId });
+    }
+
     (async () => {
       try {
         const purchase = message.purchase;
         const host = purchase?.host || message.host || (sender && sender.url && new URL(sender.url).hostname) || '';
-        const tabId = sender && sender.tab && sender.tab.id;
 
         // Mark tab as purchase as soon as any confirmation signal is detected.
         // Linking to checkout may still fail later, but popup should not get stuck in checkout mode.
@@ -146,7 +152,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             detection: purchase.detection || null
           };
 
-          try { chrome.storage.local.set({ purchaseCandidate: candidate }); } catch (e) { }
+          // Write candidate BEFORE opening popup so REQUEST_CHECKOUT_SNAPSHOT finds it
+          await new Promise((resolve) => { try { chrome.storage.local.set({ purchaseCandidate: candidate }, resolve); } catch { resolve(); } });
 
           // attempt to fetch recommendation if endpoint configured
           let rec = null;
@@ -158,22 +165,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
           // send UI message to the originating tab (or active tab)
           const uiMsg = { type: 'showRecommendation', candidate, recommendation: rec };
-
           sendToTab(tabId, uiMsg);
         } else {
           // no linked checkout found — store a pending marker for short retry window
-          try { chrome.storage.local.set({ pendingPurchase: { host, url: purchase.url || (sender && sender.url) || '', ts: Date.now() } }); } catch (e) { }
+          await new Promise((resolve) => { try { chrome.storage.local.set({ pendingPurchase: { host, url: purchase.url || (sender && sender.url) || '', ts: Date.now() } }, resolve); } catch { resolve(); } });
         }
+
+        // Open popup after storage is ready so REQUEST_CHECKOUT_SNAPSHOT has data to return
+        chrome.action.openPopup().catch(() => {});
       } catch (e) { console.warn('background purchase handling failed', e); }
     })();
-
-      //auto pop up for purchase detction
-      const tabId = sender?.tab?.id;
-      if (tabId) {
-          chrome.action.setBadgeText({ text: "✓", tabId });
-          chrome.action.setBadgeBackgroundColor({ color: "#10b981", tabId });
-      }
-      chrome.action.openPopup().catch(() => {});
 
     return true;
 
@@ -181,10 +182,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === 'REQUEST_CHECKOUT_SNAPSHOT') {
     try {
-      chrome.storage.local.get(['purchaseCandidate', 'checkoutTotal'], (data) => {
+      chrome.storage.local.get(['purchaseCandidate', 'checkoutTotal', 'pendingPurchase', 'lastPurchaseContent'], (data) => {
         try {
           const candidate = data?.purchaseCandidate || null;
           const checkout = data?.checkoutTotal || null;
+          const pending = data?.pendingPurchase || null;
+          const lastPurchase = data?.lastPurchaseContent || null;
 
           if (candidate) {
             sendResponse({
@@ -216,6 +219,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 ts: checkout.ts || Date.now(),
                 tags: ['checkout-total'],
                 checkout,
+              },
+            });
+            return;
+          }
+
+          // Fallback: purchase was detected but checkout wasn't captured — still show the UI
+          // so the user can confirm which card they used (amount will show as unavailable).
+          if (pending || lastPurchase) {
+            const host = pending?.host || (lastPurchase?.url ? (() => { try { return new URL(lastPurchase.url).hostname; } catch { return null; } })() : null);
+            sendResponse({
+              ok: true,
+              snapshot: {
+                merchantId: host || null,
+                merchantName: host || null,
+                total: null,
+                currency: '$',
+                ts: pending?.ts || lastPurchase?.capturedAt || Date.now(),
+                tags: ['pending-purchase'],
+                url: pending?.url || lastPurchase?.url || null,
+                detection: lastPurchase?.detection || null,
               },
             });
             return;

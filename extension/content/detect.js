@@ -256,6 +256,27 @@
           
           if (newDet.isCheckout && newDet.score >= 0.7) {
             chrome.runtime.sendMessage({ type: "checkoutDetected" });
+            // Auto-capture checkout total so purchase verification works even without popup interaction
+            try {
+              const total = extractCheckoutTotal();
+              if (total && total.value > 0) {
+                const checkoutObj = {
+                  amount: total.value,
+                  currency: total.currency,
+                  raw: total.raw,
+                  url: currentUrl,
+                  host: location.hostname,
+                  ts: Date.now(),
+                };
+                chrome.storage?.local?.get(['checkoutTotal'], (prev) => {
+                  const old = prev?.checkoutTotal;
+                  if (old?.amount === total.value && old?.url === currentUrl) return;
+                  chrome.storage?.local?.set({ checkoutTotal: checkoutObj }, () => {
+                    try { chrome.runtime.sendMessage({ type: 'checkoutCaptured', checkout: checkoutObj }); } catch (e) { /* ignore */ }
+                  });
+                });
+              }
+            } catch (e) { /* ignore total extraction errors */ }
           }
         } else {
           persistDetection(lastDetection);
