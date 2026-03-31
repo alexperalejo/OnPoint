@@ -15,6 +15,7 @@ export function CheckoutDetector() {
   const [reason] = useState(null);
   const FIXED_THRESHOLD = 0.7;
   const [purchaseTotal, setPurchaseTotal] = useState(null);
+  const [saved, setSaved] = useState(false);
 
   function handleClosePopup() {
     try {
@@ -274,7 +275,7 @@ export function CheckoutDetector() {
 
       {detection && (
         <div>
-          {showRecommendation && recommendedCard && (
+          {!saved && showRecommendation && recommendedCard && (
             <CardRecommendation 
               card={recommendedCard}
               reason={reason}
@@ -288,12 +289,21 @@ export function CheckoutDetector() {
                   console.warn('Could not save chosen card', e);
                 }
                 setShowRecommendation(false);
+                setSaved(true);
               }}
               onDismiss={() => {
                 setShowRecommendation(false);
                 window.close();
               }}
             />
+          )}
+
+          {saved && (
+            <div className="cd-saved">
+              <div className="cd-saved-icon">✓</div>
+              <p className="cd-saved-text">Response saved</p>
+              <button type="button" className="cd-saved-close" onClick={handleClosePopup}>Close</button>
+            </div>
           )}
 
         </div>

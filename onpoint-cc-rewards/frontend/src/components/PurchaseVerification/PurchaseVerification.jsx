@@ -300,7 +300,6 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
   const [showRecommendation, setShowRecommendation] = useState(false);
   const [recommendedCard, setRecommendedCard] = useState(null);
   const refSnapshot = useRef(null);
-  const [capturedAt, setCapturedAt] = useState(null);
   const [cardNotSaved, setCardNotSaved] = useState(false);
   const [saved, setSaved] = useState(false);
   const [allCards, setAllCards] = useState([]);
@@ -325,7 +324,6 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
       if (pageSnapshot) {
         setSnapshot(pageSnapshot);
         refSnapshot.current = pageSnapshot;
-        setCapturedAt(new Date(pageSnapshot.ts || Date.now()).toLocaleString());
         setRecommendedCard(pageSnapshot.recommended || null);
         setLoading(false);
         setShowRecommendation(false);
@@ -343,7 +341,6 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
           } else if (resp && resp.snapshot) {
             setSnapshot(resp.snapshot);
             refSnapshot.current = resp.snapshot;
-            setCapturedAt(new Date(resp.snapshot.ts || Date.now()).toLocaleString());
             setRecommendedCard(resp.recommended || resp.snapshot.recommended || null);
             setShowRecommendation(false);
             setLoading(false);
@@ -371,7 +368,6 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
         } else {
           setSnapshot(snap);
           snapshotRef.current = snap;
-          setCapturedAt(new Date(snap.ts || Date.now()).toLocaleString());
           setRecommendedCard(event.data.recommended || snap.recommended || null);
           setShowRecommendation(false);
         }
@@ -539,7 +535,6 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
               <span>{snapshot.total ? `$${snapshot.total}` : 'Amount unavailable'}</span>
             </div>
             <p className="pv-question">Did you end up using this card?</p>
-            {capturedAt && <p className="pv-captured">Captured {capturedAt}</p>}
           </>
         )}
 

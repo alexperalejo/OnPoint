@@ -23,6 +23,8 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--cr-title, #ffffff);
+  width: 100%;
+  text-align: center;
 }
 
 .cr-close {
@@ -48,6 +50,8 @@
 }
 
 .cr-visual {
+  display: flex;
+  justify-content: center;
   padding: 8px;
   border-radius: 10px;
   color: white;
@@ -65,6 +69,7 @@
   font-size: 15px;
   color: var(--cr-title);
   margin: 8px 0 4px 0;
+  text-align: center;
 }
 
 .cr-visual:hover {
@@ -107,6 +112,7 @@
   font-size: 16px;
   margin-top: 4px;
   color: var(--cr-text, #e5e7eb);
+  text-align: center;
 }
 
 .cr-rewards { margin-bottom: 8px; }
