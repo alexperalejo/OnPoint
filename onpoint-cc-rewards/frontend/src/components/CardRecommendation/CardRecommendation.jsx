@@ -62,12 +62,14 @@ export function CardRecommendation({ card, onApply, onDismiss, total, reason }) 
       <div className="cr-card-name">{card.name}</div>
 
       {card.annualFee !== undefined && (
-        <div className="cr-fee">Annual Fee: ${card.annualFee}</div>
+        <div className="cr-fee">
+          {translate('.annual-fee')}: ${card.annualFee}
+        </div>
       )}
 
       {card.rewards && card.rewards.length > 0 && (
         <div className="cr-rewards">
-          <div className="cr-rewards-title">Top Rewards:</div>
+          <div className="cr-rewards-title">{translate('.top-rewards')}:</div>
           <ul className="cr-rewards-list">
             {card.rewards.slice(0, 2).map((reward, idx) => (
               <li key={idx}>{reward.category}: {reward.rate}x{reward.details && ` (${reward.details})`}</li>
@@ -94,13 +96,13 @@ export function CardRecommendation({ card, onApply, onDismiss, total, reason }) 
           )}
           <div className="cr-details-row">
             <span>{translate('.details.reward-rate')}:</span>
-            <span>{rewardRate}x {isPointsCard ? 'Points' : '% Cashback'}</span>
+            <span>{rewardRate}x {isPointsCard ? translate('.details.points') : translate('.details.cashback-rate')}</span>
           </div>
           {total && (
             <div className="cr-details-row">
               <span>{translate('.details.rewards-earned')}:</span>
               {isPointsCard ? (
-                <span>{pointsEarned?.toLocaleString()} pts</span>
+                <span>{pointsEarned?.toLocaleString()} {translate('.details.pts')}</span>
               ) : (
                 <span>${cashbackEarned}</span>
               )}
@@ -110,11 +112,8 @@ export function CardRecommendation({ card, onApply, onDismiss, total, reason }) 
           {reason && (
             <div className="cr-details-reason">{reason}</div>
           )}
-          <button
-            className="cr-details-close"
-            onClick={() => setShowDetails(false)}
-          >
-            Close
+          <button className="cr-details-close" onClick={() => setShowDetails(false)}>
+            {translate('.details.close')}
           </button>
         </div>
       )}

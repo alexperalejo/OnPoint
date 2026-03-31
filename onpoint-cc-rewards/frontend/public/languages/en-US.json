@@ -62,5 +62,10 @@
     "card-recommendation.details.reward-rate": "Reward Rate",
     "card-recommendation.details.rewards-earned": "Rewards Earned",
     "card-recommendation.details.cashback": "Cashback",
-    "card-recommendation.details.close": "Close"
+    "card-recommendation.details.close": "Close",
+    "card-recommendation.top-rewards": "Top Rewards",
+    "card-recommendation.details.points": "Points",
+    "card-recommendation.details.cashback-rate": "% Cashback",
+    "card-recommendation.details.pts": "pts"
+
 }
