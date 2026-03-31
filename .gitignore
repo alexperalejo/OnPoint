@@ -26,3 +26,8 @@ Thumbs.db
 
 # VSCode settings
 .vscode/
+
+# Documentation build artifacts
+docs/MVP-Scope-Final.html
+docs/MVP-Scope-Final.pdf
+
