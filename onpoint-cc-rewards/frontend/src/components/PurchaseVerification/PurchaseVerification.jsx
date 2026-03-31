@@ -301,6 +301,11 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
   const [recommendedCard, setRecommendedCard] = useState(null);
   const refSnapshot = useRef(null);
   const [capturedAt, setCapturedAt] = useState(null);
+  const [cardNotSaved, setCardNotSaved] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [allCards, setAllCards] = useState([]);
+  const [showAllCards, setShowAllCards] = useState(false);
+  const [loadingCards, setLoadingCards] = useState(false);
 
   function handleClosePopup() {
     setShowRecommendation(false);
@@ -401,6 +406,24 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
     return () => { mounted = false; };
   }, [pageSnapshot]);
 
+  // After snapshot loads, read the card the user explicitly chose in CheckoutDetector.
+  // If none was saved, flag it so the UI shows "CARD NOT SAVED".
+  useEffect(() => {
+    if (loading || !snapshot) return;
+    if (typeof chrome === 'undefined' || !chrome.storage?.local) return;
+
+    chrome.storage.local.get(['chosenCard'], (data) => {
+      const card = data?.chosenCard || null;
+      if (card) {
+        setRecommendedCard(card);
+        setCardNotSaved(false);
+      } else {
+        setRecommendedCard(null);
+        setCardNotSaved(true);
+      }
+    });
+  }, [loading, snapshot]);
+
   const isDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches || document.documentElement.classList.contains('dark');
 
   async function handleConfirmCard(card) {
@@ -434,6 +457,21 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
       console.warn('Failed to save purchase verification', e);
     }
     setShowRecommendation(false);
+    setSaved(true);
+  }
+
+  async function handleShowAllCards() {
+    setLoadingCards(true);
+    try {
+      const res = await fetch('http://localhost:3000/api/cards');
+      const cards = await res.json();
+      setAllCards(cards.map(c => ({ ...c, image_url: `http://localhost:3000/${c.image_path}` })));
+      setShowAllCards(true);
+    } catch (e) {
+      console.warn('Failed to fetch all cards', e);
+    } finally {
+      setLoadingCards(false);
+    }
   }
   
   // UI rendering
@@ -455,8 +493,8 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
         '--panel-shadow': isDark ? '0 10px 24px rgba(2,6,23,0.6)' : '0 10px 24px rgba(37, 99, 235, 0.14)',
         '--meta-bg': isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255, 255, 255, 0.72)',
         '--meta-border': isDark ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(110, 174, 247, 0.5)',
-        '--card-border': isDark ? '3px solid rgba(255,255,255,0.06)' : '3px solid #d9a600',
-        '--card-name': isDark ? '#e6b95a' : '#7c5d00',
+        '--card-border': 'none',
+        '--card-name': isDark ? '#ffffff' : '#7c5d00',
         '--close-bg': isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.9)',
         '--close-hover-bg': isDark ? 'rgba(255,255,255,0.14)' : '#eef2ff',
         '--close-border': isDark ? '1px solid rgba(148,163,184,0.45)' : '1px solid rgba(107,112,128,0.6)',
@@ -500,19 +538,23 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
               <span>{snapshot.merchantName || snapshot.merchantId || 'Unknown merchant'}</span>
               <span>{snapshot.total ? `$${snapshot.total}` : 'Amount unavailable'}</span>
             </div>
-            <p className="pv-question">Which card did you end up using?</p>
+            <p className="pv-question">Did you end up using this card?</p>
             {capturedAt && <p className="pv-captured">Captured {capturedAt}</p>}
           </>
         )}
 
-        {!showRecommendation && recommendedCard && (
+        {!saved && !showAllCards && !showRecommendation && cardNotSaved && (
+          <p className="pv-error">CARD NOT SAVED</p>
+        )}
+
+        {!saved && !showAllCards && !showRecommendation && recommendedCard && (
           <button
             type="button"
             className="pv-card-choice"
             onClick={() => handleConfirmCard(recommendedCard)}
             aria-label={`Confirm ${recommendedCard.name}`}
           >
-            <div className="pv-card-visual" style={{ background: recommendedCard.color || '#f3c316' }}>
+            <div className="pv-card-visual" style={{ background: isDark ? '#111827' : (recommendedCard.color || '#f3c316') }}>
               <img
                 src={recommendedCard.image_url}
                 alt={recommendedCard.name}
@@ -523,10 +565,10 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
           </button>
         )}
 
-        {!showRecommendation && snapshot && (
+        {!saved && !showAllCards && !showRecommendation && snapshot && (
           <div className="pv-actions">
-            <button type="button" className="pv-secondary" onClick={() => setShowRecommendation(!!recommendedCard)}>
-              Another Card
+            <button type="button" className="pv-secondary" onClick={handleShowAllCards} disabled={loadingCards}>
+              {loadingCards ? 'Loading cards…' : 'Another Card'}
             </button>
             <button type="button" className="pv-dismiss" onClick={handleClosePopup}>
               Dismiss
@@ -534,7 +576,43 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
           </div>
         )}
 
-        {showRecommendation && recommendedCard && (
+        {!saved && showAllCards && (
+          <div className="pv-card-list">
+            <p className="pv-question">Choose another card:</p>
+            <div className="pv-card-list-grid">
+              {allCards.map(card => (
+                <button
+                  key={card._id || card.id}
+                  type="button"
+                  className="pv-card-list-item"
+                  onClick={() => handleConfirmCard(card)}
+                  aria-label={`Use ${card.name}`}
+                >
+                  <div
+                    className="pv-card-list-visual"
+                    style={{ background: isDark ? '#111827' : (card.color || '#1e3a8a') }}
+                  >
+                    <img src={card.image_url} alt={card.name} className="pv-card-list-image" />
+                  </div>
+                  <span className="pv-card-list-name">{card.name}</span>
+                </button>
+              ))}
+            </div>
+            <button type="button" className="pv-dismiss" style={{ marginTop: '10px' }} onClick={() => setShowAllCards(false)}>
+              Back
+            </button>
+          </div>
+        )}
+
+        {saved && (
+          <div className="pv-saved">
+            <div className="pv-saved-icon">✓</div>
+            <p className="pv-saved-text">Response saved</p>
+            <button type="button" className="pv-dismiss" onClick={handleClosePopup}>Close</button>
+          </div>
+        )}
+
+        {!saved && showRecommendation && recommendedCard && (
           <div className="pv-recommendation-wrap">
             <CardRecommendation
               card={recommendedCard}

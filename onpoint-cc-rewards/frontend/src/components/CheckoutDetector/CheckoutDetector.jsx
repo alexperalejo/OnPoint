@@ -282,8 +282,11 @@ export function CheckoutDetector() {
               breakdown={breakdown}
               onApply={(card) => {
                 console.log('User selected card:', card);
-                // TODO: Backend flag - send to backend that user selected this card for transaction
-                // This is where we'd track which card was recommended and if user used it
+                try {
+                  chrome.storage?.local?.set({ chosenCard: card });
+                } catch (e) {
+                  console.warn('Could not save chosen card', e);
+                }
                 setShowRecommendation(false);
               }}
               onDismiss={() => {
