@@ -263,15 +263,31 @@ export function CheckoutDetector() {
       }}
     >
       <div className="cd-header">
-        <div className="cd-icon">💳</div>
+        {/* OnPoint logo — rounded */}
+        <img 
+          src={chrome.runtime.getURL('icons/Onpoint48.png')} 
+          alt="OnPoint" 
+          className="cd-logo"
+        />
         <h1 className="cd-title">OnPoint</h1>
-        <button
-          type="button"
-          onClick={handleClosePopup}
-          className="cd-close"
-          aria-label="Close detector"
-          title="Close"
-        >✕</button>
+        <div className="cd-header-actions">
+          {/* Settings icon button */}
+          <button
+            type="button"
+            onClick={() => chrome.tabs.create({ url: chrome.runtime.getURL('dist/dashboard.html') + '?view=profile' })}
+            className="cd-settings-btn"
+            aria-label="Settings"
+            title="Settings"
+          >⚙️</button>
+          {/* Close button */}
+          <button
+            type="button"
+            onClick={handleClosePopup}
+            className="cd-close"
+            aria-label="Close"
+            title="Close"
+          >✕</button>
+        </div>
       </div>
 
       {loading && <p className="cd-muted">Detecting...</p>}
@@ -317,18 +333,7 @@ export function CheckoutDetector() {
 
         </div>
       )}
-        <button
-          type="button"
-          onClick={() => {
-          // Open the main dashboard
-          chrome.tabs.create({ 
-            url: chrome.runtime.getURL('dist/dashboard.html') 
-          });
-        }}
-          className="cd-close"
-          aria-label="Close detector"
-          title="Close"
-        >Settings</button>
+
     </div>
   );
 }

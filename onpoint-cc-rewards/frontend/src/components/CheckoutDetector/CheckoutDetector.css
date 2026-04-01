@@ -92,7 +92,33 @@
   box-sizing: border-box;
 }
 .cd-cta:hover { background: #2563eb; }
+.cd-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
+.cd-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.cd-settings-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.cd-settings-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
 .cd-refresh { margin-top: 12px; }
 .cd-refresh button {
   padding: 6px 12px;
