@@ -146,7 +146,8 @@ export default function CardLibrary({ userCards = [], addCard }) {
           name: v.name,
           issuer: v.issuer,
           annualFee: v.annualFee,
-          image_url: `http://localhost:3000/${v.image_path}`,  // changed from imageKey
+          type: v.cardType === 'points' ? 'travel' : v.cardType, // ← add this
+          image_url: `http://localhost:3000/${v.image_path}`,
           rewards: v.attributes.filter(a => a.type != 'url').map(a => {
             if (a.type == "all") return { category: 'all', rate: a.multiplier };
             return { category: a.category, rate: a.multiplier };

@@ -13,7 +13,7 @@ export default function Dashboard({ onSignOut }) {
   var searchParams = new URLSearchParams(window.location.search);
 
   const [storedCards, setStoredCards] = useChromeStorageSync("cardinfo", []);
-  const [currentView, setCurrentView] = useState(searchParams.get("view") || "dashboard"); // dashboard | library | savings | profile
+  const [currentView, setCurrentView] = useState(searchParams.get("view") || "dashboard"); // dashboard | library | savings | account
   const [userCards, setUserCards] = useState([]);
   const [allTimeSavingsTotal, setAllTimeSavingsTotal] = useState(0);
   const [accountCreatedAt, setAccountCreatedAt] = useState(null);
@@ -455,6 +455,7 @@ export default function Dashboard({ onSignOut }) {
         {
           ["dashboard", "library", "savings", "profile"].map(page => (
             <button
+              key={page}
               className={`nav-item ${currentView === page ? "is-active" : ""}`}
               onClick={() => setCurrentView(page)}>
                 {translate("main.nav." + page)}
