@@ -445,8 +445,12 @@ export default function Dashboard({ onSignOut }) {
     <div className="dash-shell">
       <header className="dash-topbar">
         <div className="brand">
-          <span className="brand-icon">▦</span>
-          <div>
+        <img
+          src="./onpoint-logo.png"
+          alt="OnPoint"
+          className="brand-logo"
+        />
+        <div>
             <p className="brand-name">{translate("main.brand-name")}</p>
             <p className="brand-tag">{translate("main.brand-tag")}</p>
           </div>

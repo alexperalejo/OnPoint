@@ -28,6 +28,7 @@ html.dark .dash-shell {
   gap: 0.75rem;
 }
 
+
 .brand-icon {
   width: 44px;
   height: 44px;
@@ -40,16 +41,23 @@ html.dark .dash-shell {
   font-weight: 700;
 }
 
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%; /* full circle */
+  object-fit: contain;
+}
+
 .brand-name {
   margin: 0;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.25rem;
 }
 
 .brand-tag {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .nav-actions {
@@ -75,6 +83,7 @@ html.dark .dash-shell {
 }
 
 .nav-item {
+  font-size: 1rem;
   background: none;
   border: none;
   padding: 0.65rem 1rem;
