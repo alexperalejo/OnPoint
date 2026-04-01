@@ -1,6 +1,18 @@
 // Minimal service worker (background) for future message routing
 // Right now it is intentionally light — most logic lives in the content script and popup.
 
+//helper function to check preferences before opening popup
+async function getNotificationPrefs() {
+  const data = await new Promise(resolve => 
+    chrome.storage.local.get(['notificationPrefs'], resolve)
+  );
+  return data?.notificationPrefs || {
+    checkoutReminders: true,
+    newCardSuggestions: true,
+    rewardAlerts: true
+  };
+}
+
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Checkout Detector extension installed');
 });
@@ -305,15 +317,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === "checkoutDetected") {
-        // Badge the icon so user knows a recommendation is ready
+  if (message.type === "checkoutDetected") {
+    (async () => {
+      const prefs = await getNotificationPrefs();
+      
+      // Only show badge if reward alerts are on
+      if (prefs.rewardAlerts) {
         chrome.action.setBadgeText({ text: "!", tabId: sender.tab.id });
         chrome.action.setBadgeBackgroundColor({ color: "#3b82f6", tabId: sender.tab.id });
+      }
 
-        // Try to auto-open the popup
-        chrome.action.openPopup().catch(() => {
-            // openPopup() may fail without a user gesture — badge is the fallback
-        });
-        
-    }
+      // Only open popup if checkout reminders are on
+      if (prefs.checkoutReminders) {
+        chrome.action.openPopup().catch(() => {});
+      }
+    })();
+  }
 });
