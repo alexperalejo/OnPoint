@@ -141,11 +141,20 @@ export function CheckoutDetector() {
             capturedAt: Date.now(),
           });
           setLoading(false);
-          
+
           // When checkout detected, prepare to fetch card recommendation from backend
           if (resp.detection.isCheckout) {
             console.log('Checkout detected on URL:', window.location.href);
-                
+
+              const prefs = await new Promise(resolve => 
+                chrome.storage.local.get(['notificationPrefs'], resolve)
+              );
+              const notifPrefs = prefs?.notificationPrefs;
+              if (notifPrefs && notifPrefs.newCardSuggestions === false) {
+                console.log('[PREFS] Card recommendations disabled by user');
+                setLoading(false);
+                return;
+              }
                 // Get checkout total from content script (which extracted it from the page) for use in recommendation and display
                 chrome.storage.local.get(['checkoutTotal'], (data) => {
                   if (data.checkoutTotal && data.checkoutTotal.amount) {

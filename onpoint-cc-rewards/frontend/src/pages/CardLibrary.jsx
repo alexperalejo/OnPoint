@@ -179,7 +179,9 @@ export default function CardLibrary({ userCards = [], addCard }) {
   const filteredCards = availableCards.filter(card => {
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          card.issuer.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || card.type === filterType;
+    const matchesFilter = filterType === 'all' ||
+                      card.type === filterType ||
+                      (filterType === 'beginner' && card.annualFee === 0);
     return matchesSearch && matchesFilter;
   });
 
@@ -218,6 +220,12 @@ export default function CardLibrary({ userCards = [], addCard }) {
             onClick={() => setFilterType('travel')}
           >
             {translate(".filter.travel")}
+          </button>
+          <button
+            className={`filter-pill ${filterType === 'beginner' ? 'active' : ''}`}
+            onClick={() => setFilterType('beginner')}
+          >
+            {translate(".filter.beginner")}
           </button>
         </div>
       </div>

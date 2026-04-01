@@ -1,66 +1,76 @@
+/* global chrome */
+import { useState, useEffect } from 'react';
+import { useChromeStorageSync } from 'use-chrome-storage';
+import { useTranslation } from '../utils/translation';
 import './UserProfile.css';
 
+
+const DEFAULT_NOTIFICATIONS = {
+  checkoutReminders: true,
+  monthlyReports: true,
+  newCardSuggestions: true,
+  rewardAlerts: true,
+  newCardReleases: false
+};
+
 export default function UserProfile({ onSignOut }) {
-  const userData = {
-    name: 'dfasfa',
-    email: 'justin@gmail.com',
-    cardsCount: 0,
-    notifications: {
-      checkoutReminders: true,
-      monthlyReports: true,
-      newCardSuggestions: false,
-      rewardAlerts: true
-    }
+  const translate = useTranslation('account');
+  const [cardinfo] = useChromeStorageSync('cardinfo', []);
+  const cardsCount = Array.isArray(cardinfo) ? cardinfo.length : 0;
+  const [notifications, setNotifications] = useState(DEFAULT_NOTIFICATIONS);
+  const [spendingLimits, setSpendingLimits] = useState({
+    daily: '',
+    weekly: '',
+    monthly: ''
+  });
+
+  // Load saved preferences on mount
+  useEffect(() => {
+    chrome.storage.local.get(['notificationPrefs', 'spendingLimits'], (data) => {
+      if (data.notificationPrefs) setNotifications(data.notificationPrefs);
+      if (data.spendingLimits) setSpendingLimits(data.spendingLimits);
+    });
+  }, []);
+
+  const notificationCount = Object.values(notifications).filter(Boolean).length;
+  const total = Object.keys(notifications).length;
+
+  const toggleNotification = (key) => {
+    const updated = { ...notifications, [key]: !notifications[key] };
+    setNotifications(updated);
+    chrome.storage.local.set({ notificationPrefs: updated });
   };
 
-  const notificationCount = Object.values(userData.notifications).filter(Boolean).length;
+  const handleLimitChange = (period, value) => {
+    const updated = { ...spendingLimits, [period]: value };
+    setSpendingLimits(updated);
+    chrome.storage.local.set({ spendingLimits: updated });
+  };
+
+  const handleClearData = () => {
+    if (window.confirm('Are you sure you want to clear all your data? This cannot be undone.')) {
+      chrome.storage.local.clear();
+      chrome.storage.sync.clear();
+      onSignOut && onSignOut();
+    }
+  };
 
   return (
     <div className="profile-shell">
       <div className="profile-header-card">
-        <h2 className="profile-title">Account Settings</h2>
-        <p className="profile-subtitle">
-          Manage your profile, notification preferences, and account data
-        </p>
+        <h2 className="profile-title">{translate('.title')}</h2>
+        <p className="profile-subtitle">{translate('.subtitle')}</p>
       </div>
 
       <div className="profile-info-card">
-        <div className="profile-user-row">
-          <div className="user-avatar">
-            {userData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'D'}
+        <div className="stats-grid">
+          <div className="stat-item blue">
+            <p className="stat-label">{translate('.cards-in-wallet')}</p>
+            <p className="stat-value">{cardsCount}</p>
           </div>
-          <div className="user-details">
-            <h3 className="user-name">{userData.name}</h3>
-            <p className="user-email">{userData.email}</p>
-          </div>
-        </div>
-
-        <div className="account-section">
-          <h4 className="section-heading">
-            <span className="section-icon">👤</span>
-            Account Information
-          </h4>
-
-          <div className="info-grid">
-            <div className="info-item">
-              <p className="info-label">Full Name</p>
-              <p className="info-value">{userData.name}</p>
-            </div>
-            <div className="info-item">
-              <p className="info-label">Email Address</p>
-              <p className="info-value">{userData.email}</p>
-            </div>
-          </div>
-
-          <div className="stats-grid">
-            <div className="stat-item blue">
-              <p className="stat-label">Cards in Wallet</p>
-              <p className="stat-value">{userData.cardsCount}</p>
-            </div>
-            <div className="stat-item green">
-              <p className="stat-label">Active Notifications</p>
-              <p className="stat-value">{notificationCount} / 4</p>
-            </div>
+          <div className="stat-item green">
+            <p className="stat-label">{translate('.active-notifications')}</p>
+            <p className="stat-value">{notificationCount} / {total}</p>
           </div>
         </div>
       </div>
@@ -74,63 +84,145 @@ export default function UserProfile({ onSignOut }) {
         <div className="notification-list">
           <div className="notification-item">
             <div>
-              <p className="notification-title">Checkout Reminders</p>
-              <p className="notification-desc">Remind you to use the best card at checkout</p>
+              <p className="notification-title">{translate('.notifications.checkout-reminders')}</p>
+              <p className="notification-desc">
+                Auto-popup when a checkout page is detected so you never miss a reward
+              </p>
             </div>
-            <span className={`status-badge ${userData.notifications.checkoutReminders ? 'on' : 'off'}`}>
-              {userData.notifications.checkoutReminders ? 'On' : 'Off'}
-            </span>
+            <button
+              className={`status-badge ${notifications.checkoutReminders ? 'on' : 'off'}`}
+              onClick={() => toggleNotification('checkoutReminders')}
+            >
+              {notifications.checkoutReminders ? 'On' : 'Off'}
+            </button>
           </div>
 
           <div className="notification-item">
             <div>
               <p className="notification-title">Monthly Reports</p>
-              <p className="notification-desc">Summary of rewards earned each month</p>
+              <p className="notification-desc">
+                Summary of total rewards earned across all cards each month
+              </p>
             </div>
-            <span className={`status-badge ${userData.notifications.monthlyReports ? 'on' : 'off'}`}>
-              {userData.notifications.monthlyReports ? 'On' : 'Off'}
-            </span>
+            <button
+              className={`status-badge ${notifications.monthlyReports ? 'on' : 'off'}`}
+              onClick={() => toggleNotification('monthlyReports')}
+            >
+              {notifications.monthlyReports ? 'On' : 'Off'}
+            </button>
           </div>
 
           <div className="notification-item">
             <div>
-              <p className="notification-title">New Card Suggestions</p>
-              <p className="notification-desc">Personalized card recommendations</p>
+              <p className="notification-title">Card Recommendations</p>
+              <p className="notification-desc">
+                Get notified when a better card exists for your most frequent shopping categories
+              </p>
             </div>
-            <span className={`status-badge ${userData.notifications.newCardSuggestions ? 'on' : 'off'}`}>
-              {userData.notifications.newCardSuggestions ? 'On' : 'Off'}
-            </span>
+            <button
+              className={`status-badge ${notifications.newCardSuggestions ? 'on' : 'off'}`}
+              onClick={() => toggleNotification('newCardSuggestions')}
+            >
+              {notifications.newCardSuggestions ? 'On' : 'Off'}
+            </button>
           </div>
 
           <div className="notification-item">
             <div>
               <p className="notification-title">Reward Alerts</p>
-              <p className="notification-desc">Expiring rewards and bonus opportunities</p>
+              <p className="notification-desc">
+                Alerts for expiring rewards and limited-time bonus opportunities
+              </p>
             </div>
-            <span className={`status-badge ${userData.notifications.rewardAlerts ? 'on' : 'off'}`}>
-              {userData.notifications.rewardAlerts ? 'On' : 'Off'}
-            </span>
+            <button
+              className={`status-badge ${notifications.rewardAlerts ? 'on' : 'off'}`}
+              onClick={() => toggleNotification('rewardAlerts')}
+            >
+              {notifications.rewardAlerts ? 'On' : 'Off'}
+            </button>
+          </div>
+
+          <div className="notification-item">
+            <div>
+              <p className="notification-title">New Card Releases</p>
+              <p className="notification-desc">
+                Get notified when new credit cards are added to the OnPoint library
+              </p>
+            </div>
+            <button
+              className={`status-badge ${notifications.newCardReleases ? 'on' : 'off'}`}
+              onClick={() => toggleNotification('newCardReleases')}
+            >
+              {notifications.newCardReleases ? 'On' : 'Off'}
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="notification-note">
-          <p>💡 To update your notification preferences, you'll need to go through the setup again.</p>
+      {/* Spending Limits */}
+      <div className="spending-limits-card">
+        <h4 className="section-heading">
+          <span className="section-icon">💰</span>
+          Spending Limits
+        </h4>
+        <p className="profile-subtitle">
+          Set limits to get warned when you're approaching your budget
+        </p>
+
+        <div className="limits-grid">
+          <div className="limit-item">
+            <label className="limit-label">Daily Limit</label>
+            <div className="limit-input-wrap">
+              <span className="limit-prefix">$</span>
+              <input
+                type="number"
+                className="limit-input"
+                placeholder="0.00"
+                value={spendingLimits.daily}
+                onChange={(e) => handleLimitChange('daily', e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="limit-item">
+            <label className="limit-label">Weekly Limit</label>
+            <div className="limit-input-wrap">
+              <span className="limit-prefix">$</span>
+              <input
+                type="number"
+                className="limit-input"
+                placeholder="0.00"
+                value={spendingLimits.weekly}
+                onChange={(e) => handleLimitChange('weekly', e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="limit-item">
+            <label className="limit-label">Monthly Limit</label>
+            <div className="limit-input-wrap">
+              <span className="limit-prefix">$</span>
+              <input
+                type="number"
+                className="limit-input"
+                placeholder="0.00"
+                value={spendingLimits.monthly}
+                onChange={(e) => handleLimitChange('monthly', e.target.value)}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="actions-card">
         <h4 className="section-heading">Account Actions</h4>
-        {onSignOut && (
-          <>
-            <button className="signout-btn" onClick={onSignOut}>
-              <span>🚪</span>
-              Log Out
-            </button>
-            <p className="signout-note">
-              Logging out will return you to the landing page.
-            </p>
-          </>
-        )}
+        <button className="signout-btn" onClick={handleClearData}>
+          <span>🗑️</span>
+          Delete / Clear All Information
+        </button>
+        <p className="signout-note">
+          This will permanently clear your wallet, savings data, and preferences.
+        </p>
       </div>
     </div>
   );

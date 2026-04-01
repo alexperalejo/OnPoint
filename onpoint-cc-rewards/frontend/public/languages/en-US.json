@@ -25,6 +25,7 @@
     "card-library.filter.all":"All",
     "card-library.filter.cashback":"Cashback",
     "card-library.filter.travel":"Travel",
+    "card-library.filter.beginner": "Beginner",
     
     "savings.title": "Rewards Overview",
     "savings.subtitle": "See how much value you're getting from your cards and where you could improve.",
@@ -66,6 +67,32 @@
     "card-recommendation.top-rewards": "Top Rewards",
     "card-recommendation.details.points": "Points",
     "card-recommendation.details.cashback-rate": "% Cashback",
-    "card-recommendation.details.pts": "pts"
+    "card-recommendation.details.pts": "pts",
+
+    "account.title": "Account",
+    "account.subtitle": "Manage your notification preferences and account data",
+    "account.cards-in-wallet": "Cards in Wallet",
+    "account.active-notifications": "Active Notifications",
+    "account.notifications.title": "Notification Preferences",
+    "account.notifications.checkout-reminders": "Checkout Reminders",
+    "account.notifications.checkout-reminders-desc": "Auto-popup when a checkout page is detected so you never miss a reward",
+    "account.notifications.monthly-reports": "Monthly Reports",
+    "account.notifications.monthly-reports-desc": "Summary of total rewards earned across all cards each month",
+    "account.notifications.card-recommendations": "Card Recommendations",
+    "account.notifications.card-recommendations-desc": "Get notified when a better card exists for your most frequent shopping categories",
+    "account.notifications.reward-alerts": "Reward Alerts",
+    "account.notifications.reward-alerts-desc": "Alerts for expiring rewards and limited-time bonus opportunities",
+    "account.notifications.new-card-releases": "New Card Releases",
+    "account.notifications.new-card-releases-desc": "Get notified when new credit cards are added to the OnPoint library",
+    "account.spending-limits.title": "Spending Limits",
+    "account.spending-limits.subtitle": "Set limits to get warned when you're approaching your budget",
+    "account.spending-limits.daily": "Daily Limit",
+    "account.spending-limits.weekly": "Weekly Limit",
+    "account.spending-limits.monthly": "Monthly Limit",
+    "account.actions.title": "Account Actions",
+    "account.actions.clear": "Delete / Clear All Information",
+    "account.actions.clear-note": "This will permanently clear your wallet, savings data, and preferences.",
+    "account.on": "On",
+    "account.off": "Off"
 
 }
