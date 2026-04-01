@@ -3,6 +3,8 @@ import './CardLibrary.css';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useTranslation } from '../utils/translation';
 
+
+
 const POPULAR_CARDS = [
   {
     name: 'Chase Freedom Unlimited',
@@ -133,6 +135,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [availableCards, setAvailableCards] = useState(POPULAR_CARDS);
   const [filterType, setFilterType] = useState('all');
+  const [expandedCards, setExpandedCards] = useState({});
   const translate = useTranslation("card-library");
 
 
@@ -255,11 +258,23 @@ export default function CardLibrary({ userCards = [], addCard }) {
               <div className="card-rewards">
                 <p className="rewards-label">{translate("card-display.rewards")}</p>
                 <ul className="rewards-list">
-                  {card.rewards.slice(0, 3).map((reward, i) => (
+                  {(expandedCards[card.id || card.name] ? card.rewards : card.rewards.slice(0, 3)).map((reward, i) => (
                     <li key={i}>{translate("category." + reward.category)}: {reward.rate}%</li>
                   ))}
-                  {card.rewards.length > 3 && <li>{translate("card-display.extra-rewards", {count: card.rewards.length - 3})}</li>}
                 </ul>
+                {card.rewards.length > 3 && (
+                  <button
+                    className="expand-rewards-btn"
+                    onClick={() => setExpandedCards(prev => ({
+                      ...prev,
+                      [card.id || card.name]: !prev[card.id || card.name]
+                    }))}
+                  >
+                    {expandedCards[card.id || card.name]
+                      ? '▲ Show less'
+                      : `▼ +${card.rewards.length - 3} more`}
+                  </button>
+                )}
               </div>
               {isCardAdded(card.name) ? (
                 <button className="add-card-btn added" disabled>

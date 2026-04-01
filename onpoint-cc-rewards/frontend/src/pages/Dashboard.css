@@ -566,6 +566,19 @@ html.dark .empty-icon {
   max-width: 500px;
 }
 
+.expand-rewards-btn {
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 0;
+  margin-top: 4px;
+}
+
+.expand-rewards-btn:hover {
+  text-decoration: underline;
+}
 .primary-btn {
   margin-top: 0.5rem;
   background: #2563eb;

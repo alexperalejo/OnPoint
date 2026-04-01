@@ -24,6 +24,7 @@ export default function Dashboard({ onSignOut }) {
   const [monthlyCardContributions, setMonthlyCardContributions] = useState({});
   const [monthlyCategoryTotals, setMonthlyCategoryTotals] = useState({});
   const [selectedSavingsMonth, setSelectedSavingsMonth] = useState("");
+  const [expandedCards, setExpandedCards] = useState({});
   const translate = useTranslation();
 
   const toNumber = useCallback((value) => {
@@ -541,13 +542,25 @@ export default function Dashboard({ onSignOut }) {
                       <div className="user-card-rewards">
                         <p className="rewards-heading">{translate("card-display.rewards")}</p>
                         <ul>
-                          {card.rewards.slice(0, 3).map((r, i) => (
+                          {(expandedCards[card.id] ? card.rewards : card.rewards.slice(0, 3)).map((r, i) => (
                             <li key={i}>
-                              
                               {translate("category." + r.category)}: {r.rate}%
                             </li>
                           ))}
                         </ul>
+                        {card.rewards.length > 3 && (
+                          <button
+                            className="expand-rewards-btn"
+                            onClick={() => setExpandedCards(prev => ({
+                              ...prev,
+                              [card.id]: !prev[card.id]
+                            }))}
+                          >
+                            {expandedCards[card.id] 
+                              ? '▲ Show less' 
+                              : `▼ +${card.rewards.length - 3} more`}
+                          </button>
+                        )}
                       </div>
 
                       <button
