@@ -1,3 +1,4 @@
+/* global chrome */
 import { useState, useEffect, useCallback, useMemo } from "react";
 import "./Dashboard.css";
 import CardLibrary from "./CardLibrary.jsx";
