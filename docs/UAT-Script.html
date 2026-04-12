@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OnPoint — UAT Script</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 13px;
+      color: #111;
+      background: #fff;
+      padding: 36px 40px;
+    }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    .doc-header { margin-bottom: 28px; }
+    .doc-header h1 {
+      font-size: 24px;
+      color: #1557a0;
+      border-bottom: 3px solid #1557a0;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      gap: 4px 32px;
+      font-size: 12px;
+      color: #444;
+    }
+    .meta-grid span strong { color: #1557a0; }
+
+    /* ── Section headings ────────────────────────────────────── */
+    .section-heading {
+      background: #1557a0;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 7px 12px;
+      margin: 28px 0 0 0;
+      letter-spacing: .5px;
+    }
+
+    /* ── Table ───────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 6px;
+    }
+
+    thead th {
+      background: #2470c2;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: left;
+      padding: 7px 9px;
+      border: 1px solid #1557a0;
+    }
+
+    tbody tr:nth-child(even) { background: #f0f6ff; }
+    tbody tr:nth-child(odd)  { background: #fff; }
+
+    tbody td {
+      padding: 7px 9px;
+      border: 1px solid #c5d8f3;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    /* column widths */
+    .col-id          { width: 56px;  font-weight: 700; color: #1557a0; white-space: nowrap; }
+    .col-desc        { width: 190px; }
+    .col-pre         { width: 155px; }
+    .col-steps       { width: 225px; }
+    .col-expected    { width: 170px; }
+    .col-actual      { width: 90px;  }
+    .col-status      { width: 70px;  text-align: center; }
+
+    ol { padding-left: 16px; margin: 0; }
+    ol li { margin-bottom: 2px; }
+
+    .badge-pass-fail {
+      display: inline-block;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      padding: 1px 8px;
+      font-size: 11px;
+      color: #555;
+      background: #f9f9f9;
+      white-space: nowrap;
+    }
+
+    .note {
+      font-size: 11px;
+      color: #666;
+      margin-top: 18px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     DOCUMENT HEADER
+════════════════════════════════════════════════════════════════ -->
+<div class="doc-header">
+  <h1>OnPoint — User Acceptance Testing (UAT) Script</h1>
+  <div class="meta-grid">
+    <span><strong>Project:</strong> OnPoint Chrome Extension</span>
+    <span><strong>Document Version:</strong> 1.0</span>
+    <span><strong>Date:</strong> April 10, 2026</span>
+    <span><strong>Sprint / Release:</strong> MVP v1.0</span>
+    <span><strong>Prepared By:</strong> Team INH</span>
+    <span><strong>Status:</strong> Ready for UAT</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 1 — ONBOARDING
+════════════════════════════════════════════════════════════════ -->
+<div class="section-heading">Section 1 — Onboarding Flow</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-id">ID</th>
+      <th class="col-desc">Description</th>
+      <th class="col-pre">Preconditions</th>
+      <th class="col-steps">Steps</th>
+      <th class="col-expected">Expected Results</th>
+      <th class="col-actual">Actual Results</th>
+      <th class="col-status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td class="col-id">TC001</td>
+      <td class="col-desc">Validate that the OnPoint extension loads the onboarding screen on first install</td>
+      <td class="col-pre">Chrome browser open; extension not previously installed</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open Chrome and navigate to <em>chrome://extensions</em></li>
+          <li>Enable Developer Mode and click "Load unpacked"</li>
+          <li>Select the <code>extension/</code> folder</li>
+          <li>Click the OnPoint icon in the toolbar</li>
+        </ol>
+      </td>
+      <td class="col-expected">Onboarding welcome screen is displayed with the OnPoint value proposition and a "Get Started" call-to-action</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC002</td>
+      <td class="col-desc">Validate that the onboarding flow guides the user through all setup steps</td>
+      <td class="col-pre">Extension installed; onboarding screen visible (TC001 passed)</td>
+      <td class="col-steps">
+        <ol>
+          <li>Click "Get Started" on the welcome screen</li>
+          <li>Progress through each onboarding step</li>
+          <li>Observe step indicators and navigation controls</li>
+        </ol>
+      </td>
+      <td class="col-expected">Each step is shown in sequence (welcome → card import → confirmation); progress indicators update correctly; user can navigate forward and back</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC003</td>
+      <td class="col-desc">Validate that a user can add their first credit card during onboarding</td>
+      <td class="col-pre">User is on the card import step of onboarding</td>
+      <td class="col-steps">
+        <ol>
+          <li>Click "Add Card" or the equivalent add action</li>
+          <li>Enter card nickname, reward category, and cashback rate</li>
+          <li>Submit the card form</li>
+        </ol>
+      </td>
+      <td class="col-expected">Card is added and displayed in the card preview list; no error messages appear</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC004</td>
+      <td class="col-desc">Validate that completing onboarding transitions the user to the active dashboard</td>
+      <td class="col-pre">At least one card added; user is on the confirmation step</td>
+      <td class="col-steps">
+        <ol>
+          <li>Review the confirmation screen showing the added card(s)</li>
+          <li>Click "Finish" or "Start Using OnPoint"</li>
+          <li>Observe the resulting screen</li>
+        </ol>
+      </td>
+      <td class="col-expected">User is taken to the main dashboard; card library shows the added card; detector status shows as active</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 2 — CHECKOUT PAGE DETECTION
+════════════════════════════════════════════════════════════════ -->
+<div class="section-heading">Section 2 — Checkout Page Detection</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-id">ID</th>
+      <th class="col-desc">Description</th>
+      <th class="col-pre">Preconditions</th>
+      <th class="col-steps">Steps</th>
+      <th class="col-expected">Expected Results</th>
+      <th class="col-actual">Actual Results</th>
+      <th class="col-status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td class="col-id">TC005</td>
+      <td class="col-desc">Validate that the extension detects a standard checkout page and displays the detection indicator</td>
+      <td class="col-pre">Extension installed and active; at least one card in wallet</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open <code>extension/test-pages/checkout-sample.html</code> in Chrome with the extension loaded</li>
+          <li>Wait up to 5 seconds</li>
+          <li>Observe the extension icon and any popup UI</li>
+        </ol>
+      </td>
+      <td class="col-expected">Extension badge or popup indicates a checkout has been detected; no console errors</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC006</td>
+      <td class="col-desc">Validate that the extension does NOT trigger on a non-checkout page</td>
+      <td class="col-pre">Extension installed and active</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open <code>extension/test-pages/non-checkout.html</code></li>
+          <li>Wait 5 seconds</li>
+          <li>Observe the extension icon and popup</li>
+        </ol>
+      </td>
+      <td class="col-expected">No checkout detection indicator appears; extension remains in idle state</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC007</td>
+      <td class="col-desc">Validate that the extension detects a EUR-currency checkout page</td>
+      <td class="col-pre">Extension installed and active</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open <code>extension/test-pages/checkout-sample-eur.html</code></li>
+          <li>Wait up to 5 seconds</li>
+          <li>Observe the extension popup</li>
+        </ol>
+      </td>
+      <td class="col-expected">Extension detects the checkout page regardless of currency; detection indicator appears normally</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC008</td>
+      <td class="col-desc">Validate that the extension detects a checkout on a live Shopify-based storefront</td>
+      <td class="col-pre">Extension installed; internet connection available</td>
+      <td class="col-steps">
+        <ol>
+          <li>Navigate to a publicly accessible Shopify store</li>
+          <li>Add an item to the cart and proceed to checkout</li>
+          <li>Wait up to 5 seconds on the checkout page</li>
+        </ol>
+      </td>
+      <td class="col-expected">Extension detects the Shopify checkout and shows the recommendation popup or badge</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 3 — CARD RECOMMENDATION ENGINE
+════════════════════════════════════════════════════════════════ -->
+<div class="section-heading">Section 3 — Card Recommendation Engine</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-id">ID</th>
+      <th class="col-desc">Description</th>
+      <th class="col-pre">Preconditions</th>
+      <th class="col-steps">Steps</th>
+      <th class="col-expected">Expected Results</th>
+      <th class="col-actual">Actual Results</th>
+      <th class="col-status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td class="col-id">TC009</td>
+      <td class="col-desc">Validate that a card recommendation is generated within 2 seconds of checkout detection</td>
+      <td class="col-pre">Extension active; at least one card in wallet; checkout-sample.html loaded</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open <code>extension/test-pages/checkout-sample.html</code></li>
+          <li>Note the time when the page loads</li>
+          <li>Observe when the recommendation popup appears</li>
+        </ol>
+      </td>
+      <td class="col-expected">Recommendation popup appears within 2 seconds of page load; a card name and estimated reward are displayed</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC010</td>
+      <td class="col-desc">Validate that the recommended card matches the highest reward rate for the detected merchant category</td>
+      <td class="col-pre">Two or more cards with different reward rates in wallet; merchant matches a known category (e.g., Shopping)</td>
+      <td class="col-steps">
+        <ol>
+          <li>Add two cards — Card A (3% shopping) and Card B (1% shopping)</li>
+          <li>Open a shopping checkout page</li>
+          <li>Observe which card is recommended as the primary pick</li>
+        </ol>
+      </td>
+      <td class="col-expected">Card A (3% cashback) is recommended as the top pick; Card B appears as an alternative</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC011</td>
+      <td class="col-desc">Validate that the recommendation popup displays the card image, name, and estimated reward amount</td>
+      <td class="col-pre">Checkout detected; recommendation generated</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open a checkout page with the extension active</li>
+          <li>Wait for the recommendation popup</li>
+          <li>Inspect the popup contents</li>
+        </ol>
+      </td>
+      <td class="col-expected">Popup shows: card name, card image (or placeholder), and estimated cashback/reward amount for the purchase</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC012</td>
+      <td class="col-desc">Validate that alternative card recommendations are displayed below the primary pick</td>
+      <td class="col-pre">Three or more cards in wallet; checkout detected</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open a checkout page</li>
+          <li>Wait for the recommendation popup</li>
+          <li>Scroll or expand the alternatives section</li>
+        </ol>
+      </td>
+      <td class="col-expected">At least one alternative card is shown below the primary recommendation with its reward estimate</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 4 — RECOMMENDATION INTERACTION
+════════════════════════════════════════════════════════════════ -->
+<div class="section-heading">Section 4 — Recommendation Display &amp; Interaction</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-id">ID</th>
+      <th class="col-desc">Description</th>
+      <th class="col-pre">Preconditions</th>
+      <th class="col-steps">Steps</th>
+      <th class="col-expected">Expected Results</th>
+      <th class="col-actual">Actual Results</th>
+      <th class="col-status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td class="col-id">TC013</td>
+      <td class="col-desc">Validate that the user can accept a card recommendation from the popup</td>
+      <td class="col-pre">Recommendation popup visible on a checkout page</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open a checkout page with the extension active</li>
+          <li>Wait for the recommendation popup</li>
+          <li>Click "Use This Card" (or equivalent accept action)</li>
+        </ol>
+      </td>
+      <td class="col-expected">Popup acknowledges the selection; no errors; UI updates to reflect the accepted card</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC014</td>
+      <td class="col-desc">Validate that the user can dismiss/skip the recommendation popup</td>
+      <td class="col-pre">Recommendation popup visible</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open a checkout page with a visible recommendation popup</li>
+          <li>Click "Skip" or dismiss the popup (×)</li>
+          <li>Observe the page state</li>
+        </ol>
+      </td>
+      <td class="col-expected">Popup closes without error; checkout page remains fully functional</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC015</td>
+      <td class="col-desc">Validate that the user can add a new card directly from the recommendation popup</td>
+      <td class="col-pre">Recommendation popup visible; card wallet has at least one card</td>
+      <td class="col-steps">
+        <ol>
+          <li>Click "Add New Card" within the recommendation popup</li>
+          <li>Complete the add-card form</li>
+          <li>Submit and observe</li>
+        </ol>
+      </td>
+      <td class="col-expected">New card is added to the wallet and appears in the alternatives section of the popup or card library</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC016</td>
+      <td class="col-desc">Validate that the recommendation popup does not degrade page performance</td>
+      <td class="col-pre">Extension active; checkout page loaded</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open a checkout page with the extension active</li>
+          <li>Open Chrome DevTools → Performance tab</li>
+          <li>Record while the popup appears and is interacted with</li>
+        </ol>
+      </td>
+      <td class="col-expected">Page load impact is less than 2 seconds; no layout jank observed in the performance trace</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 5 — CARD MANAGEMENT
+════════════════════════════════════════════════════════════════ -->
+<div class="section-heading">Section 5 — Card Management</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-id">ID</th>
+      <th class="col-desc">Description</th>
+      <th class="col-pre">Preconditions</th>
+      <th class="col-steps">Steps</th>
+      <th class="col-expected">Expected Results</th>
+      <th class="col-actual">Actual Results</th>
+      <th class="col-status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td class="col-id">TC017</td>
+      <td class="col-desc">Validate that a user can manually add a new credit card to their wallet</td>
+      <td class="col-pre">User is on the Card Library / dashboard; onboarding completed</td>
+      <td class="col-steps">
+        <ol>
+          <li>Navigate to the Card Library section</li>
+          <li>Click "Add Card"</li>
+          <li>Enter card nickname, reward category, and cashback percentage</li>
+          <li>Click Save</li>
+        </ol>
+      </td>
+      <td class="col-expected">New card appears in the card list immediately; data is persisted in <code>chrome.storage.local</code></td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC018</td>
+      <td class="col-desc">Validate that card data persists after the browser is restarted</td>
+      <td class="col-pre">At least one card added to the wallet</td>
+      <td class="col-steps">
+        <ol>
+          <li>Add a card to the wallet</li>
+          <li>Close and reopen Chrome</li>
+          <li>Open the OnPoint popup and navigate to Card Library</li>
+        </ol>
+      </td>
+      <td class="col-expected">Previously added card(s) are still present in the card library after restart</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC019</td>
+      <td class="col-desc">Validate that a user can edit an existing card's details</td>
+      <td class="col-pre">At least one card in the wallet</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open Card Library</li>
+          <li>Click "Edit" on an existing card</li>
+          <li>Change the nickname and cashback rate</li>
+          <li>Click Save</li>
+        </ol>
+      </td>
+      <td class="col-expected">Card details are updated in the library; updated values persist after popup close/reopen</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC020</td>
+      <td class="col-desc">Validate that a user can delete a card from their wallet</td>
+      <td class="col-pre">At least two cards in the wallet</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open Card Library</li>
+          <li>Click "Delete" on one card</li>
+          <li>Confirm the deletion prompt</li>
+          <li>Verify the card list</li>
+        </ol>
+      </td>
+      <td class="col-expected">The deleted card is removed from the library and does not reappear after refresh</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC021</td>
+      <td class="col-desc">Validate that the user can search for a card by name in the card library</td>
+      <td class="col-pre">Three or more cards in the wallet with different names</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open Card Library</li>
+          <li>Type a partial card name into the search field</li>
+          <li>Observe the results</li>
+        </ol>
+      </td>
+      <td class="col-expected">Only cards matching the search term are displayed; results update in real time as the user types</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC022</td>
+      <td class="col-desc">Validate that the user can filter cards by reward category</td>
+      <td class="col-pre">Cards with different categories (e.g., Dining, Travel, Shopping) exist in wallet</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open Card Library</li>
+          <li>Select a category filter (e.g., "Dining")</li>
+          <li>Observe the filtered results</li>
+        </ol>
+      </td>
+      <td class="col-expected">Only cards tagged with the selected category are displayed</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 6 — PURCHASE TRACKING
+════════════════════════════════════════════════════════════════ -->
+<div class="section-heading">Section 6 — Purchase Tracking (Detection Only)</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-id">ID</th>
+      <th class="col-desc">Description</th>
+      <th class="col-pre">Preconditions</th>
+      <th class="col-steps">Steps</th>
+      <th class="col-expected">Expected Results</th>
+      <th class="col-actual">Actual Results</th>
+      <th class="col-status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td class="col-id">TC023</td>
+      <td class="col-desc">Validate that the extension detects a purchase completion event on a confirmation page</td>
+      <td class="col-pre">Extension installed and active</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open <code>extension/test-pages/purchase-completion-sample.html</code></li>
+          <li>Wait up to 5 seconds</li>
+          <li>Observe extension popup or local storage for a purchase record</li>
+        </ol>
+      </td>
+      <td class="col-expected">Extension detects the purchase confirmation; a purchase record (merchant, timestamp) is stored in <code>chrome.storage.local</code></td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC024</td>
+      <td class="col-desc">Validate that purchase records include merchant name, amount (if available), and timestamp</td>
+      <td class="col-pre">Purchase completion detected (TC023 passed)</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open Chrome DevTools → Application → Storage → chrome.storage.local</li>
+          <li>Inspect the purchase history entry created by TC023</li>
+        </ol>
+      </td>
+      <td class="col-expected">Record contains at minimum: merchant identifier, timestamp; amount field present (may be null if not detectable)</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC025</td>
+      <td class="col-desc">Validate that the extension does NOT record a purchase event on a non-confirmation page</td>
+      <td class="col-pre">Extension installed; no prior purchase events in storage</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open <code>extension/test-pages/checkout-sample.html</code> (not a confirmation page)</li>
+          <li>Wait 5 seconds</li>
+          <li>Inspect <code>chrome.storage.local</code> for purchase records</li>
+        </ol>
+      </td>
+      <td class="col-expected">No new purchase record is created; storage state unchanged from baseline</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 7 — DASHBOARD & UI
+════════════════════════════════════════════════════════════════ -->
+<div class="section-heading">Section 7 — Dashboard &amp; UI</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-id">ID</th>
+      <th class="col-desc">Description</th>
+      <th class="col-pre">Preconditions</th>
+      <th class="col-steps">Steps</th>
+      <th class="col-expected">Expected Results</th>
+      <th class="col-actual">Actual Results</th>
+      <th class="col-status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td class="col-id">TC026</td>
+      <td class="col-desc">Validate that the dashboard loads and displays the card library summary</td>
+      <td class="col-pre">Onboarding completed; at least one card in wallet</td>
+      <td class="col-steps">
+        <ol>
+          <li>Click the OnPoint extension icon in Chrome</li>
+          <li>Navigate to the Dashboard view</li>
+          <li>Observe the card summary section</li>
+        </ol>
+      </td>
+      <td class="col-expected">Dashboard loads without errors; card count and card names from the wallet are displayed</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC027</td>
+      <td class="col-desc">Validate that the detector status indicator on the dashboard reflects the current detection state</td>
+      <td class="col-pre">Dashboard is open; extension active</td>
+      <td class="col-steps">
+        <ol>
+          <li>Open dashboard on a non-checkout page — note status</li>
+          <li>Open a checkout page in another tab</li>
+          <li>Switch back to the dashboard and observe status</li>
+        </ol>
+      </td>
+      <td class="col-expected">Status changes from "Idle" to "Checkout Detected" (or equivalent) when a checkout tab is active</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC028</td>
+      <td class="col-desc">Validate that the User Profile page displays stored user preferences</td>
+      <td class="col-pre">Onboarding completed; profile data present</td>
+      <td class="col-steps">
+        <ol>
+          <li>Click the OnPoint extension icon</li>
+          <li>Navigate to User Profile</li>
+          <li>Review displayed information</li>
+        </ol>
+      </td>
+      <td class="col-expected">User Profile page loads and displays any stored preferences without errors</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC029</td>
+      <td class="col-desc">Validate that the extension UI renders correctly in light and dark mode (if dark mode is supported)</td>
+      <td class="col-pre">Extension installed; <code>useDarkMode</code> hook present in codebase</td>
+      <td class="col-steps">
+        <ol>
+          <li>Enable dark mode in Chrome (Settings → Appearance)</li>
+          <li>Open the OnPoint popup</li>
+          <li>Observe all UI elements: text, buttons, backgrounds</li>
+        </ol>
+      </td>
+      <td class="col-expected">All UI elements are readable and contrast-compliant in dark mode; no unstyled elements visible</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+    <tr>
+      <td class="col-id">TC030</td>
+      <td class="col-desc">Validate that the extension UI displays correctly when no cards have been added to the wallet</td>
+      <td class="col-pre">Extension installed; card wallet is empty</td>
+      <td class="col-steps">
+        <ol>
+          <li>Remove all cards from the wallet (or install fresh)</li>
+          <li>Open a checkout page</li>
+          <li>Observe the popup/recommendation UI</li>
+        </ol>
+      </td>
+      <td class="col-expected">An empty-state message is displayed (e.g., "Add a card to get recommendations"); no crashes or blank screens</td>
+      <td class="col-actual"></td>
+      <td class="col-status"><span class="badge-pass-fail">Pass / Fail</span></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FOOTER NOTE
+════════════════════════════════════════════════════════════════ -->
+<p class="note">
+  <strong>Test Environment:</strong> Chrome / Chromium (desktop) with OnPoint extension loaded as an unpacked extension. Backend API optional — card/merchant data may be seeded from <code>database/cards.json</code> and <code>database/merchants.json</code>.
+  &nbsp;|&nbsp;
+  <strong>Out of Scope for MVP UAT:</strong> User accounts / login, push notifications, ML recommendations, Firefox / Safari, mobile responsive design.
+</p>
+
+</body>
+</html>
