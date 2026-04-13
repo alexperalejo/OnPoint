@@ -201,12 +201,10 @@ export function CheckoutDetector() {
             const cardId = bestCard.id || bestCard; // handle both object and string cases
             const cardRes = await fetch(`http://localhost:3000/api/cards/${cardId}`);
             const cardData = await cardRes.json();
-            const tagBreakdown = body.card.breakdown.find(b => b.from !== 'cashback');
             console.log("[CARD TYPE]", cardData.cardType); 
             cardData.image_url = `http://localhost:3000/${cardData.image_path}`;
-            cardData.rewardPoints = body.card.rewardPoints; // attach reward points info to card data for display
-            // Use the highest non-cashback breakdown points for display
-            cardData.rewardPoints = tagBreakdown ? tagBreakdown.points : body.card.rewardPoints;
+            // Keep total reward points/multiplier from backend result.
+            cardData.rewardPoints = body.card.rewardPoints;
 
             console.log("[IMAGE URL]", cardData.image_url);
             setRecommendedCard(cardData);

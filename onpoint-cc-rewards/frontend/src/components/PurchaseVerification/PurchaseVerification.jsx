@@ -66,10 +66,9 @@ function computeRewardValue(amount, selectedCard) {
   const points = toNumber(selectedCard?.rewardPoints);
   const pointValue = toNumber(selectedCard?.pointValue || selectedCard?.pointToDollar || selectedCard?.pointToCashValue);
   if (points > 0 && pointValue > 0) {
-    return points * pointValue;
-  }
-  if (points > 0 && pointValue === 0 && Number.isFinite(points)) {
-    return points;
+    // Treat small values as multipliers (e.g., 3x), otherwise as already-earned points.
+    const earnedPoints = points <= 20 ? points * purchaseAmount : points;
+    return earnedPoints * pointValue;
   }
 
   const rate = getCardRate(selectedCard);
@@ -176,9 +175,10 @@ function buildPurchaseFingerprint(snapshot, amount, selectedCard) {
     : `${pageUrl}|${numericAmount}|${cardRef}`;
 }
 
-async function applyAllTimeSavings(snapshot, selectedCard) {
+async function applyAllTimeSavings(snapshot, selectedCard, options = {}) {
   if (typeof chrome === 'undefined' || !chrome.storage?.local) return;
-  if (!hasPurchaseDetectorYes(snapshot)) return;
+  const wasUserConfirmed = options && options.userConfirmed === true;
+  if (!wasUserConfirmed && !hasPurchaseDetectorYes(snapshot)) return;
 
   const amount = toNumber(snapshot?.total || snapshot?.checkout?.amount);
   if (amount <= 0) return;
@@ -426,7 +426,7 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
     if (!snapshot) return;
 
     try {
-      await applyAllTimeSavings(snapshot, card || recommendedCard);
+      await applyAllTimeSavings(snapshot, card || recommendedCard, { userConfirmed: true });
     } catch (e) {
       console.warn('Failed to update all-time savings', e);
     }
