@@ -12,7 +12,6 @@ export function CheckoutDetector() {
   const [showRecommendation, setShowRecommendation] = useState(false);
   const [recommendedCard, setRecommendedCard] = useState(null);
   const [breakdown, setBreakdown] = useState(null); // for detailed recommendation breakdown
-  const [reason] = useState(null);
   const FIXED_THRESHOLD = 0.7;
   const [purchaseTotal, setPurchaseTotal] = useState(null);
   const [saved, setSaved] = useState(false);
@@ -42,29 +41,6 @@ export function CheckoutDetector() {
       console.warn('Could not store detection debug info', storageErr);
     }
   }
-
-  const DUMMY_RECOMMENDED_CARD = {
-    id: "1",
-    name: "Chase Freedom Unlimited",
-    issuer: "Chase",
-    type: "cashback",
-    annualFee: 0,
-    color: "#1E3A8A",
-    rewards: [
-      {
-        category: "dining",
-        rate: 3,
-        details: "Including takeout and delivery",
-      },
-      { category: "drugstore", rate: 3 },
-      {
-        category: "travel",
-        rate: 5,
-        details: "Through Chase Travel Portal",
-      },
-      { category: "all", rate: 1.5 },
-    ],
-  };
 
   useEffect(() => {
     async function queryContent() {
@@ -299,9 +275,8 @@ export function CheckoutDetector() {
       {detection && (
         <div>
           {!saved && showRecommendation && recommendedCard && (
-            <CardRecommendation 
+            <CardRecommendation
               card={recommendedCard}
-              reason={reason}
               total={purchaseTotal}
               breakdown={breakdown}
               onApply={(card) => {

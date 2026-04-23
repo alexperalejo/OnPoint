@@ -127,9 +127,6 @@ const MUTED_CARD_COLORS = [
   '#3f4c6b'
 ];
 
-/*function getRandomHexColor() {
-  return MUTED_CARD_COLORS[Math.floor(Math.random() * MUTED_CARD_COLORS.length)];
-}*/
 export default function CardLibrary({ userCards = [], addCard }) {
   useDarkMode(); // enables html.dark + CSS dark styles (system wins)
   const [searchTerm, setSearchTerm] = useState('');
@@ -169,13 +166,6 @@ export default function CardLibrary({ userCards = [], addCard }) {
 
   const handleAddCard = (card) => {
     if (!isCardAdded(card.name)) {
-      console.log('adding card', card)
-      //if(!storedCards || storedCards.length == 0)
-      //{
-      //  Cookies.set("user-cards", card.id +'|')
-      //} else{
-      //  Cookies.set("user-cards", storedCards + card.id + '|')
-      //}
       addCard(card);
     }
   };

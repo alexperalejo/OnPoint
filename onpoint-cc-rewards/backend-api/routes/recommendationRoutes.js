@@ -2,7 +2,6 @@
 
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose')
 const recommendationService = require('../services/recommendationService');
 const auth = require('../middleware/auth');
 
