@@ -6,6 +6,7 @@ import UserProfile from "./UserProfile.jsx";
 import { useChromeStorageSync } from "use-chrome-storage";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { useTranslation } from "../utils/translation.js";
+import { apiUrl, assetUrl } from '../utils/api';
 
 export default function Dashboard({ onSignOut }) {
   // ✅ system-following dark mode (adds/removes "dark" on <html>)
@@ -235,7 +236,7 @@ export default function Dashboard({ onSignOut }) {
       try {
         const values = await Promise.all(
           usedCards.map(async (c) => {
-            const response = await fetch("http://localhost:3000/api/cards/" + c);
+            const response = await fetch(apiUrl(`/api/cards/${c}`));
             const data = await response.json();
 
             const newCard = {
@@ -243,7 +244,7 @@ export default function Dashboard({ onSignOut }) {
               name: data.name,
               issuer: data.issuer,
               annualFee: data.annualFee,
-              image_url: `http://localhost:3000/${data.image_path}`,  // replaced imageKey
+              image_url: assetUrl(data.image_path),  // replaced imageKey
               rewards: (data.attributes || [])
                 .filter((a) => a.type != "url")
                 .map((a_1) => {

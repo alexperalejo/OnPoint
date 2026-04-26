@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation";
 import { useChromeStorageSync } from "use-chrome-storage";
+import { apiUrl, assetUrl } from '../../utils/api';
 import './PurchaseVerification.css';
 
 const SAVINGS_TOTAL_KEY = 'savings_all_time_total';
@@ -459,9 +460,9 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
   async function handleShowAllCards() {
     setLoadingCards(true);
     try {
-      const res = await fetch('http://localhost:3000/api/cards');
+      const res = await fetch(apiUrl('/api/cards'));
       const cards = await res.json();
-      setAllCards(cards.map(c => ({ ...c, image_url: `http://localhost:3000/${c.image_path}` })));
+      setAllCards(cards.map(c => ({ ...c, image_url: assetUrl(c.image_path) })));
       setShowAllCards(true);
     } catch (e) {
       console.warn('Failed to fetch all cards', e);

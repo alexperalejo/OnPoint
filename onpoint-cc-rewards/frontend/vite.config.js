@@ -13,7 +13,7 @@ export default defineConfig({
   base: './',
   build: {
     outDir: '../../extension/dist',
-    emptyOutDir: false,
+    emptyOutDir: true,
     rollupOptions: {
       input: {
         dashboard: resolve(__dirname, 'dashboard.html'),

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"; // React hooks for state and lifecycle
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation"; // Card recommendation component
 import { useChromeStorageSync } from "use-chrome-storage" // Custom hook to access chrome.storage.sync for saved cards
+import { apiUrl, assetUrl } from '../../utils/api';
 import './CheckoutDetector.css';
 
 export function CheckoutDetector() {
@@ -158,7 +159,7 @@ export function CheckoutDetector() {
         console.log("[CARD IDS SENT]", cardIds);
 
 
-        const res = await fetch('http://localhost:3000/api/recommendations', {
+        const res = await fetch(apiUrl('/api/recommendations'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cards: cardIds, url: tab.url, amount: 1 })
@@ -175,10 +176,10 @@ export function CheckoutDetector() {
         // bestCard is just an ID string, fetch the full card object
         if (bestCard) {
             const cardId = bestCard.id || bestCard; // handle both object and string cases
-            const cardRes = await fetch(`http://localhost:3000/api/cards/${cardId}`);
+          const cardRes = await fetch(apiUrl(`/api/cards/${cardId}`));
             const cardData = await cardRes.json();
             console.log("[CARD TYPE]", cardData.cardType); 
-            cardData.image_url = `http://localhost:3000/${cardData.image_path}`;
+            cardData.image_url = assetUrl(cardData.image_path);
             // Keep total reward points/multiplier from backend result.
             cardData.rewardPoints = body.card.rewardPoints;
 

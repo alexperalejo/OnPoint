@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import './CardLibrary.css';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useTranslation } from '../utils/translation';
+import { apiUrl, assetUrl } from '../utils/api';
 
 
 
@@ -137,7 +138,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
 
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/cards").then(r => r.json())
+    fetch(apiUrl('/api/cards')).then(r => r.json())
     .then(data => {
       console.log(data)
       setAvailableCards(data.map(v => {
@@ -147,7 +148,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
           issuer: v.issuer,
           annualFee: v.annualFee,
           type: v.cardType === 'points' ? 'travel' : v.cardType, // ← add this
-          image_url: `http://localhost:3000/${v.image_path}`,
+          image_url: assetUrl(v.image_path),
           rewards: v.attributes.filter(a => a.type != 'url').map(a => {
             if (a.type == "all") return { category: 'all', rate: a.multiplier };
             return { category: a.category, rate: a.multiplier };
