@@ -184,19 +184,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               const pad = n => String(n).padStart(2, '0');
               const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
               const monthKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+              const weekStart = new Date(now);
+              weekStart.setDate(now.getDate() - now.getDay());
+              const weekKey = `${weekStart.getFullYear()}-${pad(weekStart.getMonth() + 1)}-${pad(weekStart.getDate())}`;
               const spendData = await new Promise((resolve) =>
-                chrome.storage.local.get(['spendingLimits', 'spending_daily_totals', 'spending_monthly_totals', 'spending_dedupe'], resolve)
+                chrome.storage.local.get(['spendingLimits', 'spending_daily_totals', 'spending_weekly_totals', 'spending_monthly_totals', 'spending_dedupe'], resolve)
               );
               // Deduplicate: skip if we already recorded this checkout (same host + ts)
               const dedupeKey = `${host}|${checkout.ts}`;
               const dedupe = Array.isArray(spendData.spending_dedupe) ? spendData.spending_dedupe : [];
               if (!dedupe.includes(dedupeKey)) {
                 const dailyTotals = spendData.spending_daily_totals || {};
+                const weeklyTotals = spendData.spending_weekly_totals || {};
                 const monthlyTotals = spendData.spending_monthly_totals || {};
                 const newDaily = Number(((dailyTotals[dateKey] || 0) + checkout.amount).toFixed(2));
+                const newWeekly = Number(((weeklyTotals[weekKey] || 0) + checkout.amount).toFixed(2));
                 const newMonthly = Number(((monthlyTotals[monthKey] || 0) + checkout.amount).toFixed(2));
                 await new Promise((resolve) => chrome.storage.local.set({
                   spending_daily_totals: { ...dailyTotals, [dateKey]: newDaily },
+                  spending_weekly_totals: { ...weeklyTotals, [weekKey]: newWeekly },
                   spending_monthly_totals: { ...monthlyTotals, [monthKey]: newMonthly },
                   spending_dedupe: [...dedupe, dedupeKey].slice(-200),
                 }, resolve));
@@ -206,6 +212,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 const warnings = [];
                 if (limits.dailyEnabled && Number(limits.daily) > 0 && newDaily > Number(limits.daily)) {
                   warnings.push(`Daily limit $${limits.daily} exceeded — $${newDaily.toFixed(2)} spent today.`);
+                }
+                if (limits.weeklyEnabled && Number(limits.weekly) > 0 && newWeekly > Number(limits.weekly)) {
+                  warnings.push(`Weekly limit $${limits.weekly} exceeded — $${newWeekly.toFixed(2)} spent this week.`);
                 }
                 if (limits.monthlyEnabled && Number(limits.monthly) > 0 && newMonthly > Number(limits.monthly)) {
                   warnings.push(`Monthly limit $${limits.monthly} exceeded — $${newMonthly.toFixed(2)} spent this month.`);

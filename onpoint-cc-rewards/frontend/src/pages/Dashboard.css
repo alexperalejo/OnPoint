@@ -1126,3 +1126,21 @@ html.dark .rec-fee.free {
 .savings-limit-card.limit-exceeded .limit-card-alert {
   color: #b91c1c;
 }
+
+html.dark .savings-limit-card.limit-warning {
+  border-color: #92400e;
+  background: #1c1508;
+}
+
+html.dark .savings-limit-card.limit-exceeded {
+  border-color: #7f1d1d;
+  background: #1a0a0a;
+}
+
+html.dark .limit-card-alert {
+  color: #d97706;
+}
+
+html.dark .savings-limit-card.limit-exceeded .limit-card-alert {
+  color: #f87171;
+}

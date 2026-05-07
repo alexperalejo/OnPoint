@@ -193,16 +193,21 @@ export function CheckoutDetector() {
 
             // Check spending limits — warn based on what's already been spent,
             // and additionally project forward if a checkout amount is available.
-            chrome.storage.local.get(['spendingLimits', 'spending_daily_totals', 'spending_monthly_totals', 'checkoutTotal'], (limData) => {
+            chrome.storage.local.get(['spendingLimits', 'spending_daily_totals', 'spending_weekly_totals', 'spending_monthly_totals', 'checkoutTotal'], (limData) => {
               const limits = limData.spendingLimits || {};
               const checkoutAmount = limData.checkoutTotal?.amount || 0;
               const now = new Date();
               const pad = n => String(n).padStart(2, '0');
               const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
               const monthKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+              const weekStart = new Date(now);
+              weekStart.setDate(now.getDate() - now.getDay());
+              const weekKey = `${weekStart.getFullYear()}-${pad(weekStart.getMonth() + 1)}-${pad(weekStart.getDate())}`;
               const spentDaily = limData.spending_daily_totals?.[dateKey] || 0;
+              const spentWeekly = limData.spending_weekly_totals?.[weekKey] || 0;
               const spentMonthly = limData.spending_monthly_totals?.[monthKey] || 0;
               const projectedDaily = spentDaily + checkoutAmount;
+              const projectedWeekly = spentWeekly + checkoutAmount;
               const projectedMonthly = spentMonthly + checkoutAmount;
               const alerts = [];
 
@@ -214,6 +219,17 @@ export function CheckoutDetector() {
                   alerts.push(`This purchase would exceed your daily limit of $${limit}`);
                 } else if (spentDaily >= limit * 0.8) {
                   alerts.push(`Approaching daily limit — $${spentDaily.toFixed(2)} of $${limit} spent today`);
+                }
+              }
+
+              if (limits.weeklyEnabled && Number(limits.weekly) > 0) {
+                const limit = Number(limits.weekly);
+                if (spentWeekly >= limit) {
+                  alerts.push(`Weekly limit $${limit} already exceeded — $${spentWeekly.toFixed(2)} spent this week`);
+                } else if (checkoutAmount > 0 && projectedWeekly > limit) {
+                  alerts.push(`This purchase would exceed your weekly limit of $${limit}`);
+                } else if (spentWeekly >= limit * 0.8) {
+                  alerts.push(`Approaching weekly limit — $${spentWeekly.toFixed(2)} of $${limit} spent this week`);
                 }
               }
 
@@ -229,9 +245,10 @@ export function CheckoutDetector() {
               }
 
               // Fallback: limits are set but we couldn't determine any amounts — still remind the user
-              if (alerts.length === 0 && spentDaily === 0 && spentMonthly === 0 && checkoutAmount === 0) {
+              if (alerts.length === 0 && spentDaily === 0 && spentWeekly === 0 && spentMonthly === 0 && checkoutAmount === 0) {
                 const activeLabels = [];
                 if (limits.dailyEnabled && Number(limits.daily) > 0) activeLabels.push(`daily $${limits.daily}`);
+                if (limits.weeklyEnabled && Number(limits.weekly) > 0) activeLabels.push(`weekly $${limits.weekly}`);
                 if (limits.monthlyEnabled && Number(limits.monthly) > 0) activeLabels.push(`monthly $${limits.monthly}`);
                 if (activeLabels.length > 0) {
                   alerts.push(`Spending limits active: ${activeLabels.join(', ')}`);

@@ -41,6 +41,7 @@ export default function Dashboard({ onSignOut }) {
   const [recsLoading, setRecsLoading] = useState(false);
   const [spendingLimits, setSpendingLimits] = useState({});
   const [dailySpendingTotals, setDailySpendingTotals] = useState({});
+  const [weeklySpendingTotals, setWeeklySpendingTotals] = useState({});
   const [monthlySpendingTotals, setMonthlySpendingTotals] = useState({});
   const [syntheticLoadStatus, setSyntheticLoadStatus] = useState("");
   const translate = useTranslation();
@@ -518,6 +519,7 @@ export default function Dashboard({ onSignOut }) {
       setMonthlyCardContributions({});
       setMonthlyCategoryTotals({});
       setMonthlySpendingTotals({});
+      setWeeklySpendingTotals({});
       setDailySpendingTotals({});
       setAccountCreatedAt(Date.now());
       setSelectedSavingsMonth("");
@@ -554,6 +556,7 @@ export default function Dashboard({ onSignOut }) {
         "savings_monthly_card_contributions",
         "savings_monthly_category_totals",
         "spending_monthly_totals",
+        "spending_weekly_totals",
         "spending_daily_totals",
         "synthetic_savings_loaded",
         "synthetic_savings_backup",
@@ -572,6 +575,7 @@ export default function Dashboard({ onSignOut }) {
       setMonthlyCardContributions({});
       setMonthlyCategoryTotals({});
       setMonthlySpendingTotals({});
+      setWeeklySpendingTotals({});
       setDailySpendingTotals({});
       setAccountCreatedAt(now);
       setSelectedSavingsMonth("");
@@ -601,6 +605,7 @@ export default function Dashboard({ onSignOut }) {
         "savings_monthly_category_totals",
         "spendingLimits",
         "spending_daily_totals",
+        "spending_weekly_totals",
         "spending_monthly_totals",
       ], (data) => {
         setAllTimeSavingsTotal(toNumber(data?.savings_all_time_total));
@@ -632,6 +637,7 @@ export default function Dashboard({ onSignOut }) {
 
         setSpendingLimits(data?.spendingLimits && typeof data.spendingLimits === "object" ? data.spendingLimits : {});
         setDailySpendingTotals(data?.spending_daily_totals && typeof data.spending_daily_totals === "object" ? data.spending_daily_totals : {});
+        setWeeklySpendingTotals(data?.spending_weekly_totals && typeof data.spending_weekly_totals === "object" ? data.spending_weekly_totals : {});
         setMonthlySpendingTotals(data?.spending_monthly_totals && typeof data.spending_monthly_totals === "object" ? data.spending_monthly_totals : {});
 
         const existingAccountCreatedAt = Number(data?.accountCreatedAt);
@@ -732,6 +738,10 @@ export default function Dashboard({ onSignOut }) {
       if (changes?.spending_daily_totals) {
         const v = changes.spending_daily_totals.newValue;
         setDailySpendingTotals(v && typeof v === "object" ? v : {});
+      }
+      if (changes?.spending_weekly_totals) {
+        const v = changes.spending_weekly_totals.newValue;
+        setWeeklySpendingTotals(v && typeof v === "object" ? v : {});
       }
       if (changes?.spending_monthly_totals) {
         const v = changes.spending_monthly_totals.newValue;
@@ -1151,15 +1161,20 @@ export default function Dashboard({ onSignOut }) {
                 </section>
               </div>
             </div>
-          {(spendingLimits.dailyEnabled || spendingLimits.monthlyEnabled) && (() => {
+          {(spendingLimits.dailyEnabled || spendingLimits.weeklyEnabled || spendingLimits.monthlyEnabled) && (() => {
             const now = new Date();
             const pad = n => String(n).padStart(2, '0');
             const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
             const currentMonthKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
             const monthlyLimitMonthKey = activeSavingsMonth || currentMonthKey;
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - now.getDay());
+            const weekKey = `${weekStart.getFullYear()}-${pad(weekStart.getMonth() + 1)}-${pad(weekStart.getDate())}`;
             const todaySpent = toNumber(dailySpendingTotals[dateKey]);
+            const weekSpent = toNumber(weeklySpendingTotals[weekKey]);
             const monthSpent = toNumber(monthlySpendingTotals[monthlyLimitMonthKey]);
             const dailyLimit = Number(spendingLimits.daily) || 0;
+            const weeklyLimit = Number(spendingLimits.weekly) || 0;
             const monthlyLimit = Number(spendingLimits.monthly) || 0;
 
             return (
@@ -1184,6 +1199,24 @@ export default function Dashboard({ onSignOut }) {
                       {todaySpent >= dailyLimit && <p className="limit-card-alert">{translate('dashboard.savings.daily-exceeded')}</p>}
                       {todaySpent < dailyLimit && todaySpent >= dailyLimit * 0.8 && (
                         <p className="limit-card-alert">{translate('dashboard.savings.daily-approaching')}</p>
+                      )}
+                    </div>
+                  )}
+                  {spendingLimits.weeklyEnabled && weeklyLimit > 0 && (
+                    <div className={`savings-limit-card ${weekSpent >= weeklyLimit ? 'limit-exceeded' : weekSpent >= weeklyLimit * 0.8 ? 'limit-warning' : ''}`}>
+                      <div className="limit-card-header">
+                        <span className="limit-card-label">Weekly</span>
+                        <span className="limit-card-values">${weekSpent.toFixed(2)} / ${weeklyLimit.toFixed(2)}</span>
+                      </div>
+                      <div className="limit-bar-track">
+                        <div
+                          className="limit-bar-fill"
+                          style={{ width: `${Math.min((weekSpent / weeklyLimit) * 100, 100).toFixed(1)}%` }}
+                        />
+                      </div>
+                      {weekSpent >= weeklyLimit && <p className="limit-card-alert">Weekly limit exceeded</p>}
+                      {weekSpent < weeklyLimit && weekSpent >= weeklyLimit * 0.8 && (
+                        <p className="limit-card-alert">Approaching weekly limit</p>
                       )}
                     </div>
                   )}
