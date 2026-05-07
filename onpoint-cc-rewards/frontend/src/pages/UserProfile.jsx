@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useChromeStorageSync } from 'use-chrome-storage';
 import { useTranslation } from '../utils/translation';
+import { useDarkMode } from '../hooks/useDarkMode';
 import './UserProfile.css';
 
 const DEFAULT_NOTIFICATIONS = {
@@ -13,6 +14,7 @@ const DEFAULT_NOTIFICATIONS = {
 };
 
 export default function UserProfile({ onSignOut }) {
+  useDarkMode();
   const translate = useTranslation('account');
   const [cardinfo] = useChromeStorageSync('cardinfo', []);
   const cardsCount = Array.isArray(cardinfo) ? cardinfo.length : 0;

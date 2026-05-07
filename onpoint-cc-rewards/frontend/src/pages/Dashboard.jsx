@@ -9,8 +9,7 @@ import { useTranslation } from "../utils/translation.js";
 import { apiUrl, assetUrl } from '../utils/api';
 
 export default function Dashboard({ onSignOut }) {
-  // ✅ system-following dark mode (adds/removes "dark" on <html>)
-  useDarkMode();
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   var searchParams = new URLSearchParams(window.location.search);
 
@@ -524,16 +523,24 @@ export default function Dashboard({ onSignOut }) {
     <div className="dash-shell">
       <header className="dash-topbar">
         <div className="brand">
-        <img
-          src="./onpoint-logo.png"
-          alt="OnPoint"
-          className="brand-logo"
-        />
-        <div>
+          <img
+            src="./onpoint-logo.png"
+            alt="OnPoint"
+            className="brand-logo"
+          />
+          <div>
             <p className="brand-name">{translate("main.brand-name")}</p>
             <p className="brand-tag">{translate("main.brand-tag")}</p>
           </div>
         </div>
+        <button
+          className="theme-toggle-btn"
+          onClick={toggleDarkMode}
+          aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDarkMode ? '☀︎' : '⏾'}
+        </button>
       </header>
 
       <nav className="dash-nav">

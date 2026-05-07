@@ -1,35 +1,42 @@
 import { useEffect, useState } from 'react';
 
+const STORAGE_KEY = 'onpoint-theme';
+
+function getInitialMode() {
+  // Manual override wins; fall back to system preference
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored === 'dark') return true;
+  if (stored === 'light') return false;
+  return !!window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+}
+
 export function useDarkMode() {
-  // listens to system on first load
-  const getSystemPref = () =>
-  !!window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+  const [isDarkMode, setIsDarkMode] = useState(getInitialMode);
 
-
-  const [isDarkMode, setIsDarkMode] = useState(getSystemPref);
-
-  // Listen once for system theme changes
+  // Listen for system changes (only applies when no manual override is stored)
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
     const handleChange = (e) => {
-      setIsDarkMode(e.matches); // system always overrides
+      if (!localStorage.getItem(STORAGE_KEY)) {
+        setIsDarkMode(e.matches);
+      }
     };
-
     mediaQuery.addEventListener('change', handleChange);
-
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  // Apply to <html> whenever it changes
+  // Apply to <html> whenever mode changes
   useEffect(() => {
-    applyDarkMode(isDarkMode);
+    document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
 
+  function toggleDarkMode() {
+    setIsDarkMode((prev) => {
+      const next = !prev;
+      localStorage.setItem(STORAGE_KEY, next ? 'dark' : 'light');
+      return next;
+    });
+  }
 
-  return { isDarkMode};
-}
-
-function applyDarkMode(isDark) {
-  document.documentElement.classList.toggle('dark', isDark);
+  return { isDarkMode, toggleDarkMode };
 }

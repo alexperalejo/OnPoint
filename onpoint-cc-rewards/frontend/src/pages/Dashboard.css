@@ -60,6 +60,32 @@ html.dark .dash-shell {
   font-size: 1rem;
 }
 
+.theme-toggle-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
+  color: #6b7280; /* moon color — muted grey */
+}
+
+/* Sun icon shown in dark mode — make it yellow */
+html.dark .theme-toggle-btn {
+  color: #ffc003;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--border-color);
+  transform: scale(1.1);
+}
+
 .nav-actions {
   display: flex;
   align-items: center;
