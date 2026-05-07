@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
-import { copyFileSync, mkdirSync, readdirSync } from 'fs'
+import { copyFileSync, mkdirSync, readdirSync, readFileSync } from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -28,9 +28,47 @@ function copyCardImages() {
   }
 }
 
+// Sources synthetic CSV from /docs and exposes it as /synthetic_savings_jan_to_apr_2026.csv in dev/build outputs.
+function useDocsSyntheticCsv() {
+  const csvName = 'synthetic_savings_jan_to_apr_2026.csv'
+  const docsCsv = resolve(__dirname, '../../docs', csvName)
+
+  return {
+    name: 'use-docs-synthetic-csv',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url?.split('?', 1)[0] !== `/${csvName}`) {
+          next()
+          return
+        }
+
+        try {
+          const content = readFileSync(docsCsv)
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+          res.end(content)
+        } catch (e) {
+          res.statusCode = 500
+          res.end('Failed to read synthetic CSV from docs')
+          console.warn('[use-docs-synthetic-csv] failed serving CSV:', e.message)
+        }
+      })
+    },
+    closeBundle() {
+      const distCsv = resolve(__dirname, '../../extension/dist', csvName)
+      try {
+        copyFileSync(docsCsv, distCsv)
+        console.log('[use-docs-synthetic-csv] docs CSV → extension/dist/')
+      } catch (e) {
+        console.warn('[use-docs-synthetic-csv] failed to copy CSV:', e.message)
+      }
+    }
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), copyCardImages()],
+  plugins: [react(), copyCardImages(), useDocsSyntheticCsv()],
   root: '.',
   base: './',
   build: {

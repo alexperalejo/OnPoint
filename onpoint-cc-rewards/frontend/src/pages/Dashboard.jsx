@@ -8,6 +8,18 @@ import { useDarkMode } from "../hooks/useDarkMode";
 import { useTranslation } from "../utils/translation.js";
 import { apiUrl, assetUrl } from '../utils/api';
 
+const SYNTHETIC_STORAGE_KEYS = [
+  "savings_all_time_total",
+  "accountCreatedAt",
+  "savings_card_transaction_counts",
+  "savings_qualifying_transaction_total",
+  "monthlySavings",
+  "savings_monthly_card_contributions",
+  "savings_monthly_category_totals",
+  "spending_monthly_totals",
+  "spending_daily_totals",
+];
+
 export default function Dashboard({ onSignOut }) {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
 
@@ -30,6 +42,7 @@ export default function Dashboard({ onSignOut }) {
   const [spendingLimits, setSpendingLimits] = useState({});
   const [dailySpendingTotals, setDailySpendingTotals] = useState({});
   const [monthlySpendingTotals, setMonthlySpendingTotals] = useState({});
+  const [syntheticLoadStatus, setSyntheticLoadStatus] = useState("");
   const translate = useTranslation();
 
   const toNumber = useCallback((value) => {
@@ -232,6 +245,20 @@ export default function Dashboard({ onSignOut }) {
   }, [currentView]);
 
   useEffect(() => {
+    if ((storedCards || []).length > 0) return;
+    if (typeof chrome === "undefined" || !chrome.storage?.local) return;
+
+    chrome.storage.local.get(["onboardingCardIds"], (data) => {
+      const onboardingCardIds = Array.isArray(data?.onboardingCardIds)
+        ? data.onboardingCardIds.filter((id) => id != null)
+        : [];
+
+      if (!onboardingCardIds.length) return;
+      setStoredCards(onboardingCardIds);
+    });
+  }, [storedCards, setStoredCards]);
+
+  useEffect(() => {
     console.log("using cards", storedCards);
     const usedCards = (storedCards || []).filter((c) => c != null && c != undefined);
 
@@ -350,6 +377,207 @@ export default function Dashboard({ onSignOut }) {
   );
 
   const totalAnnualFees = userCards.reduce((sum, card) => sum + card.annualFee, 0);
+
+  const loadSyntheticSavingsData = useCallback(async () => {
+    setSyntheticLoadStatus("Loading synthetic CSV...");
+
+    try {
+      const response = await fetch(`./synthetic_savings_jan_to_apr_2026.csv?ts=${Date.now()}`);
+      if (!response.ok) {
+        throw new Error(`Unable to load CSV (${response.status})`);
+      }
+
+      const csvText = await response.text();
+      const lines = csvText
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      if (lines.length < 2) {
+        throw new Error("CSV is empty");
+      }
+
+      const header = lines[0].split(",").map((h) => h.trim());
+      const idx = (name) => header.indexOf(name);
+
+      const transactionTypeIdx = idx("transaction_type");
+      const monthIdx = idx("month");
+      const dateIdx = idx("date");
+      const categoryIdx = idx("category");
+      const amountIdx = idx("amount");
+
+      if ([transactionTypeIdx, monthIdx, dateIdx, categoryIdx, amountIdx].some((i) => i < 0)) {
+        throw new Error("CSV format mismatch");
+      }
+
+      const nextMonthlySavings = {};
+      const nextMonthlyCardContributions = {};
+      const nextMonthlyCategoryTotals = {};
+      const nextMonthlySpendingTotals = {};
+      const nextDailySpendingTotals = {};
+      let transferCount = 0;
+      let earliestDate = null;
+
+      lines.slice(1).forEach((line) => {
+        const cols = line.split(",");
+        if (cols.length < header.length) return;
+
+        const type = String(cols[transactionTypeIdx] || "").trim();
+        const monthKey = String(cols[monthIdx] || "").trim();
+        const dateKey = String(cols[dateIdx] || "").trim();
+        const category = String(cols[categoryIdx] || "").trim() || "other";
+        const amount = toNumber(cols[amountIdx]);
+        if (!monthKey || !dateKey || amount <= 0) return;
+
+        const parsedDate = new Date(dateKey);
+        if (!Number.isNaN(parsedDate.getTime()) && (!earliestDate || parsedDate < earliestDate)) {
+          earliestDate = parsedDate;
+        }
+
+        if (type === "transfer_to_savings") {
+          nextMonthlySavings[monthKey] = toNumber(nextMonthlySavings[monthKey]) + amount;
+          if (!nextMonthlyCardContributions[monthKey]) nextMonthlyCardContributions[monthKey] = {};
+          nextMonthlyCardContributions[monthKey]["Synthetic Savings Plan"] = {
+            issuer: "Synthetic",
+            amount: toNumber(nextMonthlyCardContributions[monthKey]["Synthetic Savings Plan"]?.amount) + amount,
+          };
+          transferCount += 1;
+        }
+
+        if (type === "expense") {
+          if (!nextMonthlyCategoryTotals[monthKey]) nextMonthlyCategoryTotals[monthKey] = {};
+          nextMonthlyCategoryTotals[monthKey][category] = toNumber(nextMonthlyCategoryTotals[monthKey][category]) + amount;
+          nextMonthlySpendingTotals[monthKey] = toNumber(nextMonthlySpendingTotals[monthKey]) + amount;
+          nextDailySpendingTotals[dateKey] = toNumber(nextDailySpendingTotals[dateKey]) + amount;
+        }
+      });
+
+      const allTimeTotal = Object.keys(nextMonthlySavings).reduce(
+        (sum, monthKey) => sum + toNumber(nextMonthlySavings[monthKey]),
+        0
+      );
+
+      const nextCardTransactionCounts = {
+        "Synthetic Savings Plan": transferCount,
+      };
+
+      const months = Object.keys(nextMonthlySavings).sort((a, b) => b.localeCompare(a));
+      const selectedMonth = months[0] || "";
+      const createdAtMs = earliestDate ? earliestDate.getTime() : Date.now();
+
+      if (typeof chrome !== "undefined" && chrome.storage?.local) {
+        chrome.storage.local.get(["synthetic_savings_loaded", "synthetic_savings_backup", ...SYNTHETIC_STORAGE_KEYS], (existing) => {
+          const hasBackup = Boolean(existing?.synthetic_savings_loaded && existing?.synthetic_savings_backup);
+          const backupPayload = hasBackup
+            ? existing.synthetic_savings_backup
+            : SYNTHETIC_STORAGE_KEYS.reduce((acc, key) => {
+                acc[key] = existing?.[key];
+                return acc;
+              }, {});
+
+          chrome.storage.local.set({
+            synthetic_savings_loaded: true,
+            synthetic_savings_backup: backupPayload,
+            savings_all_time_total: Number(allTimeTotal.toFixed(2)),
+            accountCreatedAt: createdAtMs,
+            savings_card_transaction_counts: nextCardTransactionCounts,
+            savings_qualifying_transaction_total: transferCount,
+            monthlySavings: nextMonthlySavings,
+            savings_monthly_card_contributions: nextMonthlyCardContributions,
+            savings_monthly_category_totals: nextMonthlyCategoryTotals,
+            spending_monthly_totals: nextMonthlySpendingTotals,
+            spending_daily_totals: nextDailySpendingTotals,
+          });
+        });
+      }
+
+      setAllTimeSavingsTotal(Number(allTimeTotal.toFixed(2)));
+      setAccountCreatedAt(createdAtMs);
+      setCardTransactionCounts(nextCardTransactionCounts);
+      setQualifyingTransactionTotal(transferCount);
+      setMonthlySavings(nextMonthlySavings);
+      setMonthlyCardContributions(nextMonthlyCardContributions);
+      setMonthlyCategoryTotals(nextMonthlyCategoryTotals);
+      setMonthlySpendingTotals(nextMonthlySpendingTotals);
+      setDailySpendingTotals(nextDailySpendingTotals);
+      setSelectedSavingsMonth(selectedMonth);
+      setCurrentView("savings");
+      setSyntheticLoadStatus("Synthetic savings data loaded successfully.");
+    } catch (error) {
+      console.error("Failed loading synthetic savings data", error);
+      setSyntheticLoadStatus("Failed to load synthetic CSV. Confirm docs/synthetic_savings_jan_to_apr_2026.csv exists.");
+    }
+  }, [toNumber]);
+
+  const removeSyntheticSavingsData = useCallback(() => {
+    if (typeof chrome === "undefined" || !chrome.storage?.local) {
+      setAllTimeSavingsTotal(0);
+      setCardTransactionCounts({});
+      setQualifyingTransactionTotal(0);
+      setMonthlySavings({});
+      setMonthlyCardContributions({});
+      setMonthlyCategoryTotals({});
+      setMonthlySpendingTotals({});
+      setDailySpendingTotals({});
+      setAccountCreatedAt(Date.now());
+      setSelectedSavingsMonth("");
+      setSyntheticLoadStatus("Synthetic savings data removed.");
+      return;
+    }
+
+    setSyntheticLoadStatus("Removing synthetic data...");
+
+    chrome.storage.local.get(["synthetic_savings_loaded", "synthetic_savings_backup"], (data) => {
+      const hadSynthetic = Boolean(data?.synthetic_savings_loaded);
+      const backup = data?.synthetic_savings_backup && typeof data.synthetic_savings_backup === "object"
+        ? data.synthetic_savings_backup
+        : null;
+
+      if (hadSynthetic && backup) {
+        const restoredValues = SYNTHETIC_STORAGE_KEYS.reduce((acc, key) => {
+          if (backup[key] !== undefined) {
+            acc[key] = backup[key];
+          }
+          return acc;
+        }, {});
+
+        chrome.storage.local.set(restoredValues, () => {
+          chrome.storage.local.remove(["synthetic_savings_loaded", "synthetic_savings_backup"]);
+          setSyntheticLoadStatus("Synthetic savings data removed and previous data restored.");
+        });
+        return;
+      }
+
+      const now = Date.now();
+      chrome.storage.local.remove([
+        "monthlySavings",
+        "savings_monthly_card_contributions",
+        "savings_monthly_category_totals",
+        "spending_monthly_totals",
+        "spending_daily_totals",
+        "synthetic_savings_loaded",
+        "synthetic_savings_backup",
+      ]);
+      chrome.storage.local.set({
+        savings_all_time_total: 0,
+        savings_card_transaction_counts: {},
+        savings_qualifying_transaction_total: 0,
+        accountCreatedAt: now,
+      });
+
+      setAllTimeSavingsTotal(0);
+      setCardTransactionCounts({});
+      setQualifyingTransactionTotal(0);
+      setMonthlySavings({});
+      setMonthlyCardContributions({});
+      setMonthlyCategoryTotals({});
+      setMonthlySpendingTotals({});
+      setDailySpendingTotals({});
+      setAccountCreatedAt(now);
+      setSelectedSavingsMonth("");
+      setSyntheticLoadStatus("Synthetic savings data removed.");
+    });
+  }, []);
 
   useEffect(() => {
     if (!savingsMonthKeys.length) return;
@@ -550,7 +778,7 @@ export default function Dashboard({ onSignOut }) {
               key={page}
               className={`nav-item ${currentView === page ? "is-active" : ""}`}
               onClick={() => setCurrentView(page)}>
-                {translate("main.nav." + page)}
+                {page === "profile" ? "Settings" : translate("main.nav." + page)}
             </button>
           ))
         }
@@ -757,6 +985,23 @@ export default function Dashboard({ onSignOut }) {
             <header className="savings-header">
               <h2 className="savings-title">{translate("savings.title")}</h2>
               <p className="savings-subtitle">{translate("savings.subtitle")}</p>
+              <div className="savings-import-controls">
+                <button
+                  type="button"
+                  className="savings-import-btn"
+                  onClick={loadSyntheticSavingsData}
+                >
+                  Load Synthetic Savings Data
+                </button>
+                <button
+                  type="button"
+                  className="savings-import-btn savings-import-btn-danger"
+                  onClick={removeSyntheticSavingsData}
+                >
+                  Remove Synthetic Data
+                </button>
+                {syntheticLoadStatus ? <p className="savings-import-status">{syntheticLoadStatus}</p> : null}
+              </div>
             </header>
 
             <div className="savings-overview-grid stats-grid" data-section="cashback-overview">
@@ -910,9 +1155,10 @@ export default function Dashboard({ onSignOut }) {
             const now = new Date();
             const pad = n => String(n).padStart(2, '0');
             const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-            const monthKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+            const currentMonthKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+            const monthlyLimitMonthKey = activeSavingsMonth || currentMonthKey;
             const todaySpent = toNumber(dailySpendingTotals[dateKey]);
-            const monthSpent = toNumber(monthlySpendingTotals[monthKey]);
+            const monthSpent = toNumber(monthlySpendingTotals[monthlyLimitMonthKey]);
             const dailyLimit = Number(spendingLimits.daily) || 0;
             const monthlyLimit = Number(spendingLimits.monthly) || 0;
 
@@ -944,7 +1190,7 @@ export default function Dashboard({ onSignOut }) {
                   {spendingLimits.monthlyEnabled && monthlyLimit > 0 && (
                     <div className={`savings-limit-card ${monthSpent >= monthlyLimit ? 'limit-exceeded' : monthSpent >= monthlyLimit * 0.8 ? 'limit-warning' : ''}`}>
                       <div className="limit-card-header">
-                        <span className="limit-card-label">{translate('dashboard.savings.monthly')}</span>
+                        <span className="limit-card-label">{translate('dashboard.savings.monthly')} ({getMonthKeyLabel(monthlyLimitMonthKey)})</span>
                         <span className="limit-card-values">${monthSpent.toFixed(2)} / ${monthlyLimit.toFixed(2)}</span>
                       </div>
                       <div className="limit-bar-track">

@@ -11,7 +11,6 @@ function getCurrentQuarter() {
 const express = require('express');
 const router = express.Router();
 const recommendationService = require('../services/recommendationService');
-const auth = require('../middleware/auth');
 
 //URL resolver for card images - converts stored relative path to full URL
 function resolveImageUrl(req, relativePath) {

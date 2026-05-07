@@ -1,75 +1,80 @@
+/* global chrome */
 import './Onboarding.css';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { apiUrl, extensionImageUrl } from '../../utils/api';
 
 const steps = [
-  { id: 1, title: 'Create Your Account', subtitle: 'Let’s get started with your OnPoint profile' },
-  { id: 2, title: 'Select Your Credit Cards', subtitle: 'Choose the cards you currently have in your wallet' },
-  { id: 3, title: 'Notification Preferences', subtitle: 'Stay informed about your rewards and opportunities' },
+  { id: 1, title: 'Select Your Credit Cards', subtitle: 'Choose the cards you currently have in your wallet' },
+  { id: 2, title: 'Set Spending Limits', subtitle: 'Set optional limits to stay in control of your spending' },
 ];
 
-const cardIssuers = [
-  { issuer: 'Chase', cardCount: 2 },
-  { issuer: 'Amex', cardCount: 1 },
-  { issuer: 'Citi', cardCount: 1 },
-  { issuer: 'Capital One', cardCount: 1 },
-  { issuer: 'Discover', cardCount: 1 },
-];
-
-const notificationOptions = [
-  {
-    id: 'checkout',
-    label: 'Checkout Reminders',
-    description: 'Get a notification when you’re checking out online to remind you to use the best card',
-  },
-  {
-    id: 'reports',
-    label: 'Monthly Reward Reports',
-    description: 'Receive a monthly summary of rewards earned and opportunities you captured',
-  },
-  {
-    id: 'suggestions',
-    label: 'New Card Suggestions',
-    description: 'Get personalized recommendations for new cards that could maximize your rewards based on spending',
-  },
-  {
-    id: 'alerts',
-    label: 'Reward Alerts',
-    description: 'Get notified about expiring rewards, rotating categories, and limited-time bonus opportunities',
-  },
-];
-
-export function Onboarding({ mode = 'signup', onBack, onComplete }) {
+export function Onboarding({ onBack, onComplete }) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({ fullName: '', email: '' });
-  const [selectedIssuers, setSelectedIssuers] = useState(() => {
-    const defaults = {};
-    cardIssuers.forEach(({ issuer }) => {
-      defaults[issuer] = true;
-    });
-    return defaults;
-  });
-  const [preferences, setPreferences] = useState({
-    checkout: true,
-    reports: true,
-    suggestions: false,
-    alerts: true,
-  });
+  const [selectedCards, setSelectedCards] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const [apiCards, setApiCards] = useState([]);
+  const [loadingCards, setLoadingCards] = useState(true);
+  const [spendingLimits, setSpendingLimits] = useState({
+    daily: '',
+    dailyEnabled: false,
+    weekly: '',
+    weeklyEnabled: false,
+    monthly: '',
+    monthlyEnabled: false,
+  });
 
-  const isSignup = mode === 'signup';
+  const getCardImageSrc = (card) => {
+    if (card?.image_path) {
+      return extensionImageUrl(card.image_path);
+    }
+    if (card?.image_url) {
+      return card.image_url;
+    }
+    return '';
+  };
+
+  useEffect(() => {
+    fetch(apiUrl('/api/cards'))
+      .then(r => r.json())
+      .then(data => {
+        setApiCards(Array.isArray(data) ? data : []);
+        // Start with no cards selected; user explicitly chooses cards.
+        setSelectedCards({});
+      })
+      .catch(() => {})
+      .finally(() => setLoadingCards(false));
+
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      chrome.storage.local.get(['spendingLimits'], (data) => {
+        if (data?.spendingLimits && typeof data.spendingLimits === 'object') {
+          setSpendingLimits((prev) => ({ ...prev, ...data.spendingLimits }));
+        }
+      });
+    }
+  }, []);
 
   const totalSelectedCards = useMemo(() => {
-    return cardIssuers.reduce((count, item) => {
-      return count + (selectedIssuers[item.issuer] ? item.cardCount : 0);
-    }, 0);
-  }, [selectedIssuers]);
+    return Object.values(selectedCards).filter(Boolean).length;
+  }, [selectedCards]);
 
-  const enabledNotifications = useMemo(() => {
-    return Object.values(preferences).filter(Boolean).length;
-  }, [preferences]);
+  const enabledLimitCount = useMemo(() => {
+    return ['dailyEnabled', 'weeklyEnabled', 'monthlyEnabled'].filter((k) => !!spendingLimits[k]).length;
+  }, [spendingLimits]);
 
   const handleNext = () => {
     if (currentStep === steps.length) {
+      // Persist onboarding data to chrome.storage.local if available
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        const selectedCardIds = Object.entries(selectedCards)
+          .filter(([, v]) => v)
+          .map(([id]) => id);
+        chrome.storage.local.set({
+          onboardingComplete: true,
+          onboardingCardIds: selectedCardIds,
+          cardinfo: selectedCardIds,
+          spendingLimits,
+        });
+      }
       setShowSuccess(true);
       setTimeout(() => {
         if (onComplete) {
@@ -93,12 +98,12 @@ export function Onboarding({ mode = 'signup', onBack, onComplete }) {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const toggleIssuer = (issuer) => {
-    setSelectedIssuers((prev) => ({ ...prev, [issuer]: !prev[issuer] }));
+  const toggleCard = (id) => {
+    setSelectedCards((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const togglePreference = (id) => {
-    setPreferences((prev) => ({ ...prev, [id]: !prev[id] }));
+  const updateLimit = (key, value) => {
+    setSpendingLimits((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -129,59 +134,72 @@ export function Onboarding({ mode = 'signup', onBack, onComplete }) {
         {showSuccess ? (
           <div className="success-panel">
             <div className="success-icon">✓</div>
-            <h3 className="success-title">{isSignup ? 'Account created successfully!' : 'Welcome back!'}</h3>
+            <h3 className="success-title">Setup complete!</h3>
             <p className="success-subtext">Redirecting you to OnPoint...</p>
           </div>
         ) : (
           <div className="onboarding-body">
             {currentStep === 1 && (
               <>
-                <div className="callout primary">
+                <div className="callout info">
                   <div className="callout-icon">💡</div>
                   <div>
-                    <p className="callout-title">Join thousands who are maximizing rewards</p>
-                    <p className="callout-text">OnPoint users save an average of $284/year in previously missed rewards</p>
+                    <p className="callout-title">Select all the cards you own</p>
+                    <p className="callout-text">You can always add more later from the card library.</p>
                   </div>
                 </div>
 
-                <div className="form-grid">
-                  <label className="field">
-                    <span className="field-label">Full Name *</span>
-                    <div className="field-input">
-                      <span className="field-leading">👤</span>
-                      <input
-                        type="text"
-                        placeholder="Enter your full name"
-                        value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </label>
-
-                  <label className="field">
-                    <span className="field-label">Email Address *</span>
-                    <div className="field-input">
-                      <span className="field-leading">✉️</span>
-                      <input
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <span className="field-hint">We’ll use this to send you reward alerts and monthly reports</span>
-                  </label>
-                </div>
-
-                <div className="callout success">
-                  <div className="callout-icon">✔</div>
-                  <div>
-                    <p className="callout-title">Your data is secure</p>
-                    <p className="callout-text">We never store your actual credit card numbers. Only reward structures to help you maximize benefits.</p>
+                {loadingCards ? (
+                  <p className="muted-text" style={{ textAlign: 'center', padding: '1.5rem 0' }}>Loading cards…</p>
+                ) : apiCards.length === 0 ? (
+                  <p className="muted-text" style={{ textAlign: 'center', padding: '1.5rem 0' }}>Could not load cards. You can add them from the dashboard.</p>
+                ) : (
+                  <div className="card-list">
+                    {Object.entries(
+                      apiCards.reduce((acc, card) => {
+                        if (!acc[card.issuer]) acc[card.issuer] = [];
+                        acc[card.issuer].push(card);
+                        return acc;
+                      }, {})
+                    ).map(([issuer, cards]) => (
+                      <div key={issuer} className="issuer-group">
+                        <p className="issuer-group-label">{issuer}</p>
+                        {cards.map((card) => {
+                          const isSelected = !!selectedCards[card._id];
+                          const cardImageSrc = getCardImageSrc(card);
+                          return (
+                            <button
+                              key={card._id}
+                              type="button"
+                              className={`card-row ${isSelected ? 'is-selected' : ''}`}
+                              onClick={() => toggleCard(card._id)}
+                            >
+                              <div className="card-row-left">
+                                <div className="card-thumb-wrap" aria-hidden="true">
+                                  {cardImageSrc ? (
+                                    <img
+                                      src={cardImageSrc}
+                                      alt=""
+                                      className="card-thumb"
+                                      loading="lazy"
+                                    />
+                                  ) : (
+                                    <div className="card-thumb card-thumb-placeholder" />
+                                  )}
+                                </div>
+                                <span className="chevron">{isSelected ? '▾' : '▸'}</span>
+                                <span className="issuer-name">{card.name}</span>
+                              </div>
+                              <div className="card-row-right">{card.annualFee === 0 ? 'No fee' : `$${card.annualFee}/yr`}</div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
+
+                <p className="muted-text">Don't see your card? You can add custom cards after setup.</p>
               </>
             )}
 
@@ -190,65 +208,95 @@ export function Onboarding({ mode = 'signup', onBack, onComplete }) {
                 <div className="callout info">
                   <div className="callout-icon">💡</div>
                   <div>
-                    <p className="callout-title">Select all the cards you own</p>
-                    <p className="callout-text">You can always add more later or create custom cards.</p>
+                    <p className="callout-title">Set optional guardrails</p>
+                    <p className="callout-text">These limits help OnPoint warn you when purchases approach your daily, weekly, or monthly targets.</p>
                   </div>
                 </div>
 
-                <div className="card-list">
-                  {cardIssuers.map((issuer) => {
-                    const isSelected = selectedIssuers[issuer.issuer];
-                    return (
+                <div className="onboarding-limits-list">
+                  <div className="onboarding-limit-item">
+                    <div className="onboarding-limit-row">
+                      <label className="onboarding-limit-label">Daily Limit</label>
                       <button
-                        key={issuer.issuer}
                         type="button"
-                        className={`card-row ${isSelected ? 'is-selected' : ''}`}
-                        onClick={() => toggleIssuer(issuer.issuer)}
+                        className={`onboarding-limit-toggle ${spendingLimits.dailyEnabled ? 'on' : 'off'}`}
+                        onClick={() => updateLimit('dailyEnabled', !spendingLimits.dailyEnabled)}
                       >
-                        <div className="card-row-left">
-                          <span className="chevron">{isSelected ? '▾' : '▸'}</span>
-                          <span className="issuer-name">{issuer.issuer}</span>
-                        </div>
-                        <div className="card-row-right">{issuer.cardCount} card{issuer.cardCount > 1 ? 's' : ''}</div>
+                        {spendingLimits.dailyEnabled ? 'On' : 'Off'}
                       </button>
-                    );
-                  })}
-                </div>
-
-                <p className="muted-text">Don’t see your card? You can add custom cards after setup.</p>
-              </>
-            )}
-
-            {currentStep === 3 && (
-              <>
-                <div className="callout info">
-                  <div className="callout-icon">💡</div>
-                  <div>
-                    <p className="callout-title">Customize how OnPoint keeps you updated.</p>
-                    <p className="callout-text">You can change these anytime in settings.</p>
-                  </div>
-                </div>
-
-                <div className="preferences-list">
-                  {notificationOptions.map((option) => (
-                    <label key={option.id} className="preference-row">
-                      <input
-                        type="checkbox"
-                        checked={preferences[option.id]}
-                        onChange={() => togglePreference(option.id)}
-                      />
-                      <div>
-                        <p className="preference-title">{option.label}</p>
-                        <p className="preference-desc">{option.description}</p>
+                    </div>
+                    {spendingLimits.dailyEnabled && (
+                      <div className="onboarding-limit-input-wrap">
+                        <span className="onboarding-limit-prefix">$</span>
+                        <input
+                          type="number"
+                          min="0"
+                          className="onboarding-limit-input"
+                          placeholder="0.00"
+                          value={spendingLimits.daily}
+                          onChange={(e) => updateLimit('daily', e.target.value)}
+                        />
                       </div>
-                    </label>
-                  ))}
+                    )}
+                  </div>
+
+                  <div className="onboarding-limit-item">
+                    <div className="onboarding-limit-row">
+                      <label className="onboarding-limit-label">Weekly Limit</label>
+                      <button
+                        type="button"
+                        className={`onboarding-limit-toggle ${spendingLimits.weeklyEnabled ? 'on' : 'off'}`}
+                        onClick={() => updateLimit('weeklyEnabled', !spendingLimits.weeklyEnabled)}
+                      >
+                        {spendingLimits.weeklyEnabled ? 'On' : 'Off'}
+                      </button>
+                    </div>
+                    {spendingLimits.weeklyEnabled && (
+                      <div className="onboarding-limit-input-wrap">
+                        <span className="onboarding-limit-prefix">$</span>
+                        <input
+                          type="number"
+                          min="0"
+                          className="onboarding-limit-input"
+                          placeholder="0.00"
+                          value={spendingLimits.weekly}
+                          onChange={(e) => updateLimit('weekly', e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="onboarding-limit-item">
+                    <div className="onboarding-limit-row">
+                      <label className="onboarding-limit-label">Monthly Limit</label>
+                      <button
+                        type="button"
+                        className={`onboarding-limit-toggle ${spendingLimits.monthlyEnabled ? 'on' : 'off'}`}
+                        onClick={() => updateLimit('monthlyEnabled', !spendingLimits.monthlyEnabled)}
+                      >
+                        {spendingLimits.monthlyEnabled ? 'On' : 'Off'}
+                      </button>
+                    </div>
+                    {spendingLimits.monthlyEnabled && (
+                      <div className="onboarding-limit-input-wrap">
+                        <span className="onboarding-limit-prefix">$</span>
+                        <input
+                          type="number"
+                          min="0"
+                          className="onboarding-limit-input"
+                          placeholder="0.00"
+                          value={spendingLimits.monthly}
+                          onChange={(e) => updateLimit('monthly', e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="success-banner">
                   <div className="success-banner-icon">🎉</div>
                   <div className="success-banner-body">
-                    <p className="success-banner-title">You’re All Set!</p>
+                    <p className="success-banner-title">Ready to go</p>
                     <p className="success-banner-text">Click "Complete Setup" to start maximizing your credit card rewards with OnPoint.</p>
                     <div className="summary-grid">
                       <div>
@@ -256,8 +304,8 @@ export function Onboarding({ mode = 'signup', onBack, onComplete }) {
                         <p className="summary-value">{totalSelectedCards}</p>
                       </div>
                       <div>
-                        <p className="summary-label">Notifications On</p>
-                        <p className="summary-value">{enabledNotifications}</p>
+                        <p className="summary-label">Limits Enabled</p>
+                        <p className="summary-value">{enabledLimitCount}</p>
                       </div>
                     </div>
                   </div>

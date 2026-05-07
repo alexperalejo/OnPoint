@@ -1,48 +1,29 @@
 /* global chrome */
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useChromeStorageSync } from 'use-chrome-storage';
-import { useTranslation } from '../utils/translation';
 import { useDarkMode } from '../hooks/useDarkMode';
 import './UserProfile.css';
 
-const DEFAULT_NOTIFICATIONS = {
-  checkoutReminders: true,
-  monthlyReports: true,
-  newCardSuggestions: true,
-  rewardAlerts: true,
-  newCardReleases: false
-};
-
 export default function UserProfile({ onSignOut }) {
   useDarkMode();
-  const translate = useTranslation('account');
   const [cardinfo] = useChromeStorageSync('cardinfo', []);
   const cardsCount = Array.isArray(cardinfo) ? cardinfo.length : 0;
-  const [notifications, setNotifications] = useState(DEFAULT_NOTIFICATIONS);
   const [spendingLimits, setSpendingLimits] = useState({
     daily: '',
     dailyEnabled: false,
     weekly: '',
     weeklyEnabled: false,
     monthly: '',
-    monthlyEnabled: false
+    monthlyEnabled: false,
   });
 
   useEffect(() => {
-    chrome.storage.local.get(['notificationPrefs', 'spendingLimits'], (data) => {
-      if (data.notificationPrefs) setNotifications(data.notificationPrefs);
-      if (data.spendingLimits) setSpendingLimits(data.spendingLimits);
+    chrome.storage.local.get(['spendingLimits'], (data) => {
+      if (data?.spendingLimits && typeof data.spendingLimits === 'object') {
+        setSpendingLimits((prev) => ({ ...prev, ...data.spendingLimits }));
+      }
     });
   }, []);
-
-  const notificationCount = Object.values(notifications).filter(Boolean).length;
-  const total = Object.keys(notifications).length;
-
-  const toggleNotification = (key) => {
-    const updated = { ...notifications, [key]: !notifications[key] };
-    setNotifications(updated);
-    chrome.storage.local.set({ notificationPrefs: updated });
-  };
 
   const handleLimitChange = (period, value) => {
     const updated = { ...spendingLimits, [period]: value };
@@ -60,125 +41,34 @@ export default function UserProfile({ onSignOut }) {
 
   return (
     <div className="profile-shell">
-
-      {/* Header */}
       <div className="profile-header-card">
-        <h2 className="profile-title">{translate('.title')}</h2>
-        <p className="profile-subtitle">{translate('.subtitle')}</p>
+        <h2 className="profile-title">Settings</h2>
+        <p className="profile-subtitle">Manage your wallet summary, spending guardrails, and account data.</p>
       </div>
 
-      {/* Stats */}
       <div className="profile-info-card">
         <div className="stats-grid">
           <div className="stat-item blue">
-            <p className="stat-label">{translate('.cards-in-wallet')}</p>
+            <p className="stat-label">Cards in Wallet</p>
             <p className="stat-value">{cardsCount}</p>
-          </div>
-          <div className="stat-item green">
-            <p className="stat-label">{translate('.active-notifications')}</p>
-            <p className="stat-value">{notificationCount} / {total}</p>
           </div>
         </div>
       </div>
 
-      {/* Two column layout */}
-      <div className="account-main-grid">
-
-        {/* Left — Notifications */}
-        <div className="notifications-card">
-          <h4 className="section-heading">
-
-            {translate('.notifications.title')}
-          </h4>
-          <div className="notification-list">
-
-            <div className="notification-item">
-              <div>
-                <p className="notification-title">{translate('.notifications.checkout-reminders')}</p>
-                <p className="notification-desc">{translate('.notifications.checkout-reminders-desc')}</p>
-              </div>
-              <button
-                className={`status-badge ${notifications.checkoutReminders ? 'on' : 'off'}`}
-                onClick={() => toggleNotification('checkoutReminders')}
-              >
-                {notifications.checkoutReminders ? translate('.on') : translate('.off')}
-              </button>
-            </div>
-
-            <div className="notification-item">
-              <div>
-                <p className="notification-title">{translate('.notifications.monthly-reports')}</p>
-                <p className="notification-desc">{translate('.notifications.monthly-reports-desc')}</p>
-              </div>
-              <button
-                className={`status-badge ${notifications.monthlyReports ? 'on' : 'off'}`}
-                onClick={() => toggleNotification('monthlyReports')}
-              >
-                {notifications.monthlyReports ? translate('.on') : translate('.off')}
-              </button>
-            </div>
-
-            <div className="notification-item">
-              <div>
-                <p className="notification-title">{translate('.notifications.card-recommendations')}</p>
-                <p className="notification-desc">{translate('.notifications.card-recommendations-desc')}</p>
-              </div>
-              <button
-                className={`status-badge ${notifications.newCardSuggestions ? 'on' : 'off'}`}
-                onClick={() => toggleNotification('newCardSuggestions')}
-              >
-                {notifications.newCardSuggestions ? translate('.on') : translate('.off')}
-              </button>
-            </div>
-
-            <div className="notification-item">
-              <div>
-                <p className="notification-title">{translate('.notifications.reward-alerts')}</p>
-                <p className="notification-desc">{translate('.notifications.reward-alerts-desc')}</p>
-              </div>
-              <button
-                className={`status-badge ${notifications.rewardAlerts ? 'on' : 'off'}`}
-                onClick={() => toggleNotification('rewardAlerts')}
-              >
-                {notifications.rewardAlerts ? translate('.on') : translate('.off')}
-              </button>
-            </div>
-
-            <div className="notification-item">
-              <div>
-                <p className="notification-title">{translate('.notifications.new-card-releases')}</p>
-                <p className="notification-desc">{translate('.notifications.new-card-releases-desc')}</p>
-              </div>
-              <button
-                className={`status-badge ${notifications.newCardReleases ? 'on' : 'off'}`}
-                onClick={() => toggleNotification('newCardReleases')}
-              >
-                {notifications.newCardReleases ? translate('.on') : translate('.off')}
-              </button>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Right — Spending Limits */}
+      <div className="settings-main-grid">
         <div className="spending-limits-card">
-          <h4 className="section-heading">
-
-            {translate('.spending-limits.title')}
-          </h4>
-          <p className="profile-subtitle">{translate('.spending-limits.subtitle')}</p>
+          <h4 className="section-heading">Spending Limits</h4>
+          <p className="profile-subtitle">Set optional limits to track spending in real time.</p>
 
           <div className="limits-list">
-
-            {/* Daily */}
             <div className="limit-item">
               <div className="limit-row">
-                <label className="limit-label">{translate('.spending-limits.daily')}</label>
+                <label className="limit-label">Daily</label>
                 <button
                   className={`status-badge ${spendingLimits.dailyEnabled ? 'on' : 'off'}`}
                   onClick={() => handleLimitChange('dailyEnabled', !spendingLimits.dailyEnabled)}
                 >
-                  {spendingLimits.dailyEnabled ? translate('.on') : translate('.off')}
+                  {spendingLimits.dailyEnabled ? 'On' : 'Off'}
                 </button>
               </div>
               {spendingLimits.dailyEnabled && (
@@ -195,15 +85,14 @@ export default function UserProfile({ onSignOut }) {
               )}
             </div>
 
-            {/* Weekly */}
             <div className="limit-item">
               <div className="limit-row">
-                <label className="limit-label">{translate('.spending-limits.weekly')}</label>
+                <label className="limit-label">Weekly</label>
                 <button
                   className={`status-badge ${spendingLimits.weeklyEnabled ? 'on' : 'off'}`}
                   onClick={() => handleLimitChange('weeklyEnabled', !spendingLimits.weeklyEnabled)}
                 >
-                  {spendingLimits.weeklyEnabled ? translate('.on') : translate('.off')}
+                  {spendingLimits.weeklyEnabled ? 'On' : 'Off'}
                 </button>
               </div>
               {spendingLimits.weeklyEnabled && (
@@ -220,15 +109,14 @@ export default function UserProfile({ onSignOut }) {
               )}
             </div>
 
-            {/* Monthly */}
             <div className="limit-item">
               <div className="limit-row">
-                <label className="limit-label">{translate('.spending-limits.monthly')}</label>
+                <label className="limit-label">Monthly</label>
                 <button
                   className={`status-badge ${spendingLimits.monthlyEnabled ? 'on' : 'off'}`}
                   onClick={() => handleLimitChange('monthlyEnabled', !spendingLimits.monthlyEnabled)}
                 >
-                  {spendingLimits.monthlyEnabled ? translate('.on') : translate('.off')}
+                  {spendingLimits.monthlyEnabled ? 'On' : 'Off'}
                 </button>
               </div>
               {spendingLimits.monthlyEnabled && (
@@ -244,20 +132,17 @@ export default function UserProfile({ onSignOut }) {
                 </div>
               )}
             </div>
-
           </div>
         </div>
 
-      </div>
-
-      {/* Bottom — Delete button */}
-      <div className="actions-card">
-        <h4 className="section-heading">{translate('.actions.title')}</h4>
-        <button className="signout-btn" onClick={handleClearData}>
-
-          {translate('.actions.clear')}
-        </button>
-        <p className="signout-note">{translate('.actions.clear-note')}</p>
+        <div className="actions-card danger-zone">
+          <h4 className="section-heading">Account Actions</h4>
+          <p className="profile-subtitle">Clear local extension data and reset onboarding state.</p>
+          <button className="signout-btn" onClick={handleClearData}>
+            Delete / Clear All Information
+          </button>
+          <p className="signout-note">This action permanently clears your wallet, savings snapshots, and preferences.</p>
+        </div>
       </div>
 
     </div>

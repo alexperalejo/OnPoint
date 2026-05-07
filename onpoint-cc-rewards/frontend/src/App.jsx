@@ -18,17 +18,29 @@ export default function App() {
   // Determine initial stage based on current page
   let startStage = 'landing';
   if (isExtensionMode && isOnboardingPage) {
-    startStage = 'extension-detector';
+    startStage = 'loading'; // will resolve after checking chrome.storage
   } else if (isDashboardPage) {
     startStage = 'dashboard';
   } else if (isOnboardingPage) {
     startStage = 'onboarding';
   }
   
-  const [stage, setStage] = useState(startStage); // landing | onboarding | dashboard | extension-detector
-  const [authMode, setAuthMode] = useState('signup');
+  const [stage, setStage] = useState(startStage); // loading | landing | onboarding | dashboard | extension-detector
+  //const [authMode, setAuthMode] = useState('signup'); // 'signup' | 'signin', but currently onboarding flow is the same for both so this is reserved for potential future use if we want to differentiate flows.
   useDarkMode(); // Hook applies dark mode side effects
   const [detectorType, setDetectorType] = useState(null); // 'checkout' | 'purchase' | null
+
+  // On popup open, check if user has completed onboarding
+  useEffect(() => {
+    if (stage !== 'loading' || typeof chrome === 'undefined') return;
+    chrome.storage.local.get(['onboardingComplete'], (data) => {
+      if (data?.onboardingComplete) {
+        setStage('extension-detector');
+      } else {
+        setStage('onboarding');
+      }
+    });
+  }, [stage]);
 
   useEffect(() => {
     if (stage !== 'extension-detector' || typeof chrome === 'undefined') return;
@@ -128,23 +140,16 @@ export default function App() {
       const candidate = data?.purchaseCandidate || null;
       const uiMsg = { type: 'showRecommendation', candidate, recommendation: candidate?.recommendation || null };
 
-      chrome.tabs.sendMessage(tabId, uiMsg, () => {
-        if (!chrome.runtime.lastError) return;
-        // If no listener, inject UI content script then retry
-        if (chrome.scripting && typeof chrome.scripting.executeScript === 'function') {
-          chrome.scripting.executeScript(
-            { target: { tabId }, files: ['content/checkCardUsed.js'] },
-            () => {
-              if (chrome.runtime.lastError) return;
-              try { chrome.tabs.sendMessage(tabId, uiMsg); } catch{ /* ignore */ }
-            }
-          );
-        }
-      });
+      chrome.tabs.sendMessage(tabId, uiMsg);
     });
   });
   return () => { mounted = false; };
 }, [stage, detectorType]);
+
+  // While checking storage, show nothing (avoids flash)
+  if (stage === 'loading') {
+    return <div className="app" style={{ width: '400px', minHeight: '80px' }} />;
+  }
 
   // In extension mode, decide which detector UI to show
   if (stage === 'extension-detector') {
@@ -177,11 +182,10 @@ export default function App() {
   if (isOnboardingPage || stage === 'onboarding') {
     return (
       <Onboarding
-        mode={authMode}
         onBack={() => setStage('landing')}
         onComplete={() => {
-          // If on onboarding.html in extension, redirect to dashboard.html
-          if (isOnboardingPage && typeof chrome !== 'undefined') {
+          // Always redirect to dashboard after completing onboarding
+          if (typeof chrome !== 'undefined' && chrome.runtime?.getURL) {
             window.location.href = chrome.runtime.getURL('dist/dashboard.html');
           } else {
             setStage('dashboard');
@@ -194,8 +198,7 @@ export default function App() {
   return (
     <div className="app">
       <Header
-        onAuthClick={(mode) => {
-          setAuthMode(mode);
+        onAuthClick={() => {
           setStage('onboarding');
         }}
       />

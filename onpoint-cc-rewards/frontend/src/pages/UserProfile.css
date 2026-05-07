@@ -1,13 +1,8 @@
-/* profile page styles — light mode default, dark mode via html.dark */
-
-/* ── Light-mode tokens ─────────────────────────────────────────────── */
+/* profile page styles */
 .profile-shell {
   padding: 1.5rem 2rem;
   min-height: 100vh;
-<<<<<<< HEAD
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #ede9fe 100%);
-=======
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-primary);
 }
 
 /* Header */
@@ -15,34 +10,20 @@
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.25rem;
-<<<<<<< HEAD
-  background: #ffffff;
-  border: 1px solid #bfdbfe;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
-=======
-  border: 1px solid #2d3748;
-  background: #232b3a;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .profile-title {
   margin: 0 0 0.5rem;
   font-size: 1.35rem;
   font-weight: 700;
-<<<<<<< HEAD
-  color: #1e3a8a;
-=======
-  color: #e2e8f0;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-primary);
 }
 
 .profile-subtitle {
   margin: 0;
-<<<<<<< HEAD
-  color: #6b7280;
-=======
-  color: #9fb0c3;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -51,14 +32,8 @@
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.25rem;
-<<<<<<< HEAD
-  background: #ffffff;
-  border: 1px solid #bfdbfe;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
-=======
-  border: 1px solid #2d3748;
-  background: #232b3a;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .stats-grid {
@@ -74,55 +49,46 @@
 }
 
 .stat-item.blue {
-<<<<<<< HEAD
-  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: #93c5fd;
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
-.stat-item.green {
-  background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
-  border-color: #86efac;
-=======
+html.dark .stat-item.blue {
   background: linear-gradient(180deg, #0f1724 0%, #0b1220 100%);
   border-color: #1e3a8a;
 }
 
 .stat-item.green {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+html.dark .stat-item.green {
   background: linear-gradient(180deg, #071a0f 0%, #0b1410 100%);
   border-color: #14532d;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
 }
 
 .stat-label {
   margin: 0 0 0.35rem;
   font-size: 0.9rem;
+  color: var(--text-secondary);
 }
-
-<<<<<<< HEAD
-.stat-item.blue .stat-label { color: #3b82f6; }
-.stat-item.green .stat-label { color: #16a34a; }
-=======
-.stat-item.blue .stat-label { color: #9fb0c3; }
-.stat-item.green .stat-label { color: #9fb0c3; }
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
 
 .stat-value {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 800;
   text-align: center;
-  
 }
 
-<<<<<<< HEAD
-.stat-item.blue .stat-value { color: #1d4ed8; }
-.stat-item.green .stat-value { color: #15803d; }
-=======
-.stat-item.blue .stat-value { color: #60a5fa; }
-.stat-item.green .stat-value { color: #34d399; }
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+.stat-item.blue .stat-value { color: #2563eb; }
+html.dark .stat-item.blue .stat-value { color: #60a5fa; }
+
+.stat-item.green .stat-value { color: #059669; }
+html.dark .stat-item.green .stat-value { color: #34d399; }
 
 /* Two column layout */
+.settings-main-grid,
 .account-main-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -131,38 +97,31 @@
   align-items: start;
 }
 
-/* Notifications Card */
-.notifications-card {
-<<<<<<< HEAD
-  background: #ffffff;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  border: 1px solid #bfdbfe;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
-=======
-  background: #232b3a;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  border: 1px solid #2d3748;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.45);
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
-}
-
+/* Section heading */
 .section-heading {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin: 0 0 1rem 0;
   font-size: 1.05rem;
-<<<<<<< HEAD
-  color: #1e3a8a;
-=======
-  color: #e2e8f0;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-primary);
   font-weight: 700;
 }
 
 .section-icon { font-size: 1.15rem; }
+
+/* Notifications Card */
+.notifications-card {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+html.dark .notifications-card {
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.45);
+}
 
 .notification-list {
   display: flex;
@@ -175,36 +134,27 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.85rem 1rem;
-<<<<<<< HEAD
-  background: #f0f7ff;
-  border: 1px solid #bfdbfe;
-=======
-  background: #1f2633;
-  border: 1px solid #2d3748;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  background: var(--input-background, #f3f3f5);
+  border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   gap: 1rem;
+}
+
+html.dark .notification-item {
+  background: #1f2633;
 }
 
 .notification-title {
   margin: 0 0 0.25rem;
   font-weight: 600;
-<<<<<<< HEAD
-  color: #1e3a8a;
-=======
-  color: #e2e8f0;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
 .notification-desc {
   margin: 0;
   font-size: 0.85rem;
-<<<<<<< HEAD
-  color: #6b7280;
-=======
-  color: #9fb0c3;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-secondary);
 }
 
 .status-badge {
@@ -223,29 +173,26 @@
 }
 
 .status-badge.off {
-<<<<<<< HEAD
-  background: #f1f5f9;
-=======
+  background: var(--muted, #ececf0);
+  color: var(--muted-foreground, #717182);
+}
+
+html.dark .status-badge.off {
   background: #374151;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
   color: #9ca3af;
 }
 
 /* Spending Limits Card */
 .spending-limits-card {
-<<<<<<< HEAD
-  background: #ffffff;
+  background: var(--bg-secondary);
   border-radius: 1rem;
   padding: 1.5rem;
-  border: 1px solid #bfdbfe;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
-=======
-  background: #232b3a;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  border: 1px solid #2d3748;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+html.dark .spending-limits-card {
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.45);
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
 }
 
 .limits-list {
@@ -256,18 +203,17 @@
 }
 
 .limit-item {
-<<<<<<< HEAD
-  background: #f0f7ff;
-  border: 1px solid #bfdbfe;
-=======
-  background: #1f2633;
-  border: 1px solid #2d3748;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  background: var(--input-background, #f3f3f5);
+  border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   padding: 0.85rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+html.dark .limit-item {
+  background: #1f2633;
 }
 
 .limit-row {
@@ -279,35 +225,27 @@
 .limit-label {
   font-size: 0.95rem;
   font-weight: 600;
-<<<<<<< HEAD
-  color: #1e3a8a;
-=======
-  color: #e2e8f0;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-primary);
 }
 
 .limit-input-wrap {
   display: flex;
   align-items: center;
-<<<<<<< HEAD
-  background: #ffffff;
-  border: 1px solid #93c5fd;
-=======
-  background: #111827;
-  border: 1px solid #374151;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   padding: 0.5rem 0.75rem;
   gap: 0.25rem;
   margin-top: 0.25rem;
 }
 
+html.dark .limit-input-wrap {
+  background: #111827;
+  border-color: #374151;
+}
+
 .limit-prefix {
-<<<<<<< HEAD
-  color: #3b82f6;
-=======
-  color: #9fb0c3;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
@@ -316,28 +254,16 @@
   background: transparent;
   width: 100%;
   font-size: 1rem;
-<<<<<<< HEAD
-  color: #1e3a8a;
-=======
-  color: #e2e8f0;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-primary);
   outline: none;
 }
 
 /* Actions Card */
 .actions-card {
-<<<<<<< HEAD
-  background: #ffffff;
+  background: var(--bg-secondary);
   border-radius: 1rem;
   padding: 1.25rem;
-  border: 1px solid #bfdbfe;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
-=======
-  background: #232b3a;
-  border-radius: 1rem;
-  padding: 1.25rem;
-  border: 1px solid #2d3748;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -371,81 +297,12 @@
   margin: 0;
   text-align: center;
   font-size: 0.85rem;
-<<<<<<< HEAD
-  color: #6b7280;
-}
-
-/* ── Dark-mode overrides ────────────────────────────────────────────── */
-html.dark .profile-shell {
-  background: #0f172a;
-}
-
-html.dark .profile-header-card,
-html.dark .profile-info-card,
-html.dark .notifications-card,
-html.dark .spending-limits-card,
-html.dark .actions-card {
-  background: #232b3a;
-  border-color: #2d3748;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.45);
-}
-
-html.dark .profile-title,
-html.dark .section-heading {
-  color: #e2e8f0;
-}
-
-html.dark .profile-subtitle,
-html.dark .notification-desc,
-html.dark .signout-note {
-  color: #9fb0c3;
-}
-
-html.dark .stat-item.blue {
-  background: linear-gradient(180deg, #0f1724 0%, #0b1220 100%);
-  border-color: #1e3a8a;
-}
-
-html.dark .stat-item.green {
-  background: linear-gradient(180deg, #071a0f 0%, #0b1410 100%);
-  border-color: #14532d;
-}
-
-html.dark .stat-item.blue .stat-label { color: #9fb0c3; }
-html.dark .stat-item.green .stat-label { color: #9fb0c3; }
-html.dark .stat-item.blue .stat-value { color: #60a5fa; }
-html.dark .stat-item.green .stat-value { color: #34d399; }
-
-html.dark .notification-item,
-html.dark .limit-item {
-  background: #1f2633;
-  border-color: #2d3748;
-}
-
-html.dark .notification-title,
-html.dark .limit-label {
-  color: #e2e8f0;
-}
-
-html.dark .limit-input-wrap {
-  background: #111827;
-  border-color: #374151;
-}
-
-html.dark .limit-prefix { color: #9fb0c3; }
-
-html.dark .limit-input { color: #e2e8f0; }
-
-html.dark .status-badge.off {
-  background: #374151;
-  color: #9ca3af;
-=======
-  color: #9fb0c3;
->>>>>>> bfd5738 (Revert "fix: fixed visual bug in profiles when in light mode.")
+  color: var(--text-secondary);
 }
 
 /* Responsive */
 @media (max-width: 900px) {
   .profile-shell { padding: 1rem; }
+  .settings-main-grid,
   .account-main-grid { grid-template-columns: 1fr; }
 }

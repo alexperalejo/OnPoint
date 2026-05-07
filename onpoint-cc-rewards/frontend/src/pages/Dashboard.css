@@ -169,6 +169,56 @@ html.dark .savings-panel {
   line-height: 1.6;
 }
 
+.savings-import-controls {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.9rem;
+  align-items: center;
+}
+
+.savings-import-btn {
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: 0.65rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.savings-import-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue-hover);
+}
+
+.savings-import-btn-danger {
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.savings-import-btn-danger:hover {
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+html.dark .savings-import-btn-danger {
+  border-color: #b91c1c;
+  color: #fca5a5;
+}
+
+html.dark .savings-import-btn-danger:hover {
+  border-color: #ef4444;
+  color: #fecaca;
+}
+
+.savings-import-status {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
 .savings-overview-grid {
   padding: 1.25rem;
 }
