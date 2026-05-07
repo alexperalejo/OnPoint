@@ -12,3 +12,14 @@ export function assetUrl(path = '') {
   const normalizedPath = String(path).replace(/^\/+/, '');
   return `${API_BASE_URL}/${normalizedPath}`;
 }
+
+// In the extension popup, card images are bundled into extension/dist/ and should
+// be served from the local extension package via chrome.runtime.getURL rather than
+// fetched from the remote API server (which may not serve static assets).
+export function extensionImageUrl(path = '') {
+  const normalizedPath = String(path).replace(/^\/+/, '');
+  if (typeof chrome !== 'undefined' && chrome.runtime?.getURL) {
+    return chrome.runtime.getURL(normalizedPath);
+  }
+  return assetUrl(normalizedPath);
+}

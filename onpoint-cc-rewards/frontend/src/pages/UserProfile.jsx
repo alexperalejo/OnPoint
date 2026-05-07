@@ -85,7 +85,7 @@ export default function UserProfile({ onSignOut }) {
         {/* Left — Notifications */}
         <div className="notifications-card">
           <h4 className="section-heading">
-            <span className="section-icon">🔔</span>
+
             {translate('.notifications.title')}
           </h4>
           <div className="notification-list">
@@ -161,7 +161,7 @@ export default function UserProfile({ onSignOut }) {
         {/* Right — Spending Limits */}
         <div className="spending-limits-card">
           <h4 className="section-heading">
-            <span className="section-icon">💰</span>
+
             {translate('.spending-limits.title')}
           </h4>
           <p className="profile-subtitle">{translate('.spending-limits.subtitle')}</p>

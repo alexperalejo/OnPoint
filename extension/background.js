@@ -167,6 +167,52 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           // Write candidate BEFORE opening popup so REQUEST_CHECKOUT_SNAPSHOT finds it
           await new Promise((resolve) => { try { chrome.storage.local.set({ purchaseCandidate: candidate }, resolve); } catch { resolve(); } });
 
+          // Record spending as soon as purchase is detected — don't wait for popup confirmation.
+          // This ensures spending_daily_totals / spending_monthly_totals are always up to date
+          // even if the user dismisses PurchaseVerification without confirming a card.
+          if (checkout.amount > 0) {
+            try {
+              const now = new Date();
+              const dateKey = now.toISOString().slice(0, 10);
+              const monthKey = now.toISOString().slice(0, 7);
+              const spendData = await new Promise((resolve) =>
+                chrome.storage.local.get(['spendingLimits', 'spending_daily_totals', 'spending_monthly_totals', 'spending_dedupe'], resolve)
+              );
+              // Deduplicate: skip if we already recorded this checkout (same host + ts)
+              const dedupeKey = `${host}|${checkout.ts}`;
+              const dedupe = Array.isArray(spendData.spending_dedupe) ? spendData.spending_dedupe : [];
+              if (!dedupe.includes(dedupeKey)) {
+                const dailyTotals = spendData.spending_daily_totals || {};
+                const monthlyTotals = spendData.spending_monthly_totals || {};
+                const newDaily = Number(((dailyTotals[dateKey] || 0) + checkout.amount).toFixed(2));
+                const newMonthly = Number(((monthlyTotals[monthKey] || 0) + checkout.amount).toFixed(2));
+                await new Promise((resolve) => chrome.storage.local.set({
+                  spending_daily_totals: { ...dailyTotals, [dateKey]: newDaily },
+                  spending_monthly_totals: { ...monthlyTotals, [monthKey]: newMonthly },
+                  spending_dedupe: [...dedupe, dedupeKey].slice(-200),
+                }, resolve));
+
+                // Fire notification if a limit is now exceeded
+                const limits = spendData.spendingLimits || {};
+                const warnings = [];
+                if (limits.dailyEnabled && Number(limits.daily) > 0 && newDaily > Number(limits.daily)) {
+                  warnings.push(`Daily limit $${limits.daily} exceeded — $${newDaily.toFixed(2)} spent today.`);
+                }
+                if (limits.monthlyEnabled && Number(limits.monthly) > 0 && newMonthly > Number(limits.monthly)) {
+                  warnings.push(`Monthly limit $${limits.monthly} exceeded — $${newMonthly.toFixed(2)} spent this month.`);
+                }
+                if (warnings.length > 0) {
+                  chrome.notifications.create({
+                    type: 'basic',
+                    iconUrl: 'icons/Onpoint48.png',
+                    title: 'OnPoint — Spending Limit Exceeded',
+                    message: warnings.join(' '),
+                  });
+                }
+              }
+            } catch (e) { console.warn('[bg] spending tracking failed', e); }
+          }
+
           // attempt to fetch recommendation if endpoint configured
           let rec = null;
           try {
@@ -174,6 +220,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             const endpoint = (cfg && cfg.recommendationEndpoint) || null;
             if (endpoint) rec = await fetchRecommendation(endpoint, { checkout: candidate.checkout, host, orderId: candidate.orderId });
           } catch (e) { /* ignore */ }
+
+          // Persist recommendation inside purchaseCandidate so REQUEST_CHECKOUT_SNAPSHOT
+          // returns it even when the user dismissed the checkout popup before confirming.
+          // Flatten rec.card to a top-level shape so PurchaseVerification can read
+          // image_url and name directly without knowing the API response structure.
+          if (rec) {
+            candidate.recommendation = rec.card
+              ? { ...rec.card, id: String(rec.card.cardId), reason: rec.reason }
+              : rec;
+            await new Promise((resolve) => { try { chrome.storage.local.set({ purchaseCandidate: candidate }, resolve); } catch { resolve(); } });
+          }
 
           // send UI message to the originating tab (or active tab)
           const uiMsg = { type: 'showRecommendation', candidate, recommendation: rec };
@@ -320,7 +377,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "checkoutDetected") {
     (async () => {
       const prefs = await getNotificationPrefs();
-      
+
       // Only show badge if reward alerts are on
       if (prefs.rewardAlerts) {
         chrome.action.setBadgeText({ text: "!", tabId: sender.tab.id });
@@ -332,5 +389,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         chrome.action.openPopup().catch(() => {});
       }
     })();
+  }
+
+  if (message.type === 'showSpendingWarning') {
+    try {
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/Onpoint48.png',
+        title: 'OnPoint — Spending Limit Exceeded',
+        message: message.message || 'You have exceeded a spending limit.',
+      });
+    } catch (e) {
+      console.warn('[bg] Could not create spending warning notification', e);
+    }
   }
 });

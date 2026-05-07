@@ -61,7 +61,7 @@ html.dark .card-library-shell {
 
 .search-box input {
   width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.75rem;
+  padding: 0.8rem 1rem;
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
   border-radius: 0.75rem;

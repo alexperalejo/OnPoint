@@ -10,16 +10,27 @@
     let score = 0;
     const url = (typeof location !== 'undefined' && location.href ? location.href : (doc && doc.location && doc.location.href) || '').toLowerCase();
 
+    const excludedPatterns = [
+      '/search', '/browse', '/category', '/wishlist',
+      '/account', '/profile', '/login', '/signin',
+      '/product', '/item', '/dp/', '/reviews',
+      '/cart', '/bag'
+    ];
+    if (excludedPatterns.some(function(p) { return url.includes(p); })) {
+      return { isCheckout: false, score: 0, reasons: ['excluded-path'], isCheckoutByScore: false, hasPaymentSignal: false };
+    }
+
     // URL heuristics (broadened)
     const urlChecks = [
       { p: 'checkout', w: 0.28 },
       { p: '/cart', w: 0.10 },
       { p: 'payment', w: 0.18 },
-      { p: 'order', w: 0.07 },
-      { p: 'purchase', w: 0.06 },
+      { p: 'order', w: 0.04 },
+      { p: 'purchase', w: 0.03 },
       { p: 'basket', w: 0.06 },
-      { p: 'confirm', w: 0.04 },
-      { p: 'review', w: 0.03 },
+      { p: 'confirm', w: 0.02 },
+      { p: 'review', w: 0.01 },
+      { p: 'complete', w: 0.05 },
       { p: 'pay', w: 0.12 }
     ];
     urlChecks.forEach(c => { if (url.includes(c.p)) { score += c.w; reasons.push(`url:${c.p}`); } });
@@ -156,8 +167,8 @@
     // Post-check rule to reduce false positives on CTA-heavy landing pages:
     // Default base threshold we treat as a candidate is 0.7. If score >= 0.8 we accept.
     // If score is in [0.7, 0.8) require a "strong payment" signal (payment field, order total, JSON-LD checkout/order, or payment iframe).
-    const baseThreshold = 0.7
-    const strongThreshold = 0.8
+    const baseThreshold = 0.75
+    const strongThreshold = 0.85
 
     // derive booleans if not set earlier
     hasJsonLd = typeof hasJsonLd !== 'undefined' ? hasJsonLd : (reasons.indexOf('schema:ld+json') !== -1)
@@ -178,8 +189,8 @@
     if (score >= strongThreshold) {
       isCheckout = true
     } else if (score >= baseThreshold) {
-      // between 0.7 and 0.8: accept if any payment/order signal is present
-      isCheckout = hasPaymentSignal
+      // between 0.75 and 0.85: require a strong payment signal (field, iframe, or JSON-LD)
+      isCheckout = hasStrongPaymentSignal
     } else {
       isCheckout = false
     }

@@ -7,7 +7,7 @@ const Card = require('../models/Card.js');
 async function getAllCards(){
     try {
         //return await Card.find({}).lean();
-        return await Card.find({}).select("name issuer attributes annualFee image_path cardType").lean();
+        return await Card.find({}).select("name issuer attributes annualFee pointValue image_path cardType rotatingSchedule").lean();
     } catch (err) {
         console.error('Error fetching cards:', err);
         throw err;

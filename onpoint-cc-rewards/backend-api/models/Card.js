@@ -30,8 +30,13 @@ const cardSchema = new mongoose.Schema({
   benefit_title: String,
   benefit_description: String,
   annualFee: Number,
+  pointValue: { type: Number, default: null }, // dollar value per point/mile (e.g. 0.0125 = 1.25¢). null for cashback cards.
   image_path: { type: String }, // renamed from imageKey, stores relative path
-
+  rotatingSchedule: [{
+    quarter: { type: Number, enum: [1, 2, 3, 4] },
+    categories: [{ type: String }],
+    label: { type: String }
+  }]
 });
 
 module.exports = mongoose.model("Card", cardSchema);

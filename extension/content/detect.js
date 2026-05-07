@@ -254,7 +254,7 @@
           persistDetection(lastDetection);
           try { console.info('checkout-detection:update', lastDetection); } catch (e) { }
           
-          if (newDet.isCheckout && newDet.score >= 0.7) {
+          if (newDet.isCheckout) {
             chrome.runtime.sendMessage({ type: "checkoutDetected" });
             // Auto-capture checkout total so purchase verification works even without popup interaction
             try {

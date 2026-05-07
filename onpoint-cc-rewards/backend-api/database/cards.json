@@ -1,6 +1,6 @@
 [
   {
-    "_id": "card000000000000000000001",
+    "_id": "000000000000000000000001",
     "name": "Chase Freedom Unlimited",
     "cardType": "cashback",
     "issuer": "Chase",
@@ -14,11 +14,12 @@
     "image_path": "assets/cards/chase-freedom-unlimited.png"
   },
   {
-    "_id": "card000000000000000000002",
+    "_id": "000000000000000000000002",
     "name": "Chase Sapphire Preferred",
     "cardType": "points",
     "issuer": "Chase",
     "annualFee": 95,
+    "pointValue": 0.0125,
     "attributes": [
       { "type": "tag", "category": "dining", "multiplier": 3 },
       { "type": "tag", "category": "travel_general", "multiplier": 2 },
@@ -30,11 +31,12 @@
     "image_path": "assets/cards/chase-sapphire-preferred.png"
   },
   {
-    "_id": "card000000000000000000003",
+    "_id": "000000000000000000000003",
     "name": "American Express Gold",
     "cardType": "points",
     "issuer": "Amex",
     "annualFee": 250,
+    "pointValue": 0.01,
     "attributes": [
       { "type": "tag", "category": "dining", "multiplier": 4 },
       { "type": "tag", "category": "groceries", "multiplier": 4 },
@@ -44,7 +46,7 @@
     "image_path": "assets/cards/amex-gold.png"
   },
   {
-    "_id": "card000000000000000000004",
+    "_id": "000000000000000000000004",
     "name": "Citi Double Cash",
     "cardType": "cashback",
     "issuer": "Citi",
@@ -55,7 +57,7 @@
     "image_path": "assets/cards/citi-double-cash.png"
   },
   {
-    "_id": "card000000000000000000005",
+    "_id": "000000000000000000000005",
     "name": "Capital One SavorOne",
     "cardType": "cashback",
     "issuer": "Capital One",
@@ -71,7 +73,7 @@
     "image_path": "assets/cards/capital-one-savor-one.png"
   },
   {
-    "_id": "card000000000000000000006",
+    "_id": "000000000000000000000006",
     "name": "Discover it Cash Back",
     "cardType": "cashback",
     "issuer": "Discover",
@@ -80,14 +82,21 @@
       { "type": "tag", "category": "rotating", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1 }
     ],
-    "image_path": "assets/cards/discover-it.png"
+    "image_path": "assets/cards/discover-it.png",
+    "rotatingSchedule": [
+      { "quarter": 1, "categories": ["groceries", "drugstore"], "label": "Groceries & Drugstores" },
+      { "quarter": 2, "categories": ["dining", "drugstore"], "label": "Restaurants & Drug Stores" },
+      { "quarter": 3, "categories": ["gas", "transit"], "label": "Gas & Public Transit" },
+      { "quarter": 4, "categories": ["amazon", "shopping"], "label": "Amazon & Shopping" }
+    ]
   },
   {
-    "_id": "card000000000000000000007",
+    "_id": "000000000000000000000007",
     "name": "Capital One Venture X",
     "cardType": "points",
     "issuer": "Capital One",
     "annualFee": 395,
+    "pointValue": 0.01,
     "attributes": [
       { "type": "tag", "category": "travel_capital_one_flights", "multiplier": 5 },
       { "type": "tag", "category": "travel_capital_one_hotels_cars", "multiplier": 10 },
@@ -96,7 +105,7 @@
     "image_path": "assets/cards/capital-one-venture-x.png"
   },
   {
-    "_id": "card000000000000000000008",
+    "_id": "000000000000000000000008",
     "name": "American Express Blue Cash Preferred",
     "cardType": "cashback",
     "issuer": "Amex",
@@ -111,7 +120,7 @@
     "image_path": "assets/cards/amex-blue-cash-preferred.png"
   },
   {
-    "_id": "card000000000000000000009",
+    "_id": "000000000000000000000009",
     "name": "Chase Freedom Flex",
     "cardType": "cashback",
     "issuer": "Chase",
@@ -123,6 +132,12 @@
       { "type": "tag", "category": "travel_chase", "multiplier": 5 },
       { "type": "all", "category": "all", "multiplier": 1 }
     ],
-    "image_path": "assets/cards/chase-freedom-flex.png"
+    "image_path": "assets/cards/chase-freedom-flex.png",
+    "rotatingSchedule": [
+      { "quarter": 1, "categories": ["groceries", "gas"], "label": "Groceries & Gas" },
+      { "quarter": 2, "categories": ["hotels", "streaming"], "label": "Hotels & Streaming" },
+      { "quarter": 3, "categories": ["gas", "transit"], "label": "Gas & Transit" },
+      { "quarter": 4, "categories": ["amazon", "shopping"], "label": "Amazon & Shopping" }
+    ]
   }
 ]

@@ -189,7 +189,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
 
       <div className="library-controls">
         <div className="search-box">
-          <span className="search-icon">🔍</span>
+
           <input
             type="text"
             placeholder={translate('.search-cards-placeholder')} //Search cards by name or issuer...
@@ -262,7 +262,7 @@ export default function CardLibrary({ userCards = [], addCard }) {
                     }))}
                   >
                     {expandedCards[card.id || card.name]
-                      ? '▲ Show less'
+                      ? translate('dashboard.card-expand.show-less')
                       : `▼ +${card.rewards.length - 3} more`}
                   </button>
                 )}

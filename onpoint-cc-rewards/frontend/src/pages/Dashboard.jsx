@@ -26,6 +26,11 @@ export default function Dashboard({ onSignOut }) {
   const [monthlyCategoryTotals, setMonthlyCategoryTotals] = useState({});
   const [selectedSavingsMonth, setSelectedSavingsMonth] = useState("");
   const [expandedCards, setExpandedCards] = useState({});
+  const [personalizedRecs, setPersonalizedRecs] = useState([]);
+  const [recsLoading, setRecsLoading] = useState(false);
+  const [spendingLimits, setSpendingLimits] = useState({});
+  const [dailySpendingTotals, setDailySpendingTotals] = useState({});
+  const [monthlySpendingTotals, setMonthlySpendingTotals] = useState({});
   const translate = useTranslation();
 
   const toNumber = useCallback((value) => {
@@ -186,6 +191,18 @@ export default function Dashboard({ onSignOut }) {
       .join(", ")})`;
   }, [donutSegments]);
 
+  // Aggregate spending across all months for personalized card recommendations
+  const allTimeCategorySpending = useMemo(() => {
+    const totals = {};
+    Object.values(monthlyCategoryTotals).forEach(monthData => {
+      if (!monthData || typeof monthData !== 'object') return;
+      Object.entries(monthData).forEach(([cat, amount]) => {
+        totals[cat] = (totals[cat] || 0) + toNumber(amount);
+      });
+    });
+    return totals;
+  }, [monthlyCategoryTotals, toNumber]);
+
   const topCardSummary = useMemo(() => {
     const entries = Object.entries(cardTransactionCounts || {});
     if (!entries.length || qualifyingTransactionTotal <= 0) {
@@ -233,40 +250,46 @@ export default function Dashboard({ onSignOut }) {
     }
 
     (async () => {
-      try {
-        const values = await Promise.all(
-          usedCards.map(async (c) => {
-            const response = await fetch(apiUrl(`/api/cards/${c}`));
-            const data = await response.json();
+      const results = await Promise.allSettled(
+        usedCards.map(async (c) => {
+          const response = await fetch(apiUrl(`/api/cards/${c}`));
+          if (!response.ok) throw new Error(`Card ${c} not found (${response.status})`);
+          const data = await response.json();
+          const newCard = {
+            id: data._id,
+            name: data.name,
+            issuer: data.issuer,
+            annualFee: data.annualFee,
+            image_url: assetUrl(data.image_path),
+            rewards: (data.attributes || [])
+              .filter((a) => a.type !== "url")
+              .map((a_1) => {
+                if (a_1.type === "all") return { category: "all", rate: a_1.multiplier };
+                return { category: a_1.category, rate: a_1.multiplier };
+              }),
+          };
+          console.log("received card", newCard);
+          return newCard;
+        })
+      );
 
-            const newCard = {
-              id: data._id,
-              name: data.name,
-              issuer: data.issuer,
-              annualFee: data.annualFee,
-              image_url: assetUrl(data.image_path),  // replaced imageKey
-              rewards: (data.attributes || [])
-                .filter((a) => a.type != "url")
-                .map((a_1) => {
-                  if (a_1.type == "all") {
-                    return { category: "all", rate: a_1.multiplier };
-                  }
-                  return { category: a_1.category, rate: a_1.multiplier };
-                }),
-            };
-
-            console.log("received card", newCard);
-            return newCard;
-          })
-        );
-
-        if (mounted) {
-          console.log("set user cards", values);
-          setUserCards(values);
+      const validCards = [];
+      const staleIds = [];
+      results.forEach((result, i) => {
+        if (result.status === "fulfilled") {
+          validCards.push(result.value);
+        } else {
+          console.warn("Pruning stale card ID:", usedCards[i], result.reason?.message);
+          staleIds.push(usedCards[i]);
         }
-      } catch (err) {
-        console.error("Error fetching cards:", err);
-        if (mounted) setUserCards([]);
+      });
+
+      if (mounted) {
+        if (staleIds.length > 0) {
+          setStoredCards((prev) => (prev || []).filter((id) => !staleIds.includes(id)));
+        }
+        console.log("set user cards", validCards);
+        setUserCards(validCards);
       }
     })();
 
@@ -274,6 +297,41 @@ export default function Dashboard({ onSignOut }) {
       mounted = false;
     };
   }, [storedCards]);
+
+  // Fetch personalized card recommendations whenever spending history or owned cards change
+  useEffect(() => {
+    const hasSpending = Object.values(allTimeCategorySpending).some(v => v > 0);
+    if (!hasSpending) {
+      setPersonalizedRecs([]);
+      return;
+    }
+
+    let mounted = true;
+    setRecsLoading(true);
+
+    (async () => {
+      try {
+        const response = await fetch(apiUrl('/api/recommendations/personalized'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cardIds: (storedCards || []).filter(c => c != null),
+            categorySpending: allTimeCategorySpending,
+          }),
+        });
+        if (!response.ok) throw new Error(`Personalized recs error: ${response.status}`);
+        const data = await response.json();
+        if (mounted) setPersonalizedRecs(data.recommendations || []);
+      } catch (err) {
+        console.error('Error fetching personalized recommendations:', err);
+        if (mounted) setPersonalizedRecs([]);
+      } finally {
+        if (mounted) setRecsLoading(false);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, [storedCards, allTimeCategorySpending]);
 
   const addCard = useCallback(
     (card) => {
@@ -314,6 +372,9 @@ export default function Dashboard({ onSignOut }) {
         "monthlySavings",
         "savings_monthly_card_contributions",
         "savings_monthly_category_totals",
+        "spendingLimits",
+        "spending_daily_totals",
+        "spending_monthly_totals",
       ], (data) => {
         setAllTimeSavingsTotal(toNumber(data?.savings_all_time_total));
 
@@ -341,6 +402,10 @@ export default function Dashboard({ onSignOut }) {
             ? data.savings_monthly_category_totals
             : {};
         setMonthlyCategoryTotals(nextMonthlyCategoryTotals);
+
+        setSpendingLimits(data?.spendingLimits && typeof data.spendingLimits === "object" ? data.spendingLimits : {});
+        setDailySpendingTotals(data?.spending_daily_totals && typeof data.spending_daily_totals === "object" ? data.spending_daily_totals : {});
+        setMonthlySpendingTotals(data?.spending_monthly_totals && typeof data.spending_monthly_totals === "object" ? data.spending_monthly_totals : {});
 
         const existingAccountCreatedAt = Number(data?.accountCreatedAt);
         if (Number.isFinite(existingAccountCreatedAt) && existingAccountCreatedAt > 0) {
@@ -436,6 +501,19 @@ export default function Dashboard({ onSignOut }) {
       if (changes?.savings_all_time_total || changes?.monthlySavings) {
         verifySavingsConsistency();
       }
+
+      if (changes?.spending_daily_totals) {
+        const v = changes.spending_daily_totals.newValue;
+        setDailySpendingTotals(v && typeof v === "object" ? v : {});
+      }
+      if (changes?.spending_monthly_totals) {
+        const v = changes.spending_monthly_totals.newValue;
+        setMonthlySpendingTotals(v && typeof v === "object" ? v : {});
+      }
+      if (changes?.spendingLimits) {
+        const v = changes.spendingLimits.newValue;
+        setSpendingLimits(v && typeof v === "object" ? v : {});
+      }
     };
 
     chrome.storage.onChanged.addListener(handleStorageChange);
@@ -493,7 +571,7 @@ export default function Dashboard({ onSignOut }) {
 
           <section className="tip-banner">
             <div className="tip-left">
-              <div className="tip-icon">🏅</div>
+
               <div>
                 <p className="tip-title">{translate("dashboard.tip.title")}</p>
                 <p className="tip-text">
@@ -561,8 +639,8 @@ export default function Dashboard({ onSignOut }) {
                               [card.id]: !prev[card.id]
                             }))}
                           >
-                            {expandedCards[card.id] 
-                              ? '▲ Show less' 
+                            {expandedCards[card.id]
+                              ? translate('dashboard.card-expand.show-less')
                               : `▼ +${card.rewards.length - 3} more`}
                           </button>
                         )}
@@ -591,6 +669,76 @@ export default function Dashboard({ onSignOut }) {
               </div>
             )}
           </section>
+
+          <section className="rec-section">
+            <header className="cards-header">
+              <div>
+                <p className="panel-title">{translate('dashboard.recs.title')}</p>
+                <p className="rec-subtitle">{translate('dashboard.recs.subtitle')}</p>
+              </div>
+            </header>
+
+            {recsLoading ? (
+              <div className="rec-loading">{translate('dashboard.recs.loading')}</div>
+            ) : personalizedRecs.length === 0 ? (
+              <div className="empty-state">
+
+                <p className="empty-title">{translate('dashboard.recs.empty-title')}</p>
+                <p className="empty-text">
+                  {translate('dashboard.recs.empty-text')}
+                </p>
+              </div>
+            ) : (
+              <div className="rec-grid">
+                {personalizedRecs.map((rec) => (
+                  <div key={String(rec.cardId)} className="rec-card">
+                    <div className="rec-card-image">
+                      <img src={rec.image_url} alt={rec.name} />
+                    </div>
+                    <div className="rec-card-body">
+                      <p className="rec-card-name">{rec.name}</p>
+                      <p className="rec-card-issuer">{rec.issuer}</p>
+
+                      {rec.rotatingLabel && (
+                        <p className="rec-rotating-badge">Q{new Date().getMonth() < 3 ? 1 : new Date().getMonth() < 6 ? 2 : new Date().getMonth() < 9 ? 3 : 4} Bonus: {rec.rotatingLabel}</p>
+                      )}
+
+                      {rec.topCategories.length > 0 && (
+                        <ul className="rec-top-cats">
+                          {rec.topCategories.map((tc) => (
+                            <li key={tc.category}>
+                              <span className="rec-cat-name">{tc.category}</span>
+                              <span className="rec-cat-rate">{tc.rate}%</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      <div className="rec-card-footer">
+                        <span className={`rec-fee ${rec.annualFee === 0 ? "free" : ""}`}>
+                          {rec.annualFee === 0 ? translate('dashboard.recs.no-annual-fee') : `$${rec.annualFee}/yr`}
+                        </span>
+                        <button
+                          className="rec-add-btn"
+                          onClick={() => {
+                            setStoredCards((prev) => [
+                              ...(prev || []).filter((c) => c != null),
+                              String(rec.cardId),
+                            ]);
+                            setPersonalizedRecs((prev) =>
+                              prev.filter((r) => String(r.cardId) !== String(rec.cardId))
+                            );
+                          }}
+                        >
+                          {translate('dashboard.recs.add-to-wallet')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         </main>
       )}
 
@@ -607,10 +755,8 @@ export default function Dashboard({ onSignOut }) {
             <div className="savings-overview-grid stats-grid" data-section="cashback-overview">
               <div className="stat-card savings-stat-card" data-card="total-rewards">
                 <div className="savings-stat-head">
-                  <p className="stat-label">Total Rewards</p>
-                  <div className="stat-icon" aria-hidden="true">
-                    💵
-                  </div>
+                  <h3 className="stat-label">{translate('dashboard.savings.total-rewards')}</h3>
+
                 </div>
                 <p
                   className="stat-value"
@@ -619,15 +765,13 @@ export default function Dashboard({ onSignOut }) {
                 >
                   ${allTimeSavingsTotal.toFixed(2)}
                 </p>
-                <p className="savings-helper-text">All-time rewards earned</p>
+                <p className="savings-helper-text">{translate('dashboard.savings.all-time-helper')}</p>
               </div>
 
               <div className="stat-card savings-stat-card" data-card="monthly-average">
                 <div className="savings-stat-head">
-                  <p className="stat-label">Monthly Average</p>
-                  <div className="stat-icon violet" aria-hidden="true">
-                    📅
-                  </div>
+                  <h3 className="stat-label">{translate('dashboard.savings.monthly-average')}</h3>
+
                 </div>
                 <p
                   className="stat-value"
@@ -637,16 +781,14 @@ export default function Dashboard({ onSignOut }) {
                   ${monthlyAverage.toFixed(2)}
                 </p>
                 <p className="savings-helper-text">
-                  Average per month · based on {monthlyAverageMonthsUsed} month{monthlyAverageMonthsUsed === 1 ? "" : "s"}
+                  {translate('dashboard.savings.average-helper-prefix')} {monthlyAverageMonthsUsed} {monthlyAverageMonthsUsed === 1 ? translate('dashboard.savings.average-helper-month') : translate('dashboard.savings.average-helper-months')}
                 </p>
               </div>
 
               <div className="stat-card savings-stat-card" data-card="top-card">
                 <div className="savings-stat-head">
-                  <p className="stat-label">Top Card</p>
-                  <div className="stat-icon success" aria-hidden="true">
-                    🏆
-                  </div>
+                  <h3 className="stat-label">{translate('dashboard.savings.top-card')}</h3>
+
                 </div>
                 <p className="stat-value" id="topCardValue" data-metric="top-card">
                   {topCardSummary.name}
@@ -661,8 +803,8 @@ export default function Dashboard({ onSignOut }) {
           <section className="cards-panel savings-monthly-panel">
             <header className="cards-header savings-monthly-header">
               <div>
-                <h2 className="savings-title">Monthly Savings Analysis</h2>
-                <p className="savings-subtitle">Reward breakdown per card and category</p>
+                <h2 className="savings-title">{translate('dashboard.savings.monthly-analysis-title')}</h2>
+                <p className="savings-subtitle">{translate('dashboard.savings.monthly-analysis-subtitle')}</p>
               </div>
 
               <select
@@ -685,25 +827,23 @@ export default function Dashboard({ onSignOut }) {
             <div className="savings-monthly-content">
               <section className="savings-total-banner" aria-label="total-monthly-savings">
                 <div>
-                  <p className="savings-total-label">TOTAL SAVINGS FOR {getMonthKeyLabel(activeSavingsMonth).toUpperCase()}</p>
+                  <p className="savings-total-label">{translate('dashboard.savings.total-savings-for')} {getMonthKeyLabel(activeSavingsMonth).toUpperCase()}</p>
                   <p className="savings-total-value" id="monthlySavingsValue">
                     ${selectedMonthTotalSavings.toFixed(2)}
                   </p>
                 </div>
 
-                <button className="savings-total-icon" type="button" aria-label="Monthly savings summary icon">
-                  💳
-                </button>
+
               </section>
 
               <div className="savings-two-col-layout">
                 <section className="savings-col-card">
-                  <p className="savings-col-title">Card Contributions</p>
+                  <p className="savings-col-title">{translate('dashboard.savings.card-contributions')}</p>
 
                   <div id="contributionList" className="savings-contribution-list">
                     {/* Card contributions UI is rendered dynamically for the selected month */}
                     {selectedMonthTopContributors.length === 0 ? (
-                      <p className="savings-helper-text">No card contributions for this month.</p>
+                      <p className="savings-helper-text">{translate('dashboard.savings.no-contributions')}</p>
                     ) : (
                       selectedMonthTopContributors.map((contributor) => (
                         <article key={contributor.cardName} className="savings-contribution-item">
@@ -719,7 +859,7 @@ export default function Dashboard({ onSignOut }) {
 
                           <div className="savings-contribution-right">
                             <p className="savings-item-amount">+${contributor.amount.toFixed(2)}</p>
-                            <p className="savings-item-earned">Earned</p>
+                            <p className="savings-item-earned">{translate('dashboard.savings.earned')}</p>
                           </div>
                         </article>
                       ))
@@ -728,7 +868,7 @@ export default function Dashboard({ onSignOut }) {
                 </section>
 
                 <section className="savings-col-card">
-                  <p className="savings-col-title">Category Breakdown</p>
+                  <p className="savings-col-title">{translate('dashboard.savings.category-breakdown')}</p>
 
                   <div id="categoryBreakdownChart" className="savings-donut-placeholder" aria-label="donut-chart-placeholder">
                     <div className="savings-donut-ring" style={{ background: donutBackground }} />
@@ -738,7 +878,7 @@ export default function Dashboard({ onSignOut }) {
                     {/* Legend is rendered dynamically from selected-month category totals */}
                     {donutSegments.length === 0 ? (
                       <div className="savings-legend-item">
-                        <span className="savings-legend-left">No data</span>
+                        <span className="savings-legend-left">{translate('dashboard.savings.no-data')}</span>
                         <span>$0.00</span>
                       </div>
                     ) : (
@@ -759,6 +899,62 @@ export default function Dashboard({ onSignOut }) {
                 </section>
               </div>
             </div>
+          {(spendingLimits.dailyEnabled || spendingLimits.monthlyEnabled) && (() => {
+            const now = new Date();
+            const dateKey = now.toISOString().slice(0, 10);
+            const monthKey = now.toISOString().slice(0, 7);
+            const todaySpent = toNumber(dailySpendingTotals[dateKey]);
+            const monthSpent = toNumber(monthlySpendingTotals[monthKey]);
+            const dailyLimit = Number(spendingLimits.daily) || 0;
+            const monthlyLimit = Number(spendingLimits.monthly) || 0;
+
+            return (
+              <section className="savings-limits-panel">
+                <header className="cards-header">
+                  <h2 className="savings-title">{translate('dashboard.savings.limits-title')}</h2>
+                  <p className="savings-subtitle">{translate('dashboard.savings.limits-subtitle')}</p>
+                </header>
+                <div className="savings-limits-grid">
+                  {spendingLimits.dailyEnabled && dailyLimit > 0 && (
+                    <div className={`savings-limit-card ${todaySpent >= dailyLimit ? 'limit-exceeded' : todaySpent >= dailyLimit * 0.8 ? 'limit-warning' : ''}`}>
+                      <div className="limit-card-header">
+                        <span className="limit-card-label">{translate('dashboard.savings.daily')}</span>
+                        <span className="limit-card-values">${todaySpent.toFixed(2)} / ${dailyLimit.toFixed(2)}</span>
+                      </div>
+                      <div className="limit-bar-track">
+                        <div
+                          className="limit-bar-fill"
+                          style={{ width: `${Math.min((todaySpent / dailyLimit) * 100, 100).toFixed(1)}%` }}
+                        />
+                      </div>
+                      {todaySpent >= dailyLimit && <p className="limit-card-alert">{translate('dashboard.savings.daily-exceeded')}</p>}
+                      {todaySpent < dailyLimit && todaySpent >= dailyLimit * 0.8 && (
+                        <p className="limit-card-alert">{translate('dashboard.savings.daily-approaching')}</p>
+                      )}
+                    </div>
+                  )}
+                  {spendingLimits.monthlyEnabled && monthlyLimit > 0 && (
+                    <div className={`savings-limit-card ${monthSpent >= monthlyLimit ? 'limit-exceeded' : monthSpent >= monthlyLimit * 0.8 ? 'limit-warning' : ''}`}>
+                      <div className="limit-card-header">
+                        <span className="limit-card-label">{translate('dashboard.savings.monthly')}</span>
+                        <span className="limit-card-values">${monthSpent.toFixed(2)} / ${monthlyLimit.toFixed(2)}</span>
+                      </div>
+                      <div className="limit-bar-track">
+                        <div
+                          className="limit-bar-fill"
+                          style={{ width: `${Math.min((monthSpent / monthlyLimit) * 100, 100).toFixed(1)}%` }}
+                        />
+                      </div>
+                      {monthSpent >= monthlyLimit && <p className="limit-card-alert">{translate('dashboard.savings.monthly-exceeded')}</p>}
+                      {monthSpent < monthlyLimit && monthSpent >= monthlyLimit * 0.8 && (
+                        <p className="limit-card-alert">{translate('dashboard.savings.monthly-approaching')}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </section>
+            );
+          })()}
           </section>
         </main>
       )}

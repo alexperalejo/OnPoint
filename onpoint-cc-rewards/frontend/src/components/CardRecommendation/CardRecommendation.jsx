@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from '../../utils/translation';
+import { extensionImageUrl } from '../../utils/api';
 import './CardRecommendation.css';
 // This will be redesigned as cardChoice since i can use for both checkout and purchase recommendations,
 // but for now just reuse the component and styles from the purchase recommendation work.
@@ -55,7 +56,7 @@ export function CardRecommendation({ card, onApply, onDismiss, total, reason }) 
         title={`Use ${card.name}`}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onApply(card); } }}
       >
-        <img src={card.image_url} alt={card.name} className="cr-image" />
+        <img src={extensionImageUrl(card.image_path) || card.image_url} alt={card.name} className="cr-image" />
         
       </div>
 

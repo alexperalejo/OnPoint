@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react"; // React hooks for state and lifecycle
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation"; // Card recommendation component
 import { useChromeStorageSync } from "use-chrome-storage" // Custom hook to access chrome.storage.sync for saved cards
-import { apiUrl, assetUrl } from '../../utils/api';
+import { apiUrl, extensionImageUrl } from '../../utils/api';
+import { useTranslation } from '../../utils/translation';
 import './CheckoutDetector.css';
 
 export function CheckoutDetector() {
+  const translate = useTranslation('checkout-detector');
   const [savedCards] = useChromeStorageSync('cardinfo')
   const [loading, setLoading] = useState(true);
   const [detection, setDetection] = useState(null);
@@ -16,6 +18,7 @@ export function CheckoutDetector() {
   const FIXED_THRESHOLD = 0.7;
   const [purchaseTotal, setPurchaseTotal] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [spendingAlert, setSpendingAlert] = useState(null);
 
   function handleClosePopup() {
     try {
@@ -179,7 +182,7 @@ export function CheckoutDetector() {
           const cardRes = await fetch(apiUrl(`/api/cards/${cardId}`));
             const cardData = await cardRes.json();
             console.log("[CARD TYPE]", cardData.cardType); 
-            cardData.image_url = assetUrl(cardData.image_path);
+            cardData.image_url = extensionImageUrl(cardData.image_path);
             // Keep total reward points/multiplier from backend result.
             cardData.rewardPoints = body.card.rewardPoints;
 
@@ -187,6 +190,55 @@ export function CheckoutDetector() {
             setRecommendedCard(cardData);
             setBreakdown(body.card.breakdown); // in case we want to show detailed breakdown
             setShowRecommendation(true);
+
+            // Check spending limits — warn based on what's already been spent,
+            // and additionally project forward if a checkout amount is available.
+            chrome.storage.local.get(['spendingLimits', 'spending_daily_totals', 'spending_monthly_totals', 'checkoutTotal'], (limData) => {
+              const limits = limData.spendingLimits || {};
+              const checkoutAmount = limData.checkoutTotal?.amount || 0;
+              const now = new Date();
+              const dateKey = now.toISOString().slice(0, 10);
+              const monthKey = now.toISOString().slice(0, 7);
+              const spentDaily = limData.spending_daily_totals?.[dateKey] || 0;
+              const spentMonthly = limData.spending_monthly_totals?.[monthKey] || 0;
+              const projectedDaily = spentDaily + checkoutAmount;
+              const projectedMonthly = spentMonthly + checkoutAmount;
+              const alerts = [];
+
+              if (limits.dailyEnabled && Number(limits.daily) > 0) {
+                const limit = Number(limits.daily);
+                if (spentDaily >= limit) {
+                  alerts.push(`Daily limit $${limit} already exceeded — $${spentDaily.toFixed(2)} spent today`);
+                } else if (checkoutAmount > 0 && projectedDaily > limit) {
+                  alerts.push(`This purchase would exceed your daily limit of $${limit}`);
+                } else if (spentDaily >= limit * 0.8) {
+                  alerts.push(`Approaching daily limit — $${spentDaily.toFixed(2)} of $${limit} spent today`);
+                }
+              }
+
+              if (limits.monthlyEnabled && Number(limits.monthly) > 0) {
+                const limit = Number(limits.monthly);
+                if (spentMonthly >= limit) {
+                  alerts.push(`Monthly limit $${limit} already exceeded — $${spentMonthly.toFixed(2)} spent this month`);
+                } else if (checkoutAmount > 0 && projectedMonthly > limit) {
+                  alerts.push(`This purchase would exceed your monthly limit of $${limit}`);
+                } else if (spentMonthly >= limit * 0.8) {
+                  alerts.push(`Approaching monthly limit — $${spentMonthly.toFixed(2)} of $${limit} spent this month`);
+                }
+              }
+
+              // Fallback: limits are set but we couldn't determine any amounts — still remind the user
+              if (alerts.length === 0 && spentDaily === 0 && spentMonthly === 0 && checkoutAmount === 0) {
+                const activeLabels = [];
+                if (limits.dailyEnabled && Number(limits.daily) > 0) activeLabels.push(`daily $${limits.daily}`);
+                if (limits.monthlyEnabled && Number(limits.monthly) > 0) activeLabels.push(`monthly $${limits.monthly}`);
+                if (activeLabels.length > 0) {
+                  alerts.push(`Spending limits active: ${activeLabels.join(', ')}`);
+                }
+              }
+
+              if (alerts.length > 0) setSpendingAlert(alerts.join(' · '));
+            });
         } else {
             console.log("[NO MATCH] Card not found in wallet");
             setRecommendedCard(null);
@@ -251,21 +303,21 @@ export function CheckoutDetector() {
             type="button"
             onClick={() => chrome.tabs.create({ url: chrome.runtime.getURL('dist/dashboard.html') + '?view=profile' })}
             className="cd-settings-btn"
-            aria-label="Settings"
-            title="Settings"
+            aria-label={translate('.settings-aria')}
+            title={translate('.settings-aria')}
           >⚙️</button>
           {/* Close button */}
           <button
             type="button"
             onClick={handleClosePopup}
             className="cd-close"
-            aria-label="Close"
-            title="Close"
+            aria-label={translate('.close-aria')}
+            title={translate('.close-aria')}
           >✕</button>
         </div>
       </div>
 
-      {loading && <p className="cd-muted">Detecting...</p>}
+      {loading && <p className="cd-muted">{translate('.detecting')}</p>}
       
       {error && (
         <p className="cd-error">
@@ -275,6 +327,12 @@ export function CheckoutDetector() {
 
       {detection && (
         <div>
+          {!saved && spendingAlert && (
+            <div className="cd-spending-alert">
+              ⚠️ {spendingAlert}
+            </div>
+          )}
+
           {!saved && showRecommendation && recommendedCard && (
             <CardRecommendation
               card={recommendedCard}
@@ -300,8 +358,8 @@ export function CheckoutDetector() {
           {saved && (
             <div className="cd-saved">
               <div className="cd-saved-icon">✓</div>
-              <p className="cd-saved-text">Response saved</p>
-              <button type="button" className="cd-saved-close" onClick={handleClosePopup}>Close</button>
+              <p className="cd-saved-text">{translate('.response-saved')}</p>
+              <button type="button" className="cd-saved-close" onClick={handleClosePopup}>{translate('.close')}</button>
             </div>
           )}
 

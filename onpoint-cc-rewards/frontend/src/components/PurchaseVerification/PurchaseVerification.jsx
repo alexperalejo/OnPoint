@@ -2,7 +2,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { CardRecommendation } from "../CardRecommendation/CardRecommendation";
 import { useChromeStorageSync } from "use-chrome-storage";
-import { apiUrl, assetUrl } from '../../utils/api';
+import { apiUrl, extensionImageUrl } from '../../utils/api';
+import { useTranslation } from '../../utils/translation';
 import './PurchaseVerification.css';
 
 const SAVINGS_TOTAL_KEY = 'savings_all_time_total';
@@ -64,12 +65,17 @@ function computeRewardValue(amount, selectedCard) {
   const purchaseAmount = toNumber(amount);
   if (purchaseAmount <= 0) return 0;
 
-  const points = toNumber(selectedCard?.rewardPoints);
-  const pointValue = toNumber(selectedCard?.pointValue || selectedCard?.pointToDollar || selectedCard?.pointToCashValue);
-  if (points > 0 && pointValue > 0) {
-    // Treat small values as multipliers (e.g., 3x), otherwise as already-earned points.
-    const earnedPoints = points <= 20 ? points * purchaseAmount : points;
-    return earnedPoints * pointValue;
+  // rewardPoints is the multiplier/% rate from the backend (e.g., 6 = 6%, 1 = 1%).
+  const rewardPoints = toNumber(selectedCard?.rewardPoints);
+  if (rewardPoints > 0) {
+    const pointValue = toNumber(selectedCard?.pointValue || selectedCard?.pointToDollar || selectedCard?.pointToCashValue);
+    if (pointValue > 0) {
+      // Points card with a known cents-per-point value
+      const earnedPoints = rewardPoints <= 20 ? rewardPoints * purchaseAmount : rewardPoints;
+      return earnedPoints * pointValue;
+    }
+    // Cashback card (or points card without cpp): rewardPoints is the % rate
+    return purchaseAmount * (rewardPoints / 100);
   }
 
   const rate = getCardRate(selectedCard);
@@ -294,6 +300,7 @@ async function applyAllTimeSavings(snapshot, selectedCard, options = {}) {
 }
 
 export default function PurchaseVerification({ pageSnapshot, onSaved }) {
+  const translate = useTranslation('purchase-verification');
   const [_savedCards] = useChromeStorageSync('cardinfo');
   const [loading, setLoading] = useState(true);
   const [snapshot, setSnapshot] = useState(null);
@@ -301,11 +308,13 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
   const [showRecommendation, setShowRecommendation] = useState(false);
   const [recommendedCard, setRecommendedCard] = useState(null);
   const refSnapshot = useRef(null);
+  const refSnapshotRec = useRef(null); // tracks recommendation that arrived with the snapshot
   const [cardNotSaved, setCardNotSaved] = useState(false);
   const [saved, setSaved] = useState(false);
   const [allCards, setAllCards] = useState([]);
   const [showAllCards, setShowAllCards] = useState(false);
   const [loadingCards, setLoadingCards] = useState(false);
+  const [spendingWarning, setSpendingWarning] = useState(null);
 
   function handleClosePopup() {
     setShowRecommendation(false);
@@ -342,7 +351,9 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
           } else if (resp && resp.snapshot) {
             setSnapshot(resp.snapshot);
             refSnapshot.current = resp.snapshot;
-            setRecommendedCard(resp.recommended || resp.snapshot.recommended || null);
+            const snapRec = resp.recommended || resp.snapshot.recommended || null;
+            refSnapshotRec.current = snapRec;
+            setRecommendedCard(snapRec);
             setShowRecommendation(false);
             setLoading(false);
             return; // done
@@ -369,7 +380,9 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
         } else {
           setSnapshot(snap);
           snapshotRef.current = snap;
-          setRecommendedCard(event.data.recommended || snap.recommended || null);
+          const fallbackRec = event.data.recommended || snap.recommended || null;
+          refSnapshotRec.current = fallbackRec;
+          setRecommendedCard(fallbackRec);
           setShowRecommendation(false);
         }
         setLoading(false);
@@ -403,25 +416,107 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
     return () => { mounted = false; };
   }, [pageSnapshot]);
 
-  // After snapshot loads, read the card the user explicitly chose in CheckoutDetector.
-  // If none was saved, flag it so the UI shows "CARD NOT SAVED".
+  // After snapshot loads, determine which card to show:
+  // 1. If the user explicitly tapped a card in the checkout popup (chosenCard), use that,
+  //    then immediately clear it so it doesn't persist to the next purchase session.
+  // 2. Otherwise call /api/recommendations with the same rule CheckoutDetector uses —
+  //    saved card IDs + checkout URL — so the purchase popup always shows a recommendation
+  //    regardless of whether the user interacted with the checkout popup.
   useEffect(() => {
     if (loading || !snapshot) return;
     if (typeof chrome === 'undefined' || !chrome.storage?.local) return;
+    // Wait for useChromeStorageSync to finish loading before proceeding
+    if (_savedCards === undefined || _savedCards === null) return;
 
-    chrome.storage.local.get(['chosenCard'], (data) => {
-      const card = data?.chosenCard || null;
-      if (card) {
-        setRecommendedCard(card);
+    const cardsArray = Array.isArray(_savedCards)
+      ? _savedCards
+      : Array.isArray(_savedCards?.value)
+        ? _savedCards.value
+        : [];
+    const savedCardIds = cardsArray.filter(Boolean);
+
+    chrome.storage.local.get(['chosenCard'], async (data) => {
+      const chosenCard = data?.chosenCard || null;
+      if (chosenCard) {
+        // Clear so it doesn't bleed into the next purchase popup session
+        chrome.storage.local.remove(['chosenCard']);
+        setRecommendedCard(chosenCard);
         setCardNotSaved(false);
-      } else {
+        return;
+      }
+
+      // No explicit choice — fetch a fresh recommendation exactly like CheckoutDetector does.
+      const checkoutUrl = snapshot.checkout?.url || snapshot.url || snapshot.merchantId || '';
+
+      if (!checkoutUrl || !savedCardIds.length) {
+        setRecommendedCard(null);
+        setCardNotSaved(true);
+        return;
+      }
+
+      try {
+        const res = await fetch(apiUrl('/api/recommendations'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cards: savedCardIds.map(c => c.id || c),
+            url: checkoutUrl,
+            amount: snapshot.total || 1,
+          }),
+        });
+        if (!res.ok) throw new Error(`recommendations ${res.status}`);
+        const body = await res.json();
+
+        const bestCardId = body.card?.cardId;
+        if (!bestCardId) throw new Error('no cardId in response');
+
+        const cardRes = await fetch(apiUrl(`/api/cards/${bestCardId}`));
+        if (!cardRes.ok) throw new Error(`card fetch ${cardRes.status}`);
+        const cardData = await cardRes.json();
+        cardData.image_url = extensionImageUrl(cardData.image_path);
+        cardData.rewardPoints = body.card.rewardPoints;
+
+        setRecommendedCard(cardData);
+        setCardNotSaved(false);
+      } catch (err) {
+        console.warn('PurchaseVerification: recommendation fetch failed', err);
         setRecommendedCard(null);
         setCardNotSaved(true);
       }
     });
-  }, [loading, snapshot]);
+  }, [loading, snapshot, _savedCards]);
 
   const isDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches || document.documentElement.classList.contains('dark');
+
+  // Spending is recorded by background.js the moment a purchase is detected.
+  // This function only reads the already-updated totals and shows a UI warning if limits are exceeded.
+  async function checkSpendingLimits() {
+    if (typeof chrome === 'undefined' || !chrome.storage?.local) return;
+
+    const now = new Date();
+    const dateKey = now.toISOString().slice(0, 10);
+    const monthKey = now.toISOString().slice(0, 7);
+
+    const data = await new Promise(resolve =>
+      chrome.storage.local.get(['spendingLimits', 'spending_daily_totals', 'spending_monthly_totals'], resolve)
+    );
+
+    const limits = data.spendingLimits || {};
+    const spentDaily = toNumber(data.spending_daily_totals?.[dateKey]);
+    const spentMonthly = toNumber(data.spending_monthly_totals?.[monthKey]);
+
+    const warnings = [];
+    if (limits.dailyEnabled && Number(limits.daily) > 0 && spentDaily > Number(limits.daily)) {
+      warnings.push(`Daily limit $${limits.daily} exceeded — $${spentDaily.toFixed(2)} spent today.`);
+    }
+    if (limits.monthlyEnabled && Number(limits.monthly) > 0 && spentMonthly > Number(limits.monthly)) {
+      warnings.push(`Monthly limit $${limits.monthly} exceeded — $${spentMonthly.toFixed(2)} spent this month.`);
+    }
+
+    if (warnings.length > 0) {
+      setSpendingWarning(warnings.join(' '));
+    }
+  }
 
   async function handleConfirmCard(card) {
     if (!snapshot) return;
@@ -430,6 +525,12 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
       await applyAllTimeSavings(snapshot, card || recommendedCard, { userConfirmed: true });
     } catch (e) {
       console.warn('Failed to update all-time savings', e);
+    }
+
+    try {
+      await checkSpendingLimits();
+    } catch (e) {
+      console.warn('Failed to check spending limits', e);
     }
 
     // Minimal record to send to backend
@@ -462,7 +563,7 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
     try {
       const res = await fetch(apiUrl('/api/cards'));
       const cards = await res.json();
-      setAllCards(cards.map(c => ({ ...c, image_url: assetUrl(c.image_path) })));
+      setAllCards(cards.map(c => ({ ...c, image_url: extensionImageUrl(c.image_path) })));
       setShowAllCards(true);
     } catch (e) {
       console.warn('Failed to fetch all cards', e);
@@ -512,35 +613,35 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
       <div className="pv-panel">
         <div className="pv-header">
           <div>
-            <p className="pv-eyebrow">Purchase verification</p>
-            <h1 className="pv-title">Looks like you just completed a purchase!</h1>
+            <p className="pv-eyebrow">{translate('.eyebrow')}</p>
+            <h1 className="pv-title">{translate('.title')}</h1>
           </div>
           <button
             type="button"
             className="pv-close"
             onClick={handleClosePopup}
-            aria-label="Close purchase verification"
-            title="Close"
+            aria-label={translate('.close-aria')}
+            title={translate('.close-title')}
           >
             ✕
           </button>
         </div>
 
-        {loading && <p className="pv-muted">Requesting page snapshot…</p>}
+        {loading && <p className="pv-muted">{translate('.loading')}</p>}
         {error && <p className="pv-error">{error}</p>}
 
         {snapshot && (
           <>
             <div className="pv-meta">
-              <span>{snapshot.merchantName || snapshot.merchantId || 'Unknown merchant'}</span>
-              <span>{snapshot.total ? `$${snapshot.total}` : 'Amount unavailable'}</span>
+              <span>{snapshot.merchantName || snapshot.merchantId || translate('.unknown-merchant')}</span>
+              <span>{snapshot.total ? `$${snapshot.total}` : translate('.amount-unavailable')}</span>
             </div>
-            <p className="pv-question">Did you end up using this card?</p>
+            <p className="pv-question">{translate('.question')}</p>
           </>
         )}
 
         {!saved && !showAllCards && !showRecommendation && cardNotSaved && (
-          <p className="pv-error">CARD NOT SAVED</p>
+          <p className="pv-error">{translate('.card-not-saved')}</p>
         )}
 
         {!saved && !showAllCards && !showRecommendation && recommendedCard && (
@@ -552,7 +653,7 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
           >
             <div className="pv-card-visual" style={{ background: isDark ? '#111827' : (recommendedCard.color || '#f3c316') }}>
               <img
-                src={recommendedCard.image_url}
+                src={extensionImageUrl(recommendedCard.image_path) || recommendedCard.image_url}
                 alt={recommendedCard.name}
                 className="pv-card-image"
               />
@@ -564,17 +665,17 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
         {!saved && !showAllCards && !showRecommendation && snapshot && (
           <div className="pv-actions">
             <button type="button" className="pv-secondary" onClick={handleShowAllCards} disabled={loadingCards}>
-              {loadingCards ? 'Loading cards…' : 'Another Card'}
+              {loadingCards ? translate('.loading-cards') : translate('.another-card')}
             </button>
             <button type="button" className="pv-dismiss" onClick={handleClosePopup}>
-              Dismiss
+              {translate('.dismiss')}
             </button>
           </div>
         )}
 
         {!saved && showAllCards && (
           <div className="pv-card-list">
-            <p className="pv-question">Choose another card:</p>
+            <p className="pv-question">{translate('.choose-card')}</p>
             <div className="pv-card-list-grid">
               {allCards.map(card => (
                 <button
@@ -595,7 +696,7 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
               ))}
             </div>
             <button type="button" className="pv-dismiss" style={{ marginTop: '10px' }} onClick={() => setShowAllCards(false)}>
-              Back
+              {translate('.back')}
             </button>
           </div>
         )}
@@ -603,8 +704,13 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
         {saved && (
           <div className="pv-saved">
             <div className="pv-saved-icon">✓</div>
-            <p className="pv-saved-text">Response saved</p>
-            <button type="button" className="pv-dismiss" onClick={handleClosePopup}>Close</button>
+            <p className="pv-saved-text">{translate('.response-saved')}</p>
+            {spendingWarning && (
+              <div className="pv-spending-warning">
+                ⚠️ {spendingWarning}
+              </div>
+            )}
+            <button type="button" className="pv-dismiss" onClick={handleClosePopup}>{translate('.close')}</button>
           </div>
         )}
 
