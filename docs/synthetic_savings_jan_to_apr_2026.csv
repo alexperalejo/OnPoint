@@ -1,0 +1,65 @@
+transaction_id,user_id,date,month,transaction_type,category,merchant,amount,currency,account
+TXN0001,U1001,2026-01-01,2026-01,income,salary,NorthstarTech,2600.00,USD,checking
+TXN0002,U1001,2026-01-02,2026-01,expense,housing_rent,Metro Properties,1450.00,USD,checking
+TXN0003,U1001,2026-01-03,2026-01,expense,groceries,FreshMart,138.42,USD,checking
+TXN0004,U1001,2026-01-05,2026-01,expense,transportation,City Transit,64.00,USD,checking
+TXN0005,U1001,2026-01-07,2026-01,expense,utilities,Grid Electric,92.15,USD,checking
+TXN0006,U1001,2026-01-09,2026-01,expense,dining,Cedar Cafe,34.70,USD,checking
+TXN0007,U1001,2026-01-11,2026-01,transfer_to_savings,savings_transfer,Internal Transfer,450.00,USD,savings
+TXN0008,U1001,2026-01-14,2026-01,expense,groceries,FreshMart,126.88,USD,checking
+TXN0009,U1001,2026-01-15,2026-01,income,bonus,NorthstarTech,250.00,USD,checking
+TXN0010,U1001,2026-01-17,2026-01,expense,insurance,SafeAuto,120.00,USD,checking
+TXN0011,U1001,2026-01-20,2026-01,expense,entertainment,StreamFlix,18.99,USD,checking
+TXN0012,U1001,2026-01-22,2026-01,transfer_to_savings,savings_transfer,Internal Transfer,400.00,USD,savings
+TXN0013,U1001,2026-01-24,2026-01,expense,groceries,FreshMart,119.35,USD,checking
+TXN0014,U1001,2026-01-26,2026-01,expense,healthcare,WellCare Pharmacy,41.20,USD,checking
+TXN0015,U1001,2026-01-28,2026-01,income,freelance,PixelSideGig,950.00,USD,checking
+TXN0016,U1001,2026-01-30,2026-01,expense,shopping,Urban Outfit Hub,84.30,USD,checking
+TXN0017,U1001,2026-02-01,2026-02,income,salary,NorthstarTech,2600.00,USD,checking
+TXN0018,U1001,2026-02-02,2026-02,expense,housing_rent,Metro Properties,1450.00,USD,checking
+TXN0019,U1001,2026-02-04,2026-02,expense,groceries,FreshMart,131.77,USD,checking
+TXN0020,U1001,2026-02-06,2026-02,expense,transportation,City Transit,64.00,USD,checking
+TXN0021,U1001,2026-02-08,2026-02,expense,utilities,Grid Electric,88.40,USD,checking
+TXN0022,U1001,2026-02-10,2026-02,expense,dining,Cedar Cafe,39.25,USD,checking
+TXN0023,U1001,2026-02-12,2026-02,transfer_to_savings,savings_transfer,Internal Transfer,500.00,USD,savings
+TXN0024,U1001,2026-02-14,2026-02,expense,groceries,FreshMart,121.64,USD,checking
+TXN0025,U1001,2026-02-16,2026-02,income,refund,Tax Office,340.00,USD,checking
+TXN0026,U1001,2026-02-18,2026-02,expense,insurance,SafeAuto,120.00,USD,checking
+TXN0027,U1001,2026-02-20,2026-02,expense,entertainment,LiveNation Local,72.00,USD,checking
+TXN0028,U1001,2026-02-22,2026-02,transfer_to_savings,savings_transfer,Internal Transfer,450.00,USD,savings
+TXN0029,U1001,2026-02-24,2026-02,expense,groceries,FreshMart,117.29,USD,checking
+TXN0030,U1001,2026-02-26,2026-02,expense,healthcare,WellCare Pharmacy,36.80,USD,checking
+TXN0031,U1001,2026-02-27,2026-02,income,freelance,PixelSideGig,910.00,USD,checking
+TXN0032,U1001,2026-02-28,2026-02,expense,shopping,Urban Outfit Hub,68.10,USD,checking
+TXN0033,U1001,2026-03-01,2026-03,income,salary,NorthstarTech,2600.00,USD,checking
+TXN0034,U1001,2026-03-02,2026-03,expense,housing_rent,Metro Properties,1450.00,USD,checking
+TXN0035,U1001,2026-03-03,2026-03,expense,groceries,FreshMart,142.36,USD,checking
+TXN0036,U1001,2026-03-05,2026-03,expense,transportation,City Transit,64.00,USD,checking
+TXN0037,U1001,2026-03-07,2026-03,expense,utilities,Grid Electric,95.10,USD,checking
+TXN0038,U1001,2026-03-09,2026-03,expense,dining,Cedar Cafe,44.60,USD,checking
+TXN0039,U1001,2026-03-11,2026-03,transfer_to_savings,savings_transfer,Internal Transfer,520.00,USD,savings
+TXN0040,U1001,2026-03-14,2026-03,expense,groceries,FreshMart,128.05,USD,checking
+TXN0041,U1001,2026-03-15,2026-03,income,bonus,NorthstarTech,300.00,USD,checking
+TXN0042,U1001,2026-03-17,2026-03,expense,insurance,SafeAuto,120.00,USD,checking
+TXN0043,U1001,2026-03-20,2026-03,expense,entertainment,StreamFlix,18.99,USD,checking
+TXN0044,U1001,2026-03-22,2026-03,transfer_to_savings,savings_transfer,Internal Transfer,500.00,USD,savings
+TXN0045,U1001,2026-03-24,2026-03,expense,groceries,FreshMart,124.91,USD,checking
+TXN0046,U1001,2026-03-26,2026-03,expense,healthcare,WellCare Pharmacy,39.45,USD,checking
+TXN0047,U1001,2026-03-28,2026-03,income,freelance,PixelSideGig,980.00,USD,checking
+TXN0048,U1001,2026-03-30,2026-03,expense,shopping,Urban Outfit Hub,102.70,USD,checking
+TXN0049,U1001,2026-04-01,2026-04,income,salary,NorthstarTech,2600.00,USD,checking
+TXN0050,U1001,2026-04-02,2026-04,expense,housing_rent,Metro Properties,1450.00,USD,checking
+TXN0051,U1001,2026-04-04,2026-04,expense,groceries,FreshMart,136.84,USD,checking
+TXN0052,U1001,2026-04-06,2026-04,expense,transportation,City Transit,64.00,USD,checking
+TXN0053,U1001,2026-04-08,2026-04,expense,utilities,Grid Electric,90.55,USD,checking
+TXN0054,U1001,2026-04-10,2026-04,expense,dining,Cedar Cafe,41.90,USD,checking
+TXN0055,U1001,2026-04-12,2026-04,transfer_to_savings,savings_transfer,Internal Transfer,550.00,USD,savings
+TXN0056,U1001,2026-04-14,2026-04,expense,groceries,FreshMart,122.93,USD,checking
+TXN0057,U1001,2026-04-15,2026-04,income,bonus,NorthstarTech,350.00,USD,checking
+TXN0058,U1001,2026-04-17,2026-04,expense,insurance,SafeAuto,120.00,USD,checking
+TXN0059,U1001,2026-04-20,2026-04,expense,entertainment,CinemaPlex,27.50,USD,checking
+TXN0060,U1001,2026-04-22,2026-04,transfer_to_savings,savings_transfer,Internal Transfer,550.00,USD,savings
+TXN0061,U1001,2026-04-24,2026-04,expense,groceries,FreshMart,118.60,USD,checking
+TXN0062,U1001,2026-04-26,2026-04,expense,healthcare,WellCare Pharmacy,43.10,USD,checking
+TXN0063,U1001,2026-04-28,2026-04,income,freelance,PixelSideGig,1020.00,USD,checking
+TXN0064,U1001,2026-04-30,2026-04,expense,shopping,Urban Outfit Hub,95.20,USD,checking

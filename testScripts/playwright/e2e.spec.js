@@ -87,7 +87,6 @@ test.describe('Simulated extension e2e', () => {
     await page.goto('http://localhost:8000/purchase-completion-sample.html');
     await page.addScriptTag({ path: path.resolve(__dirname, '..', '..', 'extension', 'content', 'purchase-detect-core.js') });
     await page.addScriptTag({ path: path.resolve(__dirname, '..', '..', 'extension', 'content', 'purchase.js') });
-    await page.addScriptTag({ path: path.resolve(__dirname, '..', '..', 'extension', 'content', 'checkCardUsed.js') });
 
     // Populate checkoutTotal in this page context
     await page.evaluate(() => {
@@ -164,7 +163,6 @@ test.describe('Simulated extension e2e', () => {
     await page.goto('http://localhost:8000/purchase-completion-sample.html');
     await page.addScriptTag({ path: path.resolve(__dirname, '..', '..', 'extension', 'content', 'purchase-detect-core.js') });
     await page.addScriptTag({ path: path.resolve(__dirname, '..', '..', 'extension', 'content', 'purchase.js') });
-    await page.addScriptTag({ path: path.resolve(__dirname, '..', '..', 'extension', 'content', 'checkCardUsed.js') });
 
     // Populate checkoutTotal in page context using European formatting normalized value
     await page.evaluate(() => {

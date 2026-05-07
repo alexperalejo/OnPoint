@@ -129,8 +129,6 @@ function startStaticServer(root, port = 8000) {
   await page.goto('http://localhost:8000/purchase-completion-sample.html');
   await injectScript(page, 'extension/content/purchase-detect-core.js');
   await injectScript(page, 'extension/content/purchase.js');
-  await injectScript(page, 'extension/content/checkCardUsed.js');
-
   await page.waitForTimeout(200);
 
   // Ensure the purchase page's chrome.storage has a matching checkoutTotal (page contexts reset on navigation)

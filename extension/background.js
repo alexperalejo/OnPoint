@@ -13,8 +13,16 @@ async function getNotificationPrefs() {
   };
 }
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
   console.log('Checkout Detector extension installed');
+  if (details.reason === 'install') {
+    // First install — open onboarding in a new tab
+    chrome.storage.local.get(['onboardingComplete'], (data) => {
+      if (!data?.onboardingComplete) {
+        chrome.tabs.create({ url: chrome.runtime.getURL('dist/onboarding.html') });
+      }
+    });
+  }
 });
 
 console.log("[bg] service worker boot", new Date().toISOString());
