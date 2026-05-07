@@ -117,17 +117,6 @@ const POPULAR_CARDS = [
   }
 ];
 
-const MUTED_CARD_COLORS = [
-  '#1f3a5f',
-  '#2b4a7d',
-  '#355c7d',
-  '#2f5d62',
-  '#3b3f6b',
-  '#6b4e71',
-  '#7b5b3e',
-  '#3f4c6b'
-];
-
 export default function CardLibrary({ userCards = [], addCard }) {
   useDarkMode(); // enables html.dark + CSS dark styles (system wins)
   const [searchTerm, setSearchTerm] = useState('');

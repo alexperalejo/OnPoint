@@ -142,7 +142,6 @@ export function Onboarding({ onBack, onComplete }) {
             {currentStep === 1 && (
               <>
                 <div className="callout info">
-                  <div className="callout-icon">💡</div>
                   <div>
                     <p className="callout-title">Select all the cards you own</p>
                     <p className="callout-text">You can always add more later from the card library.</p>
@@ -206,7 +205,6 @@ export function Onboarding({ onBack, onComplete }) {
             {currentStep === 2 && (
               <>
                 <div className="callout info">
-                  <div className="callout-icon">💡</div>
                   <div>
                     <p className="callout-title">Set optional guardrails</p>
                     <p className="callout-text">These limits help OnPoint warn you when purchases approach your daily, weekly, or monthly targets.</p>
@@ -294,7 +292,6 @@ export function Onboarding({ onBack, onComplete }) {
                 </div>
 
                 <div className="success-banner">
-                  <div className="success-banner-icon">🎉</div>
                   <div className="success-banner-body">
                     <p className="success-banner-title">Ready to go</p>
                     <p className="success-banner-text">Click "Complete Setup" to start maximizing your credit card rewards with OnPoint.</p>

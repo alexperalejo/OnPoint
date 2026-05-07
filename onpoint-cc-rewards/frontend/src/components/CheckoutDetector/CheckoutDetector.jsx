@@ -15,7 +15,7 @@ export function CheckoutDetector() {
   const [showRecommendation, setShowRecommendation] = useState(false);
   const [recommendedCard, setRecommendedCard] = useState(null);
   const [breakdown, setBreakdown] = useState(null); // for detailed recommendation breakdown
-  const FIXED_THRESHOLD = 0.7;
+  //const FIXED_THRESHOLD = 0.7; Used during testing to force recommendation display, but now relying on backend-calculated score and confidence thresholds instead for more dynamic control and experimentation.
   const [purchaseTotal, setPurchaseTotal] = useState(null);
   const [saved, setSaved] = useState(false);
   const [spendingAlert, setSpendingAlert] = useState(null);
