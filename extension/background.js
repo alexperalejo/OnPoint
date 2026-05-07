@@ -173,8 +173,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           if (checkout.amount > 0) {
             try {
               const now = new Date();
-              const dateKey = now.toISOString().slice(0, 10);
-              const monthKey = now.toISOString().slice(0, 7);
+              const pad = n => String(n).padStart(2, '0');
+              const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+              const monthKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
               const spendData = await new Promise((resolve) =>
                 chrome.storage.local.get(['spendingLimits', 'spending_daily_totals', 'spending_monthly_totals', 'spending_dedupe'], resolve)
               );

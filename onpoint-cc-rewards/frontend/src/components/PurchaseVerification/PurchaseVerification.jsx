@@ -494,8 +494,9 @@ export default function PurchaseVerification({ pageSnapshot, onSaved }) {
     if (typeof chrome === 'undefined' || !chrome.storage?.local) return;
 
     const now = new Date();
-    const dateKey = now.toISOString().slice(0, 10);
-    const monthKey = now.toISOString().slice(0, 7);
+    const pad = n => String(n).padStart(2, '0');
+    const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const monthKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
 
     const data = await new Promise(resolve =>
       chrome.storage.local.get(['spendingLimits', 'spending_daily_totals', 'spending_monthly_totals'], resolve)

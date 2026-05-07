@@ -197,8 +197,9 @@ export function CheckoutDetector() {
               const limits = limData.spendingLimits || {};
               const checkoutAmount = limData.checkoutTotal?.amount || 0;
               const now = new Date();
-              const dateKey = now.toISOString().slice(0, 10);
-              const monthKey = now.toISOString().slice(0, 7);
+              const pad = n => String(n).padStart(2, '0');
+              const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+              const monthKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
               const spentDaily = limData.spending_daily_totals?.[dateKey] || 0;
               const spentMonthly = limData.spending_monthly_totals?.[monthKey] || 0;
               const projectedDaily = spentDaily + checkoutAmount;

@@ -901,8 +901,9 @@ export default function Dashboard({ onSignOut }) {
             </div>
           {(spendingLimits.dailyEnabled || spendingLimits.monthlyEnabled) && (() => {
             const now = new Date();
-            const dateKey = now.toISOString().slice(0, 10);
-            const monthKey = now.toISOString().slice(0, 7);
+            const pad = n => String(n).padStart(2, '0');
+            const dateKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+            const monthKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
             const todaySpent = toNumber(dailySpendingTotals[dateKey]);
             const monthSpent = toNumber(monthlySpendingTotals[monthKey]);
             const dailyLimit = Number(spendingLimits.daily) || 0;
