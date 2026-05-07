@@ -254,7 +254,7 @@ export default function UserProfile({ onSignOut }) {
       <div className="actions-card">
         <h4 className="section-heading">{translate('.actions.title')}</h4>
         <button className="signout-btn" onClick={handleClearData}>
-          <span>🗑️</span>
+
           {translate('.actions.clear')}
         </button>
         <p className="signout-note">{translate('.actions.clear-note')}</p>
